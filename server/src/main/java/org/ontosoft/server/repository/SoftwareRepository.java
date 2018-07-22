@@ -125,7 +125,9 @@ public class SoftwareRepository {
     PropertyListConfiguration props = Config.get().getProperties();
     this.server = props.getString("server");
     //onturi = KBConstants.ONTURI();
-    onturi = "https://w3id.org/ontosoft-vff/ontology";
+//    onturi = "https://w3id.org/ontosoft-vff/ontology";
+    onturi = "http://localhost/alex_lucas.owl";
+//    onturi = "http://localhost/lucas_ontology32.owl";
     caturi = KBConstants.CATURI();
     liburi = this.LIBURI();
     enumuri = this.ENUMURI();

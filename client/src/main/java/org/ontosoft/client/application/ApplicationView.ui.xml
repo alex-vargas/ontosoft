@@ -18,11 +18,11 @@
 					</b:NavbarHeader>
 					<b:NavbarCollapse b:id="navbar-collapse">
 						<b:NavbarNav>
-							<b:AnchorListItem icon="DATABASE" text="Software"
+							<b:AnchorListItem icon="DATABASE" text="Models"
 								targetHistoryToken="{nameTokens.getList}" />
-							<b:AnchorListItem icon="COPY" text="Software Versions"
+							<b:AnchorListItem icon="COPY" text="Models Versions"
 								targetHistoryToken="{nameTokens.getVersions}" />
-							<b:AnchorListItem icon="GEARS" text="Software Functions"
+							<b:AnchorListItem icon="GEARS" text="Models Configurations"
 								targetHistoryToken="{nameTokens.getFunctions}" />
 							<b:AnchorListItem icon="USERS" text="Community"
 								targetHistoryToken="{nameTokens.getCommunity}" />

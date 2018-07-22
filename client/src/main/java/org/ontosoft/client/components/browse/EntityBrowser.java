@@ -360,7 +360,8 @@ public class EntityBrowser {
     MetadataType rangeEntity = vocabulary.getType(prop.getRange());
     
     String entitieshtml = "";
-    if(prop.getId() == KBConstants.ONTNS() + "hasFunction")
+    if(prop.getId() == KBConstants.ONTNS() + "hasFunction" ||
+    		prop.getId() == KBConstants.ONTNS() + "hasSubClass")
       entitieshtml += "<ul style='padding:20px;padding-top:10px;padding-bottom:10px'>";
     
     // TODO: This part should go into viewing adapters
@@ -368,6 +369,7 @@ public class EntityBrowser {
     boolean isMeasurement = vocabulary.isA(rangeEntity, measurement);
     boolean isLocation = vocabulary.isA(rangeEntity, location);
 
+    entitieshtml += "before the for, alex, is entities empty: " + entities.isEmpty();
     for(Entity entity : entities) { 
       entitieshtml += "<li>";
       if(isComplex) {
@@ -420,11 +422,12 @@ public class EntityBrowser {
     
     boolean empty = (entities.size() == 0);
     String entitieshtml = "";
-    if (prop.getId() == KBConstants.ONTNS()+"hasFunction") {
-    	entitieshtml = getFunctionEntityValuesHTML(prop, entities, simple);
+    if (prop.getId() == KBConstants.ONTNS()+"hasFunction" ||
+    		prop.getId() == KBConstants.ONTNS()+"hasSubClass") {
+    	entitieshtml = "alex was here1" + getFunctionEntityValuesHTML(prop, entities, simple);
 	}
     else {
-    	entitieshtml = getEntityValuesHTML(prop, entities, simple);
+    	entitieshtml = "alex was here 15" + getEntityValuesHTML(prop, entities, simple);
     }
     String prophtml = getPropertyHTML(prop, simple, empty);
     String propclass = empty ? "hide-this-in-html" : "";
@@ -436,9 +439,11 @@ public class EntityBrowser {
   } 
   
   public String getEntitiesHTML(ComplexEntity entity, List<MetadataProperty> props, boolean simple) {
-    String html = "<ul style='padding:5px;padding-left:2px;list-style-type:none'>";
-    
+    String html = "<ul style='alex2;padding:5px;padding-left:2px;list-style-type:none'>";
+    html +="checking if propos has elements: " + !props.isEmpty();
     for(MetadataProperty prop : props) {
+    	for(Entity mEntity : entity.getPropertyValues(prop.getId()))
+    		html += "<br>alex " + mEntity.getName();
     	if (prop != null)
         {
     		html += this.getPropertyValuesHTML(prop, entity.getPropertyValues(prop.getId()), simple);

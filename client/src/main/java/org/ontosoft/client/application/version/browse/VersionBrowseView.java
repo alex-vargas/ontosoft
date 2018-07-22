@@ -317,7 +317,10 @@ public class VersionBrowseView extends ParameterizedViewImpl
         props.retainAll(vocabulary.getPropertiesInCategory(lvl2cat));
         props = vocabulary.orderProperties(props);
         
-        String html = browser.getEntitiesHTML(sw, props, false);
+        String html = "alex was here 4: " + swtype.getName() + browser.getEntitiesHTML(sw, props, false);
+        for(MetadataProperty prop : props)
+        	html += prop.getName() + " - " + prop.getLabel() + " - " + prop.getCategory();
+        html += "alex was here 3";
         HTML lvl2html = new HTML(html);
         if(hasSomePropertyValues(props, sw)) {
           hasSomeValues = true;
@@ -335,7 +338,6 @@ public class VersionBrowseView extends ParameterizedViewImpl
         lvl1panel.addStyleName("hide-this-in-html");
       }
     }
-    
     htmlbutton.getParent().setVisible(true);
     editbutton.getParent().setVisible(true);
     softwareBody.setVisible(true);

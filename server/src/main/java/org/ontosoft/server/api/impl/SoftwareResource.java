@@ -279,7 +279,7 @@ public class SoftwareResource implements SoftwareService {
       }
       return vocab;
     } catch (Exception e) {
-      //e.printStackTrace();
+      e.printStackTrace();
       throw new RuntimeException("Exception: " + e.getMessage());
     }
   }

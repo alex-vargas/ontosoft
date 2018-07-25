@@ -40,11 +40,19 @@ public class ApplicationPresenter extends
   public static final NestedSlot CONTENT_SLOT = new NestedSlot();
 
   @Inject
-  public ApplicationPresenter(EventBus eventBus, final MyView view, MyProxy proxy,
-      final PlaceManager placemanager, final PublishView publishview, final PublishVersionView publishversionview,
-      final BrowseView browseview, final VersionBrowseView versionbrowseview, final SoftwareListView listview,
-      final SoftwareVersionListView versionlistview, final FunctionListView functionlistview,
-      final CompareView compareview, final CompareFunctionView comparefunctionview, final CompareVersionView compareversionview, final UserView userview) {
+  public ApplicationPresenter(EventBus eventBus, final MyView view, 
+	  MyProxy proxy, final PlaceManager placemanager, 
+	  final PublishView publishview, 
+	  final PublishVersionView publishversionview,
+	  final BrowseView browseview, 
+	  final VersionBrowseView versionbrowseview, 
+	  final SoftwareListView listview, 
+	  final SoftwareVersionListView versionlistview, 
+	  final FunctionListView functionlistview,
+      final CompareView compareview, 
+      final CompareFunctionView comparefunctionview, 
+      final CompareVersionView compareversionview, 
+      final UserView userview) {
     super(eventBus, view, proxy, RevealType.Root);
     
     final PlaceRequest.Builder builder = new PlaceRequest.Builder();
@@ -78,7 +86,9 @@ public class ApplicationPresenter extends
         else if(nametoken.equals(NameTokens.compareversion))
             sectionview = compareversionview;
         else if(nametoken.equals(NameTokens.users))
-          sectionview = userview;        
+            sectionview = userview;
+        else if(nametoken.equals(NameTokens.models))
+            sectionview = listview;
 
         // Reveal called view with parameters
         if(sectionview != null) {

@@ -360,8 +360,7 @@ public class EntityBrowser {
     MetadataType rangeEntity = vocabulary.getType(prop.getRange());
     
     String entitieshtml = "";
-    if(prop.getId() == KBConstants.ONTNS() + "hasFunction" ||
-    		prop.getId() == KBConstants.ONTNS() + "hasSubClassModel")
+    if(prop.getId() == KBConstants.ONTNS() + "hasFunction")
       entitieshtml += "<ul style='padding:20px;padding-top:10px;padding-bottom:10px'>";
     
     // TODO: This part should go into viewing adapters
@@ -421,8 +420,7 @@ public class EntityBrowser {
     
     boolean empty = (entities.size() == 0);
     String entitieshtml = "";
-    if (prop.getId() == KBConstants.ONTNS()+"hasFunction" ||
-    		prop.getId() == KBConstants.ONTNS()+"hasSubClassModel") {
+    if (prop.getId() == KBConstants.ONTNS()+"hasFunction") {
     	entitieshtml = getFunctionEntityValuesHTML(prop, entities, simple);
 	}
     else {

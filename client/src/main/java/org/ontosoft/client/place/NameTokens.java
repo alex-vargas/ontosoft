@@ -18,7 +18,12 @@ public class NameTokens {
   public static final String permission = "permission";
   public static final String versions = "versions";
   public static final String functions = "functions";
+  public static final String models = "list";
 
+  public static String getModelsList() {
+	  return models;
+  }
+  
   public static String getHome() {
     return home;
   }

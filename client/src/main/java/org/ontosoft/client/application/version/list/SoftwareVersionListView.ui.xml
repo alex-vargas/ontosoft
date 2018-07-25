@@ -13,19 +13,19 @@
 		<b:Column size="XS_12">
 			<g:FlowPanel>
 				<b:Icon pull="RIGHT" type="DATABASE" styleName="fa fa-database header-icon" />
-				<b:PageHeader text="Model Repository"
-					subText="Describe your model so others can find and use it" />
+				<b:PageHeader text="Software Repository"
+					subText="Describe your software so others can find and use it" />
 			</g:FlowPanel>				
 			<b:ButtonGroup styleName="btn-group btn-group-responsive has-bottom-margin" 
 				visible="false">
 				<b:Button ui:field="bigpublishbutton" type="INFO" icon="CLOUD_UPLOAD"
-					text="Publish your model" />
+					text="Publish your software" />
 			</b:ButtonGroup>
 
-			<b:Modal title="Publish Model" closable="true" fade="true" ui:field="publishdialog">
+			<b:Modal title="Publish Software" closable="true" fade="true" ui:field="publishdialog">
 				<b:ModalBody>
 					<b:FormGroup>
-						<b:TextBox ui:field="softwarelabel" placeholder="Type the Model name"
+						<b:TextBox ui:field="softwarelabel" placeholder="Type the Software name"
 							autoComplete="false" allowBlank="false" />
 						<b:HelpBlock />
 					</b:FormGroup>
@@ -49,7 +49,7 @@
 					<b:Panel type="INFO">
 						<b:PanelHeader styleName="panel-heading tight-header">
 							<g:HorizontalPanel verticalAlignment="MIDDLE" width="100%">
-								<b:Heading size="H4" text="Model Version List" />
+								<b:Heading size="H4" text="Software Version List" />
 								<g:cell horizontalAlignment="RIGHT">
 									<b:ButtonGroup 
 										styleName="btn-group btn-group-responsive btn-group-header">
@@ -79,7 +79,7 @@
 				<b:Column size="SM_4">
 					<b:Panel type="INFO">
 						<b:PanelHeader dataToggle="COLLAPSE" dataTarget="#filters">
-							<b:Heading size="H4" text="Filter Model List" />
+							<b:Heading size="H4" text="Filter Software List" />
 						</b:PanelHeader>
 						<b:PanelCollapse b:id="filters" in="true">
 							<b:PanelBody styleName="panel-body tightish-body">

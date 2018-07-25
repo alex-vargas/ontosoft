@@ -18,16 +18,35 @@
 					</b:NavbarHeader>
 					<b:NavbarCollapse b:id="navbar-collapse">
 						<b:NavbarNav>
-							<b:AnchorListItem icon="DATABASE" text="Models"
-								targetHistoryToken="{nameTokens.getList}" />
-							<b:AnchorListItem icon="COPY" text="Models Versions"
-								targetHistoryToken="{nameTokens.getVersions}" />
-							<b:AnchorListItem icon="GEARS" text="Models Configurations"
-								targetHistoryToken="{nameTokens.getFunctions}" />
+							<b:ListDropDown ui:field="softwaredropdown" visible="true">
+								<b:AnchorButton icon="DATABASE" 
+									dataToggle="DROPDOWN">Software</b:AnchorButton>
+								<b:DropDownMenu>
+									<b:AnchorListItem icon="DATABASE" text="Software"
+										targetHistoryToken="{nameTokens.getList}" />
+									<b:AnchorListItem icon="COPY" text="Software Versions"
+										targetHistoryToken="{nameTokens.getVersions}" />
+									<b:AnchorListItem icon="GEARS" text="Software Functions"
+										targetHistoryToken="{nameTokens.getFunctions}" />
+								</b:DropDownMenu>
+							</b:ListDropDown>
+							
+							<b:ListDropDown ui:field="modeldropdown" visible="true">
+								<b:AnchorButton icon="DATABASE" 
+									dataToggle="DROPDOWN">Models</b:AnchorButton>
+								<b:DropDownMenu>
+									<b:AnchorListItem icon="DATABASE" text="Models"
+										targetHistoryToken="{nameTokens.getModelsList}" />
+									<b:AnchorListItem icon="COPY"
+										text="Model Configurations"/>
+								</b:DropDownMenu>
+							</b:ListDropDown>
+							
 							<b:AnchorListItem icon="USERS" text="Community"
 								targetHistoryToken="{nameTokens.getCommunity}" />
 							<b:AnchorListItem icon="GRADUATION_CAP" text="Training"
-								targetHistoryToken="{nameTokens.getTraining}" />																
+								targetHistoryToken="{nameTokens.getTraining}" />
+							
 						</b:NavbarNav>
 						<b:NavbarNav pull="RIGHT">
 							<b:AnchorListItem icon="SIGN_IN" text="Login" ui:field="login" />

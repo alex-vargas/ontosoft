@@ -127,7 +127,7 @@ public class SoftwareRepository {
     this.server = props.getString("server");
     onturi = KBConstants.ONTURI();
 //    onturi = "https://w3id.org/ontosoft-vff/ontology";
-    onturi = "http://localhost/mint/alex_lucas_ontology5.owl";
+    onturi = "http://localhost/mint/alex_lucas_ontology6.owl";
 //    onturi = "http://localhost/lucas_ontology32.owl";
     caturi = KBConstants.CATURI();
     liburi = this.LIBURI();
@@ -146,7 +146,7 @@ public class SoftwareRepository {
     
     topclass = ontns + "Software";
     topclassversion = ontns + "SoftwareVersion";
-    topClassModel = ontns + "Model";
+    topClassModel = "https://w3id.org/mint/modelCatalog#" + "Model";
     uniongraph = "urn:x-arq:UnionGraph";
     
     owlns = KBConstants.OWLNS();
@@ -267,10 +267,12 @@ public class SoftwareRepository {
       List<MetadataType> types = this.vocabulary.getSubTypes(enumtype);
       types.add(this.vocabulary.getType(KBConstants.ONTNS() + "Function"));
       types.add(this.vocabulary.getType(KBConstants.ONTNS() + "KnownIssue"));
+      types.add(this.vocabulary.getType("https://w3id.org/mint/modelCatalog#" + "Model"));
       
       enumerations = new HashMap<String, List<MetadataEnumeration>>();
       
       for(MetadataType type : types) {
+    	  
         List<MetadataEnumeration> typeenums = new ArrayList<MetadataEnumeration>();
         KBAPI kb = enumkb;
         //if(vocabulary.isA(type, swtype))
@@ -281,6 +283,7 @@ public class SoftwareRepository {
           KBObject i = this.ontkb.getProperty(KBConstants.ONTNS() + "hasFunctionName");
           KBObject i2 = this.ontkb.getProperty(KBConstants.ONTNS() + "hasKnownIssueDescription");
           KBObject i3 = this.ontkb.getProperty(KBConstants.ONTNS() + "hasTextValue");
+          KBObject i4 = this.ontkb.getProperty(KBConstants.ONTNS() + "hasModelName");
           menum.setId(inst.getID());
           menum.setName(inst.getName());
           menum.setType(type.getId());
@@ -298,8 +301,20 @@ public class SoftwareRepository {
 	        		  typeenums.add(menum);
 	        	  }
         	  }
-          }
-          else if (type.getId().equals(KBConstants.ONTNS() + "KnownIssue")) {
+          }else if (type.getId().equals("https://w3id.org/mint/modelCatalog#" + "Model")) {
+        	  KBObject value = this.ontkb.getPropertyValue(inst, i4);
+        	  KBAPI vkb = fac.getKB(uniongraph, OntSpec.PLAIN);
+        	  if (value != null)
+        	  {
+	        	  KBObject individual = vkb.getIndividual(value.getID());
+	        	  
+	        	  if (individual != null) {
+	        		  label = vkb.getPropertyValue(individual, i3).getValue().toString();
+	        		  menum.setLabel(label);
+	        		  typeenums.add(menum);
+	        	  }
+        	  }
+          }else if (type.getId().equals(KBConstants.ONTNS() + "KnownIssue")) {
         	  KBObject value = this.ontkb.getPropertyValue(inst, i2);
         	  KBAPI vkb = fac.getKB(uniongraph, OntSpec.PLAIN);
         	  if (value != null)

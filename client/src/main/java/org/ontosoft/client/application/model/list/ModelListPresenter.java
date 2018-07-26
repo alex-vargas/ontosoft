@@ -16,7 +16,7 @@ public class ModelListPresenter extends
     	ModelListPresenter.MyProxy> {
 
   @ProxyCodeSplit
-  @NameToken(NameTokens.list)
+  @NameToken(NameTokens.models)
   public interface MyProxy extends ProxyPlace<ModelListPresenter> {
   }
 

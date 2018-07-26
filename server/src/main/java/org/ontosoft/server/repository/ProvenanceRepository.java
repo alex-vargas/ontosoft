@@ -11,6 +11,7 @@ import org.apache.commons.configuration.plist.PropertyListConfiguration;
 import org.ontosoft.server.users.User;
 import org.ontosoft.server.util.Config;
 import org.ontosoft.shared.classes.entities.Entity;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.provenance.Activity;
 import org.ontosoft.shared.classes.provenance.Agent;
@@ -166,6 +167,40 @@ public class ProvenanceRepository {
     prov.addEntity(swentity);
     
     Map<String, List<Entity>> propEntities = sw.getValue();
+    for(String propid : propEntities.keySet()) {
+      List<Entity> entities = propEntities.get(propid);
+      for(Entity entity : entities) {
+        ProvEntity pentity = new ProvEntity();
+        pentity.setId(entity.getId());
+        pentity.setGeneratedBy(activity.getId());
+        prov.addEntity(pentity);
+      }
+    }
+    
+    return prov;
+  }
+  
+  public Provenance getAddProvenance(Model model, User user) throws Exception {
+    Provenance prov = new Provenance();
+    prov.setId(PROVURI(model.getId()));
+    String provns = prov.getId() + "#";
+    
+    Agent agent = new Agent();
+    agent.setId(getUserId(user));
+    prov.addAgent(agent);
+    
+    Activity activity = new Activity();
+    activity.setId(provns + "Create-" + GUID.get());
+    activity.setTime(new Date());
+    activity.setAgentId(agent.getId());
+    prov.addActivity(activity);
+    
+    ProvEntity swentity = new ProvEntity();
+    swentity.setId(model.getId());
+    swentity.setGeneratedBy(activity.getId());
+    prov.addEntity(swentity);
+    
+    Map<String, List<Entity>> propEntities = model.getValue();
     for(String propid : propEntities.keySet()) {
       List<Entity> entities = propEntities.get(propid);
       for(Entity entity : entities) {

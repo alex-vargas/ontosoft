@@ -2,7 +2,6 @@ package org.ontosoft.client.components.form.formgroup.input;
 
 import java.util.HashMap;
 
-import org.ontosoft.client.components.form.SoftwareVersionForm;
 import org.ontosoft.client.generator.EntityFactory;
 import org.ontosoft.shared.classes.entities.Entity;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;

@@ -42,13 +42,13 @@
 								</b:DropDownMenu>
 							</b:ListDropDown>
 							
+							
+						</b:NavbarNav>
+						<b:NavbarNav pull="RIGHT">
 							<b:AnchorListItem icon="USERS" text="Community"
 								targetHistoryToken="{nameTokens.getCommunity}" />
 							<b:AnchorListItem icon="GRADUATION_CAP" text="Training"
 								targetHistoryToken="{nameTokens.getTraining}" />
-							
-						</b:NavbarNav>
-						<b:NavbarNav pull="RIGHT">
 							<b:AnchorListItem icon="SIGN_IN" text="Login" ui:field="login" />
 							<b:AnchorListItem icon="USER_PLUS" text="Register" ui:field="register" 
 								targetHistoryToken="{nameTokens.getUsers}" />	

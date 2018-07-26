@@ -16,6 +16,7 @@ import org.fusesource.restygwt.client.DirectRestService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
@@ -144,6 +145,12 @@ public interface SoftwareService extends DirectRestService {
   @Produces("application/json")
   @Consumes("application/json")
   public Software publish(@JsonProperty("software") Software software);
+  
+  @POST
+  @Path("model")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public Model publish(@JsonProperty("model") Model model);
 
   @PUT
   @Path("software/{name}")

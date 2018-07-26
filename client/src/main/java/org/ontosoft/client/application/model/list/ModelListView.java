@@ -1,4 +1,4 @@
-package org.ontosoft.client.application.function.list;
+package org.ontosoft.client.application.model.list;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,8 @@ import org.ontosoft.client.components.form.facet.FacetedSearchPanel;
 import org.ontosoft.client.components.form.facet.events.FacetSelectionEvent;
 import org.ontosoft.client.place.NameTokens;
 import org.ontosoft.client.rest.SoftwareREST;
-import org.ontosoft.shared.classes.FunctionSummary;
+import org.ontosoft.shared.classes.ModelSummary;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.users.UserSession;
 import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import org.ontosoft.shared.utils.PermUtils;
@@ -59,8 +60,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Inject;
 
-public class FunctionListView extends ParameterizedViewImpl 
-  implements FunctionListPresenter.MyView {
+public class ModelListView extends ParameterizedViewImpl 
+  implements ModelListPresenter.MyView {
   
   boolean isreguser, isadmin;
   
@@ -82,13 +83,13 @@ public class FunctionListView extends ParameterizedViewImpl
   Row content;
   
   @UiField
-  TextBox softwarelabel, searchbox;
+  TextBox modellabel, searchbox;
   
   @UiField
   FacetedSearchPanel facets;
   
   @UiField(provided = true)
-  CellTable<FunctionSummary> table = new CellTable<FunctionSummary>(40);
+  CellTable<ModelSummary> table = new CellTable<ModelSummary>(40);
 
   @UiField
   SimplePager pager;
@@ -96,22 +97,22 @@ public class FunctionListView extends ParameterizedViewImpl
   SoftwareREST api;
   Map<String, SoftwareREST> apis;
   Map<String, String> clientUrls;
-  
-  private List<FunctionSummary> allSoftwareList;
-  private HashMap<String, Boolean> filteredSoftwareIdMap =
-      new HashMap<String, Boolean>();
-  private ListDataProvider<FunctionSummary> listProvider = 
-      new ListDataProvider<FunctionSummary>();
 
-  private List<FunctionSummary> selections;
+  private List<ModelSummary> allModelList;
+  private HashMap<String, Boolean> filteredModelIdMap =
+	      new HashMap<String, Boolean>();
+  private ListDataProvider<ModelSummary> modelListProvider = 
+	      new ListDataProvider<ModelSummary>();
+
+  private List<ModelSummary> selections;
+
+  private Comparator<ModelSummary> modelCompare;
   
-  private Comparator<FunctionSummary> swcompare;
-  
-  interface Binder extends UiBinder<Widget, FunctionListView> {
+  interface Binder extends UiBinder<Widget, ModelListView> {
   }
 
   @Inject
-  public FunctionListView(Binder binder) {
+  public ModelListView(Binder binder) {
     initWidget(binder.createAndBindUi(this));
     initAPIs();
     initVocabulary();
@@ -155,24 +156,24 @@ public class FunctionListView extends ParameterizedViewImpl
     
     for(final String sname : apis.keySet()) {
       SoftwareREST sapi = apis.get(sname);
-      allSoftwareList = new ArrayList<FunctionSummary>();
-      sapi.getFunctionList(new Callback<List<FunctionSummary>, Throwable>() {
+      allModelList = new ArrayList<ModelSummary>();
+      sapi.getModelsList(new Callback<List<ModelSummary>, Throwable>() {
         @Override
-        public void onSuccess(List<FunctionSummary> list) {
-          for(FunctionSummary sum : list) {
+        public void onSuccess(List<ModelSummary> list) {
+          for(ModelSummary sum : list) {
             sum.setExternalRepositoryId(sname);
             sum.setExternalRepositoryUrl(clientUrls.get(sname));
           }
-          allSoftwareList.addAll(list);
-          Collections.sort(allSoftwareList, swcompare);
-          for(FunctionSummary sum : list)
-            filteredSoftwareIdMap.put(sum.getId(), true);
+          allModelList.addAll(list);
+          Collections.sort(allModelList, modelCompare);
+          for(ModelSummary sum : list)
+        	  filteredModelIdMap.put(sum.getId(), true);
           
           loaded.add(sname);
           if(loaded.size() == apis.size()) {
-            listProvider.getList().clear();
-            listProvider.getList().addAll(allSoftwareList);
-            listProvider.flush();
+            modelListProvider.getList().clear();
+            modelListProvider.getList().addAll(allModelList);
+            modelListProvider.flush();
             initMaterial();
             loading.setVisible(false);
             content.setVisible(true);
@@ -202,46 +203,55 @@ public class FunctionListView extends ParameterizedViewImpl
   
   public void redrawControls() {
     table.removeStyleName("edit-col");
+    table.removeStyleName("delete-col");
 	
     bigpublishbutton.getParent().setVisible(false);
     
     if(this.isadmin || this.isreguser) {
       bigpublishbutton.getParent().setVisible(true);
       table.addStyleName("edit-col");
+      table.addStyleName("delete-col");
       table.redraw();
     }
   }
   
   private void initTable() {
-    ListHandler<FunctionSummary> sortHandler =
-        new ListHandler<FunctionSummary>(listProvider.getList());
+    ListHandler<ModelSummary> sortHandler =
+        new ListHandler<ModelSummary>(modelListProvider.getList());
     
-    selections = new ArrayList<FunctionSummary>();
+    selections = new ArrayList<ModelSummary>();
     
     table.addColumnSortHandler(sortHandler);
-    table.setEmptyTableWidget(new Label("No Software found.."));
+    table.setEmptyTableWidget(new Label("No Models found.."));
     
-    this.swcompare = new Comparator<FunctionSummary>() {
+    this.modelCompare = new Comparator<ModelSummary>() {
       @Override
-      public int compare(FunctionSummary sw1, FunctionSummary sw2) {
-        if(sw1.getLabel() != null && sw2.getLabel() != null)
-          return sw1.getLabel().compareToIgnoreCase(sw2.getLabel());
+      public int compare(ModelSummary model1, ModelSummary model2) {
+        if(model1.getLabel() != null && model2.getLabel() != null)
+          return model1.getLabel().compareToIgnoreCase(model2.getLabel());
         return 0;
       }
     };
     
+    /*SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
+      @Override
+      public SafeHtml render(String object) {
+        SafeHtmlBuilder sb = new SafeHtmlBuilder();
+        sb.appendHtmlConstant("<a href=\"javascript:;\">").appendEscaped(object)
+            .appendHtmlConstant("</a>");
+        return sb.toSafeHtml();
+      }
+    };*/
+    
     // Name Column
     // TODO: Add extra rows for associated Software Versions too (indented)
     final SafeHtmlCell progressCell = new SafeHtmlCell();
-    Column<FunctionSummary, SafeHtml> namecol = new Column<FunctionSummary, SafeHtml>(progressCell) {
+    Column<ModelSummary, SafeHtml> namecol = new Column<ModelSummary, SafeHtml>(progressCell) {
         @Override
-        public SafeHtml getValue(FunctionSummary summary) {
+        public SafeHtml getValue(ModelSummary summary) {
             SafeHtmlBuilder sb = new SafeHtmlBuilder();
             
-            String link = "#" + NameTokens.version + "/" + summary.getSoftwareSummary().getName() + ":" + summary.getSoftwareVersionSummary().getName();
-            String softwareLink = "#" + NameTokens.browse + "/" + summary.getSoftwareSummary().getName();
-            String softwareVersionLink = "#" + NameTokens.version + "/" + summary.getSoftwareSummary().getName() + ":" + summary.getSoftwareVersionSummary().getName();
-            
+            String link = "#" + NameTokens.browse + "/" + summary.getName();
             String extralabel = "";
             
             if(!summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL)) {
@@ -252,20 +262,9 @@ public class FunctionListView extends ParameterizedViewImpl
             
             sb.appendHtmlConstant("<div class='software-list-item'>");
             sb.appendHtmlConstant("<div class='software-name'>");
-            if (summary.getSoftwareSummary().getSoftwareName() != null)
-              sb.appendHtmlConstant("<a href='" + softwareLink + "'>" + summary.getSoftwareSummary().getSoftwareName() + "</a>");
-            else
-              sb.appendHtmlConstant("<a href='" + softwareLink + "'>" + summary.getSoftwareSummary().getLabel() + "</a>");
-            sb.appendHtmlConstant(" >> ");
-            if (summary.getSoftwareVersionSummary().getSoftwareName() != null)
-              sb.appendHtmlConstant("<a href='" + softwareVersionLink + "'>" + summary.getSoftwareVersionSummary().getSoftwareName() + "</a>");
-            else
-              sb.appendHtmlConstant("<a href='" + softwareVersionLink + "'>" + summary.getSoftwareVersionSummary().getLabel() + "</a>");
-            sb.appendHtmlConstant("</div>");
-            sb.appendHtmlConstant("<div class='software-name'>");
             sb.appendHtmlConstant(extralabel);
-            if (summary.getSoftwareName() != null)
-              sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getSoftwareName() + "</a>");
+            if (summary.getModelName() != null)
+              sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getModelName() + "</a>");
             else
               sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getLabel() + "</a>");
             sb.appendHtmlConstant("</div>");
@@ -307,20 +306,50 @@ public class FunctionListView extends ParameterizedViewImpl
 
     table.addColumn(namecol);
     namecol.setSortable(true);
-    sortHandler.setComparator(namecol, this.swcompare);
+    sortHandler.setComparator(namecol, this.modelCompare);
     table.getColumnSortList().push(namecol);
     
+    // Delete Button Column
+    Column<ModelSummary, String> deletecolumn = 
+        new Column<ModelSummary, String>(
+            new ButtonCell(IconType.REMOVE, ButtonType.DANGER, ButtonSize.EXTRA_SMALL)) {
+      @Override
+      public String getValue(ModelSummary details) {
+        return "Delete";
+      }
+      @Override
+      public String getCellStyleNames(Context context,
+    		  ModelSummary summary) {
+        UserSession session = SessionStorage.getSession();
+        String style = "hidden-cell";
+        if (isadmin || 
+            (isreguser && 
+                PermUtils.hasOwnerAccess(summary.getPermission(), session.getUsername()))) {
+          if(summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL))
+            style = "delete-cell";
+        }
+        return style;
+      }
+    };
+    deletecolumn.setFieldUpdater(new FieldUpdater<ModelSummary, String>() {
+      @Override
+      public void update(int index, ModelSummary summary, String value) {
+        deleteModel(summary);
+      }
+    });
+    table.addColumn(deletecolumn);
+
     // Edit Button Column
-    final Column<FunctionSummary, String> editcol = 
-        new Column<FunctionSummary, String>(
+    final Column<ModelSummary, String> editcol = 
+        new Column<ModelSummary, String>(
             new ButtonCell(IconType.EDIT, ButtonType.INFO, ButtonSize.EXTRA_SMALL)) {
         @Override
-        public String getValue(FunctionSummary details) {
+        public String getValue(ModelSummary details) {
           return "Edit";
         }
         @Override
         public String getCellStyleNames(Context context,
-            FunctionSummary summary) {
+        		ModelSummary summary) {
           UserSession session = SessionStorage.getSession();
           String style = "hidden-cell";
           if (isadmin ||
@@ -334,27 +363,26 @@ public class FunctionListView extends ParameterizedViewImpl
         }     
     };
     
-    editcol.setFieldUpdater(new FieldUpdater<FunctionSummary, String>() {
+    editcol.setFieldUpdater(new FieldUpdater<ModelSummary, String>() {
       @Override
-      public void update(int index, FunctionSummary summary, String value) {
-        String vname = summary.getSoftwareVersionSummary().getName();
-        String swname = summary.getSoftwareSummary().getName();
-        History.newItem(NameTokens.publishversion + "/" + swname + ":" + vname + "/Research/Compose");
+      public void update(int index, ModelSummary summary, String value) {
+        String swname = summary.getName();
+        History.newItem(NameTokens.publish + "/" + swname);
       }
     });
     table.addColumn(editcol);
     
     // Checkbox, software selection column (to select software to compare)
-    Column<FunctionSummary, Boolean> checkboxcolumn = 
-        new Column<FunctionSummary, Boolean>(new CheckboxCell(true, true)) {
+    Column<ModelSummary, Boolean> checkboxcolumn = 
+        new Column<ModelSummary, Boolean>(new CheckboxCell(true, true)) {
         @Override
-        public Boolean getValue(FunctionSummary summary) {
+        public Boolean getValue(ModelSummary summary) {
           return selections.contains(summary);
         }
     };
-    checkboxcolumn.setFieldUpdater(new FieldUpdater<FunctionSummary, Boolean>() {
+    checkboxcolumn.setFieldUpdater(new FieldUpdater<ModelSummary, Boolean>() {
         @Override
-        public void update(int index, FunctionSummary summary, Boolean value) {
+        public void update(int index, ModelSummary summary, Boolean value) {
           if(value) 
             selections.add(summary);
           else
@@ -368,9 +396,9 @@ public class FunctionListView extends ParameterizedViewImpl
     table.addColumn(checkboxcolumn);
     
     // Set row styles
-    table.setRowStyles(new RowStyles<FunctionSummary>() {
+    table.setRowStyles(new RowStyles<ModelSummary>() {
       @Override
-      public String getStyleNames(FunctionSummary summary, int rowIndex) {
+      public String getStyleNames(ModelSummary summary, int rowIndex) {
        if(selections.contains(summary))
          return "selected-row";
        return "";
@@ -380,12 +408,28 @@ public class FunctionListView extends ParameterizedViewImpl
     
     // Bind list & pager to table
     pager.setDisplay(table);
-    listProvider.addDataDisplay(table);
+    modelListProvider.addDataDisplay(table);
+  }
+  
+  private void deleteModel(final ModelSummary model) {
+    if (Window.confirm("Are you sure you want to delete the model ?")) {
+      this.api.deleteModel(model.getName(),
+          new Callback<Void, Throwable>() {
+            @Override
+            public void onSuccess(Void v) {
+              removeFromList(model);
+              updateList();
+            }
+            @Override
+            public void onFailure(Throwable exception) { }
+          }
+      );
+    }
   }
   
   @UiHandler("publishdialog")
   void onShowWindow(ModalShownEvent event) {
-    softwarelabel.setFocus(true);
+    modellabel.setFocus(true);
   }
   
   @UiHandler("bigpublishbutton")
@@ -395,20 +439,64 @@ public class FunctionListView extends ParameterizedViewImpl
   
   @UiHandler("publishbutton")
   void onPublishButtonClick(ClickEvent event) {
-    //submitPublishForm();
+    submitPublishForm();
     event.stopPropagation();
   }
   
-  @UiHandler("softwarelabel")
+  @UiHandler("modellabel")
   void onSoftwareEnter(KeyPressEvent event) {
     if(event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-      //submitPublishForm();
+      submitPublishForm();
     }
   }
   
   @UiHandler("cancelbutton")
   void onCancelPublish(ClickEvent event) {
-    softwarelabel.setValue(null);
+	  modellabel.setValue(null);
+  }
+  
+  private void submitPublishForm() {
+    String label = modellabel.getValue();
+    if(modellabel.validate(true)) {
+      Model tmpModel = new Model();
+      tmpModel.setLabel(label);
+      this.api.publishModel(tmpModel, new Callback<Model, Throwable>() {
+        public void onSuccess(Model model) {
+          // Add item to list
+          ModelSummary newModel = new ModelSummary(model);
+          newModel.setExternalRepositoryId(SoftwareREST.LOCAL);
+          addToList(newModel);
+          updateList();
+          
+          // Go to the new item
+          History.newItem(NameTokens.publish + "/" + model.getName());
+          
+          publishdialog.hide();
+          modellabel.setValue(null);
+        }
+        @Override
+        public void onFailure(Throwable exception) { }
+      });
+    } 
+  }
+  
+  private void addToList(ModelSummary summary) {
+    boolean contains = false;
+    for(ModelSummary sum : allModelList) {
+      if(sum.getId().equals(summary.getId())) {
+        contains = true;
+        break;
+      }
+    }
+    if(!contains)
+      allModelList.add(summary);
+    filteredModelIdMap.put(summary.getId(), true);
+    Collections.sort(allModelList, modelCompare);    
+  }
+  
+  private void removeFromList(ModelSummary summary) {
+    filteredModelIdMap.remove(summary);
+    allModelList.remove(summary);
   }
   
   @UiHandler("searchbox")
@@ -423,16 +511,16 @@ public class FunctionListView extends ParameterizedViewImpl
   }
   
   void updateList() {
-    listProvider.getList().clear();
+    modelListProvider.getList().clear();
     String value = searchbox.getValue();
-    for(FunctionSummary summary : allSoftwareList) {
-      if(filteredSoftwareIdMap.containsKey(summary.getId())) {
+    for(ModelSummary summary : allModelList) {
+      if(filteredModelIdMap.containsKey(summary.getId())) {
         if(value == null || value.equals("") ||
-            summary.getSoftwareName().toLowerCase().contains(value.toLowerCase()))
-        listProvider.getList().add(summary);
+            summary.getLabel().toLowerCase().contains(value.toLowerCase()))
+        modelListProvider.getList().add(summary);
       }
     }
-    this.listProvider.flush();    
+    this.modelListProvider.flush();    
   }
   
   void updateCompareButton() {
@@ -446,19 +534,19 @@ public class FunctionListView extends ParameterizedViewImpl
   void onFacetSelection(FacetSelectionEvent event) {
     final List<String> loaded = new ArrayList<String>();
     
-    final List<FunctionSummary> facetList = new ArrayList<FunctionSummary>();
+    final List<ModelSummary> facetList = new ArrayList<ModelSummary>();
     for(final String sname : apis.keySet()) {
       SoftwareREST sapi = apis.get(sname);
-      sapi.getFunctionListFaceted(facets.getFacets(),
-          new Callback<List<FunctionSummary>, Throwable>() {
+      sapi.getModelListFaceted(facets.getFacets(),
+          new Callback<List<ModelSummary>, Throwable>() {
         @Override
-        public void onSuccess(List<FunctionSummary> list) {
+        public void onSuccess(List<ModelSummary> list) {
           facetList.addAll(list);
           loaded.add(sname);
           if(loaded.size() == apis.size()) {
-            filteredSoftwareIdMap.clear();
-            for(FunctionSummary flist: facetList)
-              filteredSoftwareIdMap.put(flist.getId(), true);
+            filteredModelIdMap.clear();
+            for(ModelSummary flist: facetList)
+              filteredModelIdMap.put(flist.getId(), true);
             updateList();
           }
         }
@@ -491,21 +579,21 @@ public class FunctionListView extends ParameterizedViewImpl
   void onCompareButtonClick(ClickEvent event) {
     String idtext = "";
     if(selections.size() < 2)
-      Window.alert("Select atleast 2 software to compare.\n\n"
+      Window.alert("Select at least 2 software to compare.\n\n"
           + "Click on the checkbox next to the compare button.\n"
           + "Then select software using checkboxes in each row");
     else if(selections.size() > 10)
       Window.alert("Cannot compare more than 10 at a time");    
     else {
       int i=0;
-      for(FunctionSummary summary : selections) {
+      for(ModelSummary summary : selections) {
         if(i > 0) idtext += ",";
         if(!summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL))
           idtext += summary.getExternalRepositoryId()+":";
-        idtext += summary.getSoftwareSummary().getName() + ":" + summary.getSoftwareVersionSummary().getName() + ":" + summary.getName();
+        idtext += summary.getName();
         i++;
       }
-      History.newItem(NameTokens.comparefunction + "/" + idtext);
+      History.newItem(NameTokens.compare + "/" + idtext);
     }
   }
 

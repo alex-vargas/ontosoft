@@ -13,8 +13,10 @@ import org.fusesource.restygwt.client.RestServiceProxy;
 import org.ontosoft.client.authentication.AuthenticatedDispatcher;
 import org.ontosoft.shared.api.SoftwareService;
 import org.ontosoft.shared.classes.FunctionSummary;
+import org.ontosoft.shared.classes.ModelSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
@@ -42,12 +44,16 @@ public class SoftwareREST {
   
   private Vocabulary vocabulary;
   private List<SoftwareSummary> softwareList;
+  private List<ModelSummary> modelList;
   private List<SoftwareVersionSummary> softwareVersionList;
   private List<FunctionSummary> functionList;
+  private List<ModelSummary> modelsList;
   private SoftwareService service;
-  
+
   private HashMap<String, Software> softwareCache = 
       new HashMap<String, Software>();
+  private HashMap<String, Model> modelCache = 
+	      new HashMap<String, Model>();
   private HashMap<String, SoftwareVersion> softwareVersionCache = 
 	      new HashMap<String, SoftwareVersion>();
   private HashMap<String, SoftwareFunction> softwareFunctionCache = 
@@ -58,7 +64,9 @@ public class SoftwareREST {
   private ArrayList<Callback<Vocabulary, Throwable>> vocabulary_callbacks =
       new ArrayList<Callback<Vocabulary, Throwable>>();  
   private ArrayList<Callback<List<SoftwareSummary>, Throwable>> list_callbacks =
-      new ArrayList<Callback<List<SoftwareSummary>, Throwable>>();
+	      new ArrayList<Callback<List<SoftwareSummary>, Throwable>>();
+  private ArrayList<Callback<List<ModelSummary>, Throwable>> list_models_callbacks =
+	      new ArrayList<Callback<List<ModelSummary>, Throwable>>();
   private ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>> list_version_callbacks =
 	      new ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>>();
   private ArrayList<Callback<List<FunctionSummary>, Throwable>> list_function_callbacks =
@@ -121,6 +129,37 @@ public class SoftwareREST {
       }
       else {
         vocabulary_callbacks.add(callback);
+      }
+    }
+  }
+  
+  public void getModelsList(final Callback<List<ModelSummary>, Throwable> callback,
+      boolean reload) {
+
+    if(modelsList != null && !reload) {
+      callback.onSuccess(modelsList);
+    }
+    else {
+      modelsList = null;
+      if(list_models_callbacks.isEmpty()) {
+    	list_models_callbacks.add(callback);
+        REST.withCallback(new MethodCallback<List<ModelSummary>>() {
+          @Override
+          public void onSuccess(Method method, List<ModelSummary> mModelList) {
+        	  modelList = mModelList;
+            for(Callback<List<ModelSummary>, Throwable> cb : list_models_callbacks)
+              cb.onSuccess(modelList);    
+            list_models_callbacks.clear();
+          }
+          @Override
+          public void onFailure(Method method, Throwable exception) {
+            AppNotification.notifyFailure("Could not load model list");
+            callback.onFailure(exception);
+          }
+        }).call(this.service).list();
+      }
+      else {
+    	  list_models_callbacks.add(callback);
       }
     }
   }
@@ -221,6 +260,20 @@ public class SoftwareREST {
       @Override
       public void onSuccess(Method method, List<SoftwareSummary> swlist) {
         callback.onSuccess(swlist);            
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        callback.onFailure(exception);
+      }
+    }).call(this.service).listWithFacets(facets);
+  }
+  
+  public void getModelListFaceted(List<EnumerationFacet> facets,
+      final Callback<List<ModelSummary>, Throwable> callback) {
+    REST.withCallback(new MethodCallback<List<ModelSummary>>() {
+      @Override
+      public void onSuccess(Method method, List<ModelSummary> modelList) {
+        callback.onSuccess(modelList);            
       }
       @Override
       public void onFailure(Method method, Throwable exception) {
@@ -437,6 +490,30 @@ public class SoftwareREST {
     }).call(this.service).publish(software);    
   }
   
+  public void publishModel(final Model model, 
+      final Callback<Model, Throwable> callback) {
+    REST.withCallback(new MethodCallback<Model>() {
+      @Override
+      public void onSuccess(Method method, Model model) {
+        if(model != null) {
+          modelCache.put(model.getName(), model);
+          modelList.add(new ModelSummary(model));
+          AppNotification.notifySuccess(model.getLabel() + " published. Now enter some details !", 1500);
+          callback.onSuccess(model);
+        }
+        else {
+          AppNotification.notifyFailure("Could not publish");
+          callback.onFailure(new Throwable("Returned null"));
+        }
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not publish");
+        callback.onFailure(exception);
+      }
+    }).call(this.service).publish(model);    
+  }
+  
   public void publishSoftwareVersion(final String software, 
 	  final SoftwareVersion version, 
       final Callback<SoftwareVersion, Throwable> callback) {
@@ -514,6 +591,26 @@ public class SoftwareREST {
         callback.onFailure(exception);
       }
     }).call(this.service).delete(swname);    
+  }
+  
+  public void deleteModel(final String modelName, 
+      final Callback<Void, Throwable> callback) {
+    REST.withCallback(new MethodCallback<Void>() {
+      @Override
+      public void onSuccess(Method method, Void v) {
+        modelCache.remove(modelName);
+        for(ModelSummary sum: modelList)
+          if(sum.getName().equals(modelName))
+            modelList.remove(sum);
+        callback.onSuccess(v);
+        AppNotification.notifySuccess(modelName+" deleted", 1000);
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not delete "+modelName);
+        callback.onFailure(exception);
+      }
+    }).call(this.service).delete(modelName);    
   }
   
   public void deleteSoftwareVersion(final String swname, final String vname, 

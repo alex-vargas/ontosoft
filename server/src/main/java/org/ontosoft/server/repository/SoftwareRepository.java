@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.configuration.plist.PropertyListConfiguration;
@@ -23,13 +23,15 @@ import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Entity;
 import org.ontosoft.shared.classes.entities.EnumerationEntity;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
-import org.ontosoft.shared.classes.provenance.Provenance;
 import org.ontosoft.shared.classes.permission.AccessMode;
 import org.ontosoft.shared.classes.permission.Authorization;
 import org.ontosoft.shared.classes.permission.Permission;
+import org.ontosoft.shared.classes.provenance.Provenance;
+import org.ontosoft.shared.classes.users.UserCredentials;
 import org.ontosoft.shared.classes.util.GUID;
 import org.ontosoft.shared.classes.util.KBConstants;
 import org.ontosoft.shared.classes.vocabulary.MetadataCategory;
@@ -42,7 +44,6 @@ import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import org.ontosoft.shared.plugins.PluginRegistrar;
 import org.ontosoft.shared.search.EnumerationFacet;
 import org.ontosoft.shared.utils.PermUtils;
-import org.ontosoft.shared.classes.users.UserCredentials;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -68,7 +69,7 @@ public class SoftwareRepository {
   
   String server;
   
-  String topclass, topclassversion, uniongraph;
+  String topclass, topclassversion, topClassModel, uniongraph;
 
   Vocabulary vocabulary;
   Map<String, List<MetadataEnumeration>> enumerations;
@@ -145,6 +146,7 @@ public class SoftwareRepository {
     
     topclass = ontns + "Software";
     topclassversion = ontns + "SoftwareVersion";
+    topClassModel = ontns + "Model";
     uniongraph = "urn:x-arq:UnionGraph";
     
     owlns = KBConstants.OWLNS();
@@ -516,6 +518,38 @@ public class SoftwareRepository {
     return swid;
   }
   
+  /**
+   * Adding a new model
+   * @author Alex Vargas ;)
+   * 
+   * @param model Model
+   * @return
+   * @throws Exception
+   */
+  public String addModel(Model model, User user) throws Exception {
+    if(model.getId() == null) 
+      model.setId(this.LIBNS() + "Model-" + GUID.get());
+    
+    if(model.getType() == null)
+      model.setType(topClassModel);
+    
+    // First Look for existing model with same label
+    for(MetadataEnumeration menum : enumerations.get(topClassModel)) {
+      if(menum.getLabel().equalsIgnoreCase(model.getLabel())) {
+        model.setId(menum.getId());
+        return model.getId();
+      }
+    }
+    String modelID = updateOrAddModel(model, user, false);
+    if(modelID != null)  {
+      Provenance prov = this.prov.getAddProvenance(model, user);
+      this.prov.addProvenance(prov);
+      Permission perm = this.perm_repo.createSoftwarePermisson(model.getId(), user);
+      this.perm_repo.commitPermission(perm, model.getId());
+    }
+    return modelID;
+  }
+  
   public String createEntityId(String swid, Entity entity) {
     MetadataType type = vocabulary.getType(entity.getType());
     // Treat software entities specially 
@@ -641,6 +675,127 @@ public class SoftwareRepository {
         //vocabulary.setNeedsReload(true);
       }
       return sw.getId();
+    }
+    return null;    
+  }
+  
+  private String updateOrAddModel(Model model, User user, boolean update) throws Exception {
+    boolean isModerator = false;
+    Boolean permFetureEnabled = getPermissionFeatureEnabled();
+    
+    if (update) {
+      String accesslevel = PermUtils.getAccessLevelForUser(model, user.getName(), model.getId());
+      if (user.getRoles().contains("admin") || 
+          PermUtils.hasOwnerAccess(model.getPermission(), user.getName())
+          || accesslevel.equals("Write")) {
+        isModerator = true;
+      }
+    }
+
+    KBAPI modelKB = fac.getKB(model.getId(), OntSpec.PLAIN, true);
+    String modelType = model.getType();
+    if(modelType == null)
+      modelType = topClassModel;
+    KBObject modelCls = this.ontkb.getConcept(modelType);
+
+    KBObject modelObj = update ? modelKB.getIndividual(model.getId())
+        : modelKB.createObjectOfClass(model.getId(), modelCls);
+    
+    if(modelObj == null)
+      return null;
+    
+    if(model.getLabel() != null)
+      modelKB.setLabel(modelObj, model.getLabel());
+    
+    for(String propid : model.getValue().keySet()) {
+      if (!permFetureEnabled ||
+          !update            || 
+          isModerator        || 
+          PermUtils.getAccessLevelForUser(model, user.getName(), propid).equals("Write")) {
+        KBObject modelProp = this.ontkb.getProperty(propid);
+        if (modelProp != null) {
+          List<Entity> entities = model.getValue().get(propid);
+          MetadataProperty prop = vocabulary.getProperty(modelProp.getID());
+	        
+          // Remove existing property values if any
+          if (update) {
+            for(KBTriple t : modelKB.genericTripleQuery(modelObj, modelProp, null))
+              modelKB.removeTriple(t);
+          }
+	      
+          for(Entity entity: entities) {
+            MetadataType type = vocabulary.getType(entity.getType());
+	          
+            // Treat model entities specially 
+            if(vocabulary.isA(type, vocabulary.getType(topclass))) {
+              if(!this.hasModel(entity.getId())) {
+                Model subModel = new Model();
+                subModel.setId(entity.getId());
+                subModel.setLabel((String)entity.getValue());
+                subModel.setType(entity.getType());
+                String modelID = this.addModel(subModel, user);
+                entity.setId(modelID);
+              }
+	
+              KBObject modelVal = modelKB.getResource(entity.getId());
+              modelKB.addPropertyValue(modelObj, modelProp, modelVal);
+              continue;
+            }
+            
+//            if(vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+//            	String[] parts = entity.getId().split("#");
+//            	if (parts.length > 1) {
+//            	  String vid = this.LIBNS() + model.getName() + "/version/" + parts[1];
+//            	  entity.setId(vid);
+//            	}
+//            	if(!this.hasModel(entity.getId())) {
+//	              ModelVersion subsw = new ModelVersion();
+//	              subsw.setId(entity.getId());
+//	              subsw.setLabel(entity.getValue().toString());
+//	              subsw.setType(entity.getType());
+//	              String swid = this.addModelVersion(model.getName(), subsw, user);
+//	              entity.setId(swid);
+//	            }
+//	
+//	            KBObject swval = modelKB.getResource(entity.getId());
+//	            modelKB.addPropertyValue(modelObj, modelProp, swval);
+//	            continue;
+//	          }
+	          
+            // Get entity adapter for class
+            IEntityAdapter adapter = EntityRegistrar.getAdapter(modelKB, ontkb, enumkb, prop.getRange());
+            if(adapter != null) {
+              if(entity.getId() == null) {
+                entity.setId(GUID.randomEntityId(model.getId(), entity.getType()));
+              }
+              if(adapter.saveEntity(entity)) {
+                KBObject entityobj = modelKB.getIndividual(entity.getId());
+                if(entityobj == null)
+                  entityobj = ontkb.getIndividual(entity.getId());
+                if(entityobj == null)
+                  entityobj = enumkb.getIndividual(entity.getId());
+                if(entityobj != null)
+                  modelKB.addPropertyValue(modelObj, modelProp, entityobj);
+              }
+            } else {
+              System.out.println("No adapter registered for type: "+entity.getType());
+            }
+          }
+        }
+      }
+    }
+    
+    if(modelKB.save() && enumkb.save()) {
+      if(!update) {
+        MetadataEnumeration menum = new MetadataEnumeration();
+        menum.setId(model.getId());
+        menum.setLabel(model.getLabel());
+        menum.setType(model.getType());
+        menum.setName(model.getName());
+        addEnumerationToVocabulary(menum);
+        //vocabulary.setNeedsReload(true);
+      }
+      return model.getId();
     }
     return null;    
   }
@@ -1284,6 +1439,59 @@ public class SoftwareRepository {
     return null;
   }
   
+  public Model getModel(String modelId) throws Exception {
+    KBAPI modelKB = fac.getKB(modelId, OntSpec.PLAIN);
+    KBObject modelObj = modelKB.getIndividual(modelId);
+    if(modelObj != null) {
+      Model model = new Model();
+      model.setId(modelId);
+      model.setLabel(modelKB.getLabel(modelObj));
+      model.setName(modelObj.getName());
+      
+      KBObject typeobj = modelKB.getPropertyValue(modelObj, ontkb.getProperty(rdfns+"type"));
+      model.setType(typeobj.getID());
+
+      MetadataType modelType = this.vocabulary.getType(model.getType());
+      
+      for(MetadataProperty prop : this.vocabulary.getPropertiesForType(modelType)) {
+        
+        KBObject propobj = modelKB.getProperty(prop.getId());
+        ArrayList<Entity> entities = new ArrayList<Entity>();
+        for(KBObject valobj: modelKB.getPropertyValues(modelObj, propobj)) {
+          
+          MetadataType type = vocabulary.getType(prop.getRange());
+          // Treat model entities specially 
+          if(vocabulary.isA(type, vocabulary.getType(topClassModel)) || vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+            KBAPI tmpkb = fac.getKB(valobj.getID(), OntSpec.PLAIN);
+            KBObject valswobj = tmpkb.getIndividual(valobj.getID());
+            if(valswobj != null) {
+              Entity entity = new EnumerationEntity();
+              entity.setId(valobj.getID());
+              entity.setLabel(tmpkb.getLabel(valswobj));
+              entity.setType(prop.getRange());
+              entities.add(entity);
+            }
+          }
+          else {
+            Entity entity = this.getModelEntity(modelKB, valobj, prop.getRange());
+            if(entity != null)
+              entities.add(entity);
+          }
+        }
+        model.addPropertyValues(prop.getId(), entities);
+      }
+      
+      Entity modelName = model.getPropertyValue(KBConstants.ONTNS()+"hasName");
+      if (modelName != null)
+    	  model.setModelName(modelName.getValue().toString());
+      
+      model.setProvenance(this.prov.getSoftwareProvenance(modelId));
+      model.setPermission(this.perm_repo.getSoftwarePermission(modelId));
+      return model;
+    }
+    return null;
+  }
+  
   public SoftwareVersion getSoftwareVersion(String swid, String vid) throws Exception {
 	KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
 	KBAPI vkb = fac.getKB(vid, OntSpec.PLAIN);
@@ -1604,8 +1812,23 @@ public class SoftwareRepository {
     return false;
   }
   
+  public boolean hasModel(String modelID) throws Exception {
+    KBAPI modelKB = fac.getKB(modelID, OntSpec.PLAIN);
+    KBObject modelObj = modelKB.getIndividual(modelID);
+    if(modelObj != null) 
+      return true;
+    return false;
+  }
+
   private Entity getSoftwareEntity(KBAPI swkb, KBObject entityobj, String clsid) {
     IEntityAdapter adapter = EntityRegistrar.getAdapter(swkb, ontkb, enumkb, clsid);
+    if(adapter != null)
+      return adapter.getEntity(entityobj.getID());
+    return null;
+  }
+  
+  private Entity getModelEntity(KBAPI modelKB, KBObject entityobj, String clsid) {
+    IEntityAdapter adapter = EntityRegistrar.getAdapter(modelKB, ontkb, enumkb, clsid);
     if(adapter != null)
       return adapter.getEntity(entityobj.getID());
     return null;

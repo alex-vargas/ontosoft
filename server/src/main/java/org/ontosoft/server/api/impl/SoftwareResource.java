@@ -26,6 +26,7 @@ import org.ontosoft.shared.api.SoftwareService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
@@ -335,6 +336,29 @@ public class SoftwareResource implements SoftwareService {
       if(swid != null) {
         software.setId(swid);
         return this.repo.getSoftware(swid);
+        //response.sendRedirect(swid);
+        //return software;
+      }
+      return null;
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception in add: " + e.getMessage());
+    }
+  }
+
+  @POST
+  @Path("model")
+  @Produces("application/json")
+  @Consumes("application/json")
+  @RolesAllowed("user")
+  @Override
+  public Model publish(@JsonProperty("model") Model model) {
+    try {
+      String modelId = this.repo.addModel(model,
+          (User) securityContext.getUserPrincipal());
+      if(modelId != null) {
+    	  model.setId(modelId);
+        return this.repo.getModel(modelId);
         //response.sendRedirect(swid);
         //return software;
       }

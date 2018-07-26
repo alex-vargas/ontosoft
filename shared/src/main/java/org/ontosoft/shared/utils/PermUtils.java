@@ -2,7 +2,9 @@ package org.ontosoft.shared.utils;
 
 import java.util.Map;
 
+import org.ontosoft.shared.classes.ModelSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
+import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.permission.Authorization;
 import org.ontosoft.shared.classes.permission.Permission;
@@ -36,4 +38,13 @@ public class PermUtils {
     }
     return level;		
   }
+
+  static public String getAccessLevelForUser(Model model, String username, String targetid) {
+    return getAccessLevelForUser(model.getPermission(), username, targetid);
+  }
+
+  static public String getAccessLevelForUser(ModelSummary summary, String username, String targetid) {
+    return getAccessLevelForUser(summary.getPermission(), username, targetid);		
+  }
+	
 }

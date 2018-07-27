@@ -24,6 +24,8 @@ import org.ontosoft.server.repository.SoftwareRepository;
 import org.ontosoft.server.users.User;
 import org.ontosoft.shared.api.SoftwareService;
 import org.ontosoft.shared.classes.FunctionSummary;
+import org.ontosoft.shared.classes.ModelConfigurationSummary;
+import org.ontosoft.shared.classes.ModelSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Model;
@@ -78,6 +80,19 @@ public class SoftwareResource implements SoftwareService {
       throw new RuntimeException("Exception: " + e.getMessage());
     }
   }
+
+  @GET
+  @Path("model")
+  @Produces("application/json")
+  @Override
+  public List<ModelSummary> listModels() {
+    try {
+      return this.repo.getAllModels();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception: " + e.getMessage());
+    }
+  }
   
   @GET
   @Path("versions")
@@ -118,6 +133,20 @@ public class SoftwareResource implements SoftwareService {
       throw new RuntimeException("Exception: " + e.getMessage());
     }
   }
+
+  @POST
+  @Path("searchModel")
+  @Produces("application/json")
+  @Consumes("application/json")
+  @Override
+  public List<ModelSummary> listModelsWithFacets(@JsonProperty("facets") List<EnumerationFacet> facets) {
+    try {
+      return this.repo.getAllModelsWithFacets(facets);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception: " + e.getMessage());
+    }
+  }
   
   @POST
   @Path("searchVersion")
@@ -127,6 +156,20 @@ public class SoftwareResource implements SoftwareService {
   public List<SoftwareVersionSummary> listSoftwareVersionWithFacets(@JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("version") String software) {
     try {
       return this.repo.getAllSoftwareVersionWithFacets(facets, software);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception: " + e.getMessage());
+    }
+  }
+  
+  @POST
+  @Path("searchModelConfiguration")
+  @Produces("application/json")
+  @Consumes("application/json")
+  @Override
+  public List<ModelConfigurationSummary> listModelConfigurationWithFacets(@JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("version") String model) {
+    try {
+      return this.repo.getAllModelConfigurationsWithFacets(facets, model);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Exception: " + e.getMessage());
@@ -459,6 +502,24 @@ public class SoftwareResource implements SoftwareService {
       throw new RuntimeException("Exception in delete: " + e.getMessage());
     }
   }
+
+  @DELETE
+  @Path("model/{name}")
+  @Produces("text/html")
+  @RolesAllowed("user")
+  @Override
+  public void deleteModel(@PathParam("name") String name) {
+    try {
+      String swid = name;
+      if(!name.startsWith("http:"))
+        swid = repo.LIBNS() + name;
+      if (!this.repo.deleteSoftware(swid, (User) securityContext.getUserPrincipal()))
+        throw new RuntimeException("Could not delete " + name);
+    } catch (Exception e) {
+      //e.printStackTrace();
+      throw new RuntimeException("Exception in delete: " + e.getMessage());
+    }
+  }
   
   @DELETE
   @Path("software/{name}/version/{vname}")
@@ -472,6 +533,26 @@ public class SoftwareResource implements SoftwareService {
         swid = repo.LIBNS() + name;
       String vid = swid + "/version/" + vname;
       if (!this.repo.deleteSoftwareVersion(swid,vid, (User) securityContext.getUserPrincipal()))
+        throw new RuntimeException("Could not delete " + name);
+    } catch (Exception e) {
+      //e.printStackTrace();
+      throw new RuntimeException("Exception in delete: " + e.getMessage());
+    }
+  }
+  
+  @DELETE
+  @Path("model/{name}/modelconfiguration/{vname}")
+  @Produces("text/html")
+  @RolesAllowed("user")
+  @Override
+  public void deleteModelConfiguration(@PathParam("name") String name, 
+		  @PathParam("vname") String vname) {
+    try {
+      String id = name;
+      if(!name.startsWith("http:"))
+        id = repo.LIBNS() + name;
+      String vid = id + "/modelconfiguration/" + vname;
+      if (!this.repo.deleteModelConfiguration(id,vid, (User) securityContext.getUserPrincipal()))
         throw new RuntimeException("Could not delete " + name);
     } catch (Exception e) {
       //e.printStackTrace();
@@ -649,6 +730,14 @@ public class SoftwareResource implements SoftwareService {
   public Boolean getPermissionFeatureEnabled() {
     return this.repo.getPermissionFeatureEnabled();
   }
+
+
+@Override
+public List<ModelConfigurationSummary> modelConfigurations(String model) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
   
   /**
    * Exports

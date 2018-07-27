@@ -19,6 +19,8 @@ import org.ontosoft.server.users.User;
 import org.ontosoft.server.users.UserDatabase;
 import org.ontosoft.server.util.Config;
 import org.ontosoft.shared.classes.FunctionSummary;
+import org.ontosoft.shared.classes.ModelConfigurationSummary;
+import org.ontosoft.shared.classes.ModelSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Entity;
@@ -69,7 +71,7 @@ public class SoftwareRepository {
   
   String server;
   
-  String topclass, topclassversion, topClassModel, uniongraph;
+  String topclass, topclassversion, topClassModel, uniongraph, topClassModelConfiguration;
 
   Vocabulary vocabulary;
   Map<String, List<MetadataEnumeration>> enumerations;
@@ -127,7 +129,7 @@ public class SoftwareRepository {
     this.server = props.getString("server");
     onturi = KBConstants.ONTURI();
 //    onturi = "https://w3id.org/ontosoft-vff/ontology";
-    onturi = "http://localhost/mint/alex_lucas_ontology6.owl";
+    onturi = "http://localhost/mint/alex_lucas_ontology7.owl";
 //    onturi = "http://localhost/lucas_ontology32.owl";
     caturi = KBConstants.CATURI();
     liburi = this.LIBURI();
@@ -147,6 +149,8 @@ public class SoftwareRepository {
     topclass = ontns + "Software";
     topclassversion = ontns + "SoftwareVersion";
     topClassModel = "https://w3id.org/mint/modelCatalog#" + "Model";
+    topClassModelConfiguration = "https://w3id.org/mint/modelCatalog#" + "ModelConfiguration";
+    
     uniongraph = "urn:x-arq:UnionGraph";
     
     owlns = KBConstants.OWLNS();
@@ -1034,6 +1038,10 @@ public class SoftwareRepository {
     return this.getAllSoftwareWithFacets(null);
   }
   
+  public ArrayList<ModelSummary> getAllModels() throws Exception {
+	    return this.getAllModelsWithFacets(null);
+	  }
+  
   public ArrayList<SoftwareVersionSummary> getAllSoftwareVersion(String software) throws Exception {
     return this.getAllSoftwareVersionWithFacets(null, software);
   }
@@ -1041,6 +1049,114 @@ public class SoftwareRepository {
   public ArrayList<FunctionSummary> getAllFunction() throws Exception {
     return this.getAllFunctionWithFacets(null);
   }
+    
+  public ArrayList<ModelSummary> getAllModelsWithFacets(
+	      List<EnumerationFacet> facets) throws Exception {
+	    /*if(facets == null || facets.size() == 0)
+	      return getAllSoftware();*/
+		String ons = KBConstants.ONTNS();
+	    String pns = KBConstants.PROVNS();
+	    String facetquery = "";
+	    if(facets != null) {
+	      for(EnumerationFacet facet : facets) {
+	        int i=0;
+	        int num = facet.getEnumerationIds().size();
+	        if(num > 0) {
+	          facetquery += "\t {\n";
+	          for(String propid : facet.getPropertyIds()) {
+	            for(String enumid : facet.getEnumerationIds()) {
+	              if(i > 0)
+	                facetquery += "\t\t UNION\n";
+	              facetquery += "\t\t { ?x <"+propid+"> <"+enumid+"> }\n";
+	              facetquery += "\t\t UNION\n";
+	              facetquery += "\t\t { ?x <" + ons + "hasSoftwareVersion> ?v . \n";
+	              facetquery += "\t\t  ?v <"+propid+"> <"+enumid+"> }\n";
+	              facetquery += "\t\t UNION\n";
+	              facetquery += "\t\t { ?x <" + ons + "hasSoftwareVersion> ?v . \n";
+	              facetquery += "\t\t  ?v <" + ons + "hasFunction> ?f . \n";
+	              facetquery += "\t\t  ?f <"+propid+"> <"+enumid+"> }\n";
+	              i++;
+	            }
+	          }
+	          facetquery += "\t } .\n";
+	        }
+	      }
+	    }
+	    
+	    String swquery = "\t ?x a <" + ons +"Software> .\n"
+	                   + "\t OPTIONAL {\n"
+	                   + "\t\t ?x <" + ons + "hasShortDescription> ?dobj .\n"
+	                   + "\t\t ?dobj <" + ons + "hasTextValue> ?desc \n"
+	                   + "\t } .\n"
+	                   + "\t OPTIONAL {\n"
+	                   + "\t\t ?x <" + ons + "hasCreator> ?creator .\n"
+	                   + "\t } .\n"
+	                   + "\t ?x <" + pns + "wasGeneratedBy> ?act .\n"
+	                   + "\t ?act <" + pns + "wasAssociatedWith> ?agent .\n"
+	                   + "\t ?act <" + pns + "endedAtTime> ?time .\n"
+	                   + "\t OPTIONAL {\n"
+	                   + "\t\t ?x <" + ons + "hasName> ?nobj .\n"
+	                   + "\t\t ?nobj <" + ons + "hasTextValue> ?name \n"
+	                   + "\t } .\n"
+	                   + "\t FILTER (STRSTARTS(STR(?act), CONCAT(STR(?x), '/" + ProvenanceRepository.PROV_GRAPH + "')))";
+	    String query = "SELECT ?x (SAMPLE(?desc) as ?description) "
+	        + " (GROUP_CONCAT(?creator) as ?creators)"
+	        + " (SAMPLE(?agent) as ?user)"
+	        + " (SAMPLE(?time) as ?posttime)"
+	        + " (SAMPLE(?name) as ?swname)"
+	        + " WHERE {\n" + swquery + facetquery + "}"
+	        + " GROUP BY ?x\n";
+	       
+	    ArrayList<ModelSummary> list = new ArrayList<ModelSummary>();
+	    KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
+	    for(ArrayList<SparqlQuerySolution> soln : allkb.sparqlQuery(query)) {
+	      KBObject sw = soln.get(0).getObject();
+	      KBObject desc = soln.get(1).getObject();
+	      KBObject creator = soln.get(2).getObject();
+	      KBObject agent = soln.get(3).getObject();
+	      KBObject time = soln.get(4).getObject();
+	      KBObject name = soln.get(5).getObject();
+	      
+	      if(sw == null)
+	        continue;
+	      
+	      ModelSummary summary = new ModelSummary();
+	      summary.setId(sw.getID());
+	      summary.setName(sw.getName());
+	      summary.setLabel(allkb.getLabel(sw));
+	      summary.setType(topclass);
+	      summary.setPermission(this.perm_repo.getSoftwarePermission(sw.getID()));
+	      
+	      if(name != null && name.getValue() != null) {
+	    	  summary.setModelName(name.getValueAsString());
+	      }
+	      
+	      if(desc != null && desc.getValue() != null) {
+	        String description = desc.getValue().toString();
+	        description = Pattern.compile("\\n\\nInitial metadata was retrieved .*$", Pattern.DOTALL).
+	          matcher(description).replaceAll("");
+	        if(description.length() > 300)
+	          description = description.substring(0, 297) + "...";
+	        summary.setDescription(description);
+	      }
+	      if(creator != null && creator.getValue() != null) {
+	        List<String> authors = new ArrayList<String>();
+	        for(String creatorid : creator.getValue().toString().split("\\s")) {
+	          KBObject authobj = allkb.getResource(creatorid);
+	          authors.add(allkb.getLabel(authobj));
+	        }
+	        summary.setAuthors(authors);
+	      }
+	      if(agent != null)
+	        summary.setUser(agent.getName());
+	      if(time != null && time.getValue() != null) {
+	        Date timestamp = (Date)time.getValue();
+	        summary.setTime(timestamp.getTime());
+	      }
+	      list.add(summary);
+	    }
+	    return list;
+	  }
   
   public ArrayList<SoftwareSummary> getAllSoftwareWithFacets(
       List<EnumerationFacet> facets) throws Exception {
@@ -1242,6 +1358,127 @@ public class SoftwareRepository {
       
       if(name != null && name.getValue() != null) {
     	  summary.setSoftwareName(name.getValueAsString());
+      }
+      
+      if(desc != null && desc.getValue() != null) {
+        String description = desc.getValue().toString();
+        description = Pattern.compile("\\n\\nInitial metadata was retrieved .*$", Pattern.DOTALL).
+          matcher(description).replaceAll("");
+        if(description.length() > 300)
+          description = description.substring(0, 297) + "...";
+        summary.setDescription(description);
+      }
+      if(creator != null && creator.getValue() != null) {
+        List<String> authors = new ArrayList<String>();
+        for(String creatorid : creator.getValue().toString().split("\\s")) {
+          KBObject authobj = allkb.getResource(creatorid);
+          authors.add(allkb.getLabel(authobj));
+        }
+        summary.setAuthors(authors);
+      }
+      if(agent != null)
+        summary.setUser(agent.getName());
+      if(time != null && time.getValue() != null) {
+        Date timestamp = (Date)time.getValue();
+        summary.setTime(timestamp.getTime());
+      }
+      list.add(summary);
+    }
+    return list;
+  }
+  
+  public ArrayList<ModelConfigurationSummary> getAllModelConfigurationsWithFacets(
+      List<EnumerationFacet> facets, String model) throws Exception {
+    /*if(facets == null || facets.size() == 0)
+      return getAllSoftware();*/
+    String ons = "https://w3id.org/mint/modelCatalog#";
+    String pns = KBConstants.PROVNS();
+    
+    String facetquery = "";
+    if(facets != null) {
+      for(EnumerationFacet facet : facets) {
+        int i=0;
+        int num = facet.getEnumerationIds().size();
+        if(num > 0) {
+          facetquery += "\t {\n";
+          for(String propid : facet.getPropertyIds()) {
+            for(String enumid : facet.getEnumerationIds()) {
+              if(i > 0)
+                facetquery += "\t\t UNION\n";
+              facetquery += "\t\t { ?x <"+propid+"> <"+enumid+"> }\n";
+              facetquery += "\t\t UNION\n";
+              facetquery += "\t\t { ?x <" + ons + "hasFunction> ?f . \n";
+              facetquery += "\t\t  ?f <"+propid+"> <"+enumid+"> }\n";
+              i++;
+            }
+          }
+          facetquery += "\t } .\n";
+        }
+      }
+    }
+
+    String swquery = "\t ?x a <" + ons +"SoftwareVersion> .\n"
+    			   + "\t ?swobj <" + ons + "hasSoftwareVersion> ?x .\n"
+                   + "\t OPTIONAL {\n"
+                   + "\t\t ?x <" + ons + "hasShortDescription> ?dobj .\n"
+                   + "\t\t ?dobj <" + ons + "hasTextValue> ?desc \n"
+                   + "\t } .\n"
+                   + "\t OPTIONAL {\n"
+                   + "\t\t ?x <" + ons + "hasCreator> ?creator .\n"
+                   + "\t } .\n"
+                   + "\t ?x <" + pns + "wasGeneratedBy> ?act .\n"
+                   + "\t ?act <" + pns + "wasAssociatedWith> ?agent .\n"
+                   + "\t ?act <" + pns + "endedAtTime> ?time .\n"
+                   + "\t OPTIONAL {\n"
+                   + "\t\t ?x <" + ons + "hasName> ?nobj .\n"
+                   + "\t\t ?nobj <" + ons + "hasTextValue> ?name \n"
+                   + "\t } .\n"
+                   + "\t FILTER (STRSTARTS(STR(?act), CONCAT(STR(?x), '/" + ProvenanceRepository.PROV_GRAPH + "')))\n";
+    
+    if (model != null && model != "")
+    {
+    	swquery += "FILTER (regex(STR(?swobj),\"" + LIBURI() + model + "\"))";
+    }
+
+    String query = "SELECT ?x (SAMPLE(?desc) as ?description) "
+        + " (GROUP_CONCAT(?creator) as ?creators)"
+        + " (SAMPLE(?agent) as ?user)"
+        + " (SAMPLE(?time) as ?posttime)"
+        + " (SAMPLE(?name) as ?swname)"
+        + " (SAMPLE(?swobj) as ?software)"
+        + " WHERE {\n" + swquery + facetquery + "}"
+        + " GROUP BY ?x\n";
+
+    ArrayList<ModelConfigurationSummary> list = new ArrayList<ModelConfigurationSummary>();
+    KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
+    for(ArrayList<SparqlQuerySolution> soln : allkb.sparqlQuery(query)) {
+      KBObject version = soln.get(0).getObject();
+      KBObject desc = soln.get(1).getObject();
+      KBObject creator = soln.get(2).getObject();
+      KBObject agent = soln.get(3).getObject();
+      KBObject time = soln.get(4).getObject();
+      KBObject name = soln.get(5).getObject();
+      KBObject sw = soln.get(6).getObject();
+      
+      if(version == null)
+        continue;
+      
+      ModelSummary modelSummary = new ModelSummary();
+      modelSummary.setId(sw.getID());
+      modelSummary.setName(sw.getName());
+      modelSummary.setLabel(allkb.getLabel(sw));
+      modelSummary.setType(topClassModel);
+      
+      ModelConfigurationSummary summary = new ModelConfigurationSummary();
+      summary.setModelSummary(modelSummary);
+      summary.setId(version.getID());
+      summary.setName(version.getName());
+      summary.setLabel(allkb.getLabel(version));
+      summary.setType(topClassModelConfiguration);
+      summary.setPermission(this.perm_repo.getSoftwarePermission(version.getID()));
+      
+      if(name != null && name.getValue() != null) {
+    	  summary.setModelName(name.getValueAsString());
       }
       
       if(desc != null && desc.getValue() != null) {
@@ -1875,6 +2112,22 @@ public class SoftwareRepository {
     return false;
   }
   
+  public boolean deleteModel(String swid, User loggedinuser) throws Exception {
+	Permission perm = getSoftwarePermission(swid);
+	if (loggedinuser.getRoles().contains("admin") || PermUtils.hasOwnerAccess(perm,  loggedinuser.getName()))
+	{
+	    KBAPI swkb = fac.getKB(swid, OntSpec.PLAIN);
+	    //KBObject swobj = swkb.getIndividual(swid);
+	    if (swkb.delete()) { // && (swobj != null)) {
+	      deleteEnumerationFromVocabulary(swid);
+	      this.prov.deleteSoftwareProvenance(swid);
+	      this.perm_repo.deleteSoftwarePermission(swid);
+	      return true;
+	    }		
+	}
+    return false;
+  }
+  
   public boolean deleteSoftwareVersion(String swid, String vid, User loggedinuser) throws Exception {
 	Permission perm = getSoftwarePermission(vid);
 	if (loggedinuser.getRoles().contains("admin") || PermUtils.hasOwnerAccess(perm,  loggedinuser.getName()))
@@ -1926,5 +2179,21 @@ public class SoftwareRepository {
   private String getUserId(UserCredentials user) {
 	return this.USERNS() + user.getName().replaceAll("[^a-zA-Z0-9_]", "_");    
   }
+
+  public boolean deleteModelConfiguration(String id, String vid, User userPrincipal) throws Exception {
+	Permission perm = getSoftwarePermission(vid);
+	if (userPrincipal.getRoles().contains("admin") || PermUtils.hasOwnerAccess(perm,  userPrincipal.getName()))
+	{
+	    KBAPI swkb = fac.getKB(vid, OntSpec.PLAIN);
+	    //KBObject swobj = swkb.getIndividual(swid);
+	    if (swkb.delete()) { // && (swobj != null)) {
+	      deleteEnumerationFromVocabulary(vid);
+	      this.prov.deleteSoftwareProvenance(vid);
+	      this.perm_repo.deleteSoftwarePermission(vid);
+	      return true;
+	    }		
+	}
+    return false;
+}
 
 }

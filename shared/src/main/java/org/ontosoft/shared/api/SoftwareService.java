@@ -14,6 +14,8 @@ import javax.ws.rs.Produces;
 
 import org.fusesource.restygwt.client.DirectRestService;
 import org.ontosoft.shared.classes.FunctionSummary;
+import org.ontosoft.shared.classes.ModelConfigurationSummary;
+import org.ontosoft.shared.classes.ModelSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Model;
@@ -40,11 +42,21 @@ public interface SoftwareService extends DirectRestService {
   @Path("software")
   @Produces("application/json")
   public List<SoftwareSummary> list();
+
+  @GET
+  @Path("model")
+  @Produces("application/json")
+  public List<ModelSummary> listModels();
   
   @GET
   @Path("versions")
   @Produces("application/json")
   public List<SoftwareVersionSummary> versions(String software);
+  
+  @GET
+  @Path("modelconfigurations")
+  @Produces("application/json")
+  public List<ModelConfigurationSummary> modelConfigurations(String model);
   
   @GET
   @Path("functions")
@@ -60,7 +72,21 @@ public interface SoftwareService extends DirectRestService {
   @Consumes("application/json")
   public List<SoftwareSummary> listWithFacets(
       @JsonProperty("facets") List<EnumerationFacet> facets);
-  
+
+  @POST
+  @Path("search")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public List<ModelSummary> listModelsWithFacets(
+      @JsonProperty("facets") List<EnumerationFacet> facets);
+
+  @POST
+  @Path("searchVersion")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public List<ModelConfigurationSummary> listModelConfigurationWithFacets(
+      @JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("model") String model);
+
   @POST
   @Path("searchVersion")
   @Produces("application/json")
@@ -172,9 +198,19 @@ public interface SoftwareService extends DirectRestService {
   public void delete(@PathParam("name") String name);
   
   @DELETE
+  @Path("model/{name}")
+  @Produces("text/html")
+  public void deleteModel(@PathParam("name") String name);
+  
+  @DELETE
   @Path("software/{name}/version/{vname}")
   @Produces("text/html")
   public void deleteSoftwareVersion(@PathParam("name") String name, @PathParam("vname") String vname);
+
+  @DELETE
+  @Path("software/{name}/modelconfiguration/{vname}")
+  @Produces("text/html")
+  public void deleteModelConfiguration(@PathParam("name") String name, @PathParam("vname") String vname);
 
   @DELETE
   @Path("software/enumerations/{name}")

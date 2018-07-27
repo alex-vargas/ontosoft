@@ -3,7 +3,9 @@ package org.ontosoft.client.place;
 public class NameTokens {
   public static final String home = "home";
   public static final String publish = "publish";
+  public static final String publishModel = "publishmodel";
   public static final String publishversion = "publishversion";
+  public static final String publishModelConfiguration = "publishmodelconfiguration";
   public static final String browse = "browse";
   public static final String version = "version";
   public static final String search = "search";
@@ -19,6 +21,11 @@ public class NameTokens {
   public static final String versions = "versions";
   public static final String functions = "functions";
   public static final String models = "models";
+  public static final String modelconfigurations = "modelconfigurations";
+  
+  public static String getModelConfigurations() {
+	  return modelconfigurations;
+  }
 
   public static String getModelsList() {
 	  return models;

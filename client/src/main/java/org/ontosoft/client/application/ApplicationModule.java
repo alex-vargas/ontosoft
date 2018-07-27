@@ -18,6 +18,8 @@ import org.ontosoft.client.application.loader.LoaderPresenter;
 import org.ontosoft.client.application.loader.LoaderView;
 import org.ontosoft.client.application.model.list.ModelListPresenter;
 import org.ontosoft.client.application.model.list.ModelListView;
+import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListPresenter;
+import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishPresenter;
 import org.ontosoft.client.application.publish.PublishView;
 import org.ontosoft.client.application.training.TrainingPresenter;
@@ -76,6 +78,8 @@ public class ApplicationModule extends AbstractPresenterModule {
         UserView.class, UserPresenter.MyProxy.class);
     bindPresenter(ModelListPresenter.class, ModelListPresenter.MyView.class,
             ModelListView.class, ModelListPresenter.MyProxy.class); 
+    bindPresenter(ModelConfigurationListPresenter.class, ModelConfigurationListPresenter.MyView.class,
+            ModelConfigurationListView.class, ModelConfigurationListPresenter.MyProxy.class);  
   }
 
 }

@@ -5,7 +5,7 @@ import org.ontosoft.shared.classes.provenance.Provenance;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Model extends ComplexEntity {
+public class Model extends Software {
 	Provenance provenance;
 	Permission permission;
 	String modelName;

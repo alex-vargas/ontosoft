@@ -248,7 +248,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
             SafeHtmlBuilder sb = new SafeHtmlBuilder();
             
             String link = "#" + NameTokens.modelconfigurations + "/" + summary.getModelSummary().getName() + ":" + summary.getName();
-            String modelLink = "#" + NameTokens.browse + "/" + summary.getModelSummary().getName();
+            String modelLink = "#" + NameTokens.modelbrowse + "/" + summary.getModelSummary().getName();
 
             String extralabel = "";
             

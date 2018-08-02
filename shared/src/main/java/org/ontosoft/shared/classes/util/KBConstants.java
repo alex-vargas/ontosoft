@@ -2,6 +2,7 @@ package org.ontosoft.shared.classes.util;
 
 public class KBConstants {
   private static String onturi = "http://ontosoft.org/software";
+  private static String modelCatalogURI = "https://w3id.org/mint/modelCatalog";
   private static String caturi = "http://ontosoft.org/softwareCategories";
   private static String provuri = "http://www.w3.org/ns/prov-o";
   private static String permuri = "http://www.w3.org/ns/auth/acl";
@@ -16,6 +17,18 @@ public class KBConstants {
   
   private static String dctermsns = "http://purl.org/dc/terms/";
   private static String dcns = "http://purl.org/dc/elements/1.1/";
+  
+  public static String MODELCATALOGURI() {
+	 return modelCatalogURI;
+  }
+  
+  public static void MODELCATALOGURI(String uri) {
+	  modelCatalogURI = uri;
+  }
+  
+  public static String MODELCATALOGURINS() {
+	  return modelCatalogURI + "#";
+  }
   
   public static String ONTURI() {
     return onturi;

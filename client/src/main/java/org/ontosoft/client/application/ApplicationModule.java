@@ -16,6 +16,8 @@ import org.ontosoft.client.application.list.SoftwareListPresenter;
 import org.ontosoft.client.application.list.SoftwareListView;
 import org.ontosoft.client.application.loader.LoaderPresenter;
 import org.ontosoft.client.application.loader.LoaderView;
+import org.ontosoft.client.application.model.browse.ModelBrowsePresenter;
+import org.ontosoft.client.application.model.browse.ModelBrowseView;
 import org.ontosoft.client.application.model.list.ModelListPresenter;
 import org.ontosoft.client.application.model.list.ModelListView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListPresenter;
@@ -79,7 +81,9 @@ public class ApplicationModule extends AbstractPresenterModule {
     bindPresenter(ModelListPresenter.class, ModelListPresenter.MyView.class,
             ModelListView.class, ModelListPresenter.MyProxy.class); 
     bindPresenter(ModelConfigurationListPresenter.class, ModelConfigurationListPresenter.MyView.class,
-            ModelConfigurationListView.class, ModelConfigurationListPresenter.MyProxy.class);  
+            ModelConfigurationListView.class, ModelConfigurationListPresenter.MyProxy.class);
+    bindPresenter(ModelBrowsePresenter.class, ModelBrowsePresenter.MyView.class,
+    		ModelBrowseView.class, ModelBrowsePresenter.MyProxy.class);
   }
 
 }

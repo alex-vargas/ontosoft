@@ -395,7 +395,7 @@ public class SoftwareResource implements SoftwareService {
   @Consumes("application/json")
   @RolesAllowed("user")
   @Override
-  public Model publish(@JsonProperty("model") Model model) {
+  public Model publishModel(@JsonProperty("model") Model model) {
     try {
       String modelId = this.repo.addModel(model,
           (User) securityContext.getUserPrincipal());

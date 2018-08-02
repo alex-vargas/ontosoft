@@ -22,6 +22,11 @@ public class NameTokens {
   public static final String functions = "functions";
   public static final String models = "models";
   public static final String modelconfigurations = "modelconfigurations";
+  public static final String modelbrowse = "modelbrowse";
+  
+  public static String getModelBrowse() {
+	  return modelbrowse;
+  }
   
   public static String getModelConfigurations() {
 	  return modelconfigurations;

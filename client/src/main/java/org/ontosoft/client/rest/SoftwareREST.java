@@ -394,6 +394,39 @@ public class SoftwareREST {
     }
   }
   
+  public void getModel(final String modelName,
+		  final Callback<Model, Throwable> callback,
+      final boolean reload) {
+    //GWT.log(softwareCache.keySet().toString() + ": "+reload);
+    if(modelCache.containsKey(modelName) && !reload) {
+      callback.onSuccess(modelCache.get(modelName));
+    }    
+    else {
+      REST.withCallback(new MethodCallback<Model>() {
+        @Override
+        public void onSuccess(Method method, Model model) {
+          //GWT.log("caching "+sw.getName());
+          if(model != null) {
+        	  modelCache.put(model.getName(), model);
+            if(reload)
+              AppNotification.notifySuccess(model.getLabel() + " reloaded", 1000);
+            callback.onSuccess(model);
+          }
+          else {
+            AppNotification.notifyFailure("Could not find "+modelName);
+            callback.onFailure(new Throwable("Model details could not be found"));
+          }
+        }
+        @Override
+        public void onFailure(Method method, Throwable exception) {
+          GWT.log("Could not fetch model: "+ modelName, exception);
+          AppNotification.notifyFailure("Could not fetch model: "+ modelName);
+          callback.onFailure(exception);
+        }
+      }).call(this.service).getVersion(URL.encodeQueryString(modelName), URL.encodeQueryString(modelName));
+    }
+  }
+  
   public void getSoftwareVersion(final String swname, final String vname, final Callback<SoftwareVersion, Throwable> callback,
       final boolean reload) {
     //GWT.log(softwareCache.keySet().toString() + ": "+reload);
@@ -456,6 +489,28 @@ public class SoftwareREST {
           callback.onFailure(exception);
         }
       }).call(this.service).getSoftwareFunction(URL.encodeQueryString(swname), URL.encodeQueryString(vname), URL.encodeQueryString(fname));
+    }
+  }
+  
+  public void getModelRDF(final String modelid, 
+      final Callback<String, Throwable> callback) {
+    RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, modelid);
+    rb.setHeader("Accept", "application/rdf+xml");
+    try {
+      rb.sendRequest(null, new RequestCallback() {
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+          callback.onSuccess(response.getText());
+        }
+        @Override
+        public void onError(Request request, Throwable exception) {
+          AppNotification.notifyFailure("Could not find " + modelid);
+          callback.onFailure(new Throwable(
+              "Software graph could not be found"));
+        }
+      });
+    } catch (Exception e) {
+      AppNotification.notifyFailure("Could not find " + modelid);
     }
   }
   
@@ -563,9 +618,9 @@ public class SoftwareREST {
         AppNotification.notifyFailure("Could not publish");
         callback.onFailure(exception);
       }
-    }).call(this.service).publish(model);    
+    }).call(this.service).publishModel(model);    
   }
-  
+    
   public void publishSoftwareVersion(final String software, 
 	  final SoftwareVersion version, 
       final Callback<SoftwareVersion, Throwable> callback) {

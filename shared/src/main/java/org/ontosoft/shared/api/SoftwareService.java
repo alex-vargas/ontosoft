@@ -176,7 +176,7 @@ public interface SoftwareService extends DirectRestService {
   @Path("model")
   @Produces("application/json")
   @Consumes("application/json")
-  public Model publish(@JsonProperty("model") Model model);
+  public Model publishModel(@JsonProperty("model") Model model);
 
   @PUT
   @Path("software/{name}")

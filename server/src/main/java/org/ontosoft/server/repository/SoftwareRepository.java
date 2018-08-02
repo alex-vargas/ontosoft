@@ -148,8 +148,8 @@ public class SoftwareRepository {
     
     topclass = ontns + "Software";
     topclassversion = ontns + "SoftwareVersion";
-    topClassModel = "https://w3id.org/mint/modelCatalog#" + "Model";
-    topClassModelConfiguration = "https://w3id.org/mint/modelCatalog#" + "ModelConfiguration";
+    topClassModel = KBConstants.MODELCATALOGURINS() + "Model";
+    topClassModelConfiguration = KBConstants.MODELCATALOGURINS() + "ModelConfiguration";
     
     uniongraph = "urn:x-arq:UnionGraph";
     
@@ -271,7 +271,7 @@ public class SoftwareRepository {
       List<MetadataType> types = this.vocabulary.getSubTypes(enumtype);
       types.add(this.vocabulary.getType(KBConstants.ONTNS() + "Function"));
       types.add(this.vocabulary.getType(KBConstants.ONTNS() + "KnownIssue"));
-      types.add(this.vocabulary.getType("https://w3id.org/mint/modelCatalog#" + "Model"));
+      types.add(this.vocabulary.getType(KBConstants.MODELCATALOGURINS() + "Model"));
       
       enumerations = new HashMap<String, List<MetadataEnumeration>>();
       
@@ -305,7 +305,7 @@ public class SoftwareRepository {
 	        		  typeenums.add(menum);
 	        	  }
         	  }
-          }else if (type.getId().equals("https://w3id.org/mint/modelCatalog#" + "Model")) {
+          }else if (type.getId().equals(KBConstants.MODELCATALOGURINS() + "Model")) {
         	  KBObject value = this.ontkb.getPropertyValue(inst, i4);
         	  KBAPI vkb = fac.getKB(uniongraph, OntSpec.PLAIN);
         	  if (value != null)
@@ -1391,7 +1391,7 @@ public class SoftwareRepository {
       List<EnumerationFacet> facets, String model) throws Exception {
     /*if(facets == null || facets.size() == 0)
       return getAllSoftware();*/
-    String ons = "https://w3id.org/mint/modelCatalog#";
+    String ons = KBConstants.MODELCATALOGURINS();
     String pns = KBConstants.PROVNS();
     
     String facetquery = "";

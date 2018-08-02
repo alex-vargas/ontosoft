@@ -251,7 +251,7 @@ public class ModelListView extends ParameterizedViewImpl
         public SafeHtml getValue(ModelSummary summary) {
             SafeHtmlBuilder sb = new SafeHtmlBuilder();
             
-            String link = "#" + NameTokens.browse + "/" + summary.getName();
+            String link = "#" + NameTokens.modelbrowse + "/" + summary.getName();
             String extralabel = "";
             
             if(!summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL)) {
@@ -367,7 +367,7 @@ public class ModelListView extends ParameterizedViewImpl
       @Override
       public void update(int index, ModelSummary summary, String value) {
         String swname = summary.getName();
-        History.newItem(NameTokens.publish + "/" + swname);
+        History.newItem(NameTokens.publishModel + "/" + swname);
       }
     });
     table.addColumn(editcol);
@@ -469,7 +469,7 @@ public class ModelListView extends ParameterizedViewImpl
           updateList();
           
           // Go to the new item
-          History.newItem(NameTokens.publish + "/" + model.getName());
+          History.newItem(NameTokens.publishModel + "/" + model.getName());
           
           publishdialog.hide();
           modellabel.setValue(null);

@@ -9,6 +9,7 @@ import org.ontosoft.client.application.function.list.FunctionListView;
 import org.ontosoft.client.application.list.SoftwareListView;
 import org.ontosoft.client.application.model.browse.ModelBrowseView;
 import org.ontosoft.client.application.model.list.ModelListView;
+import org.ontosoft.client.application.model.publish.PublishModelView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishView;
 import org.ontosoft.client.application.users.UserView;
@@ -58,7 +59,8 @@ public class ApplicationPresenter extends
       final UserView userview,
       final ModelListView modellistview,
       final ModelConfigurationListView modelConfigurationListView,
-      final ModelBrowseView modelbrowse) {
+      final ModelBrowseView modelbrowse,
+      final PublishModelView publishmodel) {
     super(eventBus, view, proxy, RevealType.Root);
     
     final PlaceRequest.Builder builder = new PlaceRequest.Builder();
@@ -99,6 +101,8 @@ public class ApplicationPresenter extends
             sectionview = modelConfigurationListView;
         else if(nametoken.equals(NameTokens.modelbrowse))
         	sectionview = modelbrowse;
+        else if(nametoken.equals(NameTokens.publishModel))
+        	sectionview = publishmodel;
 
         // Reveal called view with parameters
         if(sectionview != null) {

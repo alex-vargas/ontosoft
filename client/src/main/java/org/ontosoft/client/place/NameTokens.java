@@ -3,8 +3,8 @@ package org.ontosoft.client.place;
 public class NameTokens {
   public static final String home = "home";
   public static final String publish = "publish";
-  public static final String publishModel = "publishmodel";
   public static final String publishversion = "publishversion";
+  public static final String publishModel = "publishmodel";
   public static final String publishModelConfiguration = "publishmodelconfiguration";
   public static final String browse = "browse";
   public static final String version = "version";

@@ -3,6 +3,7 @@ package org.ontosoft.client.components.form.notification;
 import org.gwtbootstrap3.client.ui.PanelGroup;
 import org.gwtbootstrap3.extras.animate.client.ui.Animate;
 import org.gwtbootstrap3.extras.animate.client.ui.constants.Animation;
+import org.ontosoft.client.components.form.ModelForm;
 import org.ontosoft.client.components.form.SoftwareForm;
 import org.ontosoft.client.components.form.SoftwareVersionForm;
 import org.ontosoft.shared.classes.util.GUID;
@@ -17,6 +18,12 @@ public class PluginNotifications extends PanelGroup {
 
   public void addPluginResponse(PluginResponse response, SoftwareForm form) {
     PluginNotification notification = new PluginNotification(response, this.id, form);
+    this.add(notification);
+    Animate.animate(notification, Animation.FADE_IN_DOWN, 1, 400);
+  }
+
+  public void addPluginResponse(PluginResponse response, ModelForm form) {
+	  PluginModelNotification notification = new PluginModelNotification(response, this.id, form);
     this.add(notification);
     Animate.animate(notification, Animation.FADE_IN_DOWN, 1, 400);
   }

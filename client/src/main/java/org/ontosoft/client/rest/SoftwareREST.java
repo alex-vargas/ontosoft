@@ -663,6 +663,23 @@ public class SoftwareREST {
     }).call(this.service).update(software.getName(), software);    
   }
   
+  public void updateModel(final Model model, 
+      final Callback<Model, Throwable> callback) {
+    REST.withCallback(new MethodCallback<Model>() {
+      @Override
+      public void onSuccess(Method method, Model model) {
+        modelCache.put(model.getName(), model);
+        AppNotification.notifySuccess(model.getLabel() + " saved", 1000);
+        callback.onSuccess(model);
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not save "+model.getLabel());
+        callback.onFailure(exception);
+      }
+    }).call(this.service).update(model.getName(), model);    
+  }
+  
   public void updateSoftwareVersion(final String software, final SoftwareVersion version, 
       final Callback<SoftwareVersion, Throwable> callback) {
     REST.withCallback(new MethodCallback<SoftwareVersion>() {

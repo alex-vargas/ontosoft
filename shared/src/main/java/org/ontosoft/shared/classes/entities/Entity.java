@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
   @Type(name="Software", value=Software.class),
   @Type(name="SoftwareVersion", value=SoftwareVersion.class),
   @Type(name="SoftwareFunction", value=SoftwareFunction.class),
-  @Type(name="Model", value=Model.class)
+  @Type(name="Model", value=Model.class),
+  @Type(name="ModelVersion", value=ModelVersion.class)
 })
 @JsonTypeInfo(use=Id.NAME)
 public abstract class Entity {

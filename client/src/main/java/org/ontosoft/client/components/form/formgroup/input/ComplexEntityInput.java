@@ -18,6 +18,7 @@ import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeEv
 import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeHandler;
 import org.ontosoft.shared.classes.entities.ComplexEntity;
 import org.ontosoft.shared.classes.entities.Entity;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
 import org.ontosoft.shared.classes.provenance.Activity;
 import org.ontosoft.shared.classes.provenance.Agent;
@@ -44,6 +45,7 @@ public class ComplexEntityInput extends FieldSet implements IEntityInput {
   private List<Entity> entities;
   private HandlerManager handlerManager;
   SoftwareVersion version;
+  ModelVersion modelVersion;
   ComplexEntity entity;
   MetadataProperty property;
   Vocabulary vocabulary;
@@ -105,6 +107,141 @@ public class ComplexEntityInput extends FieldSet implements IEntityInput {
       }
       catch (Exception exception) {
         GWT.log("Problem adding sub widget: "+subprop.getId()+" for "+prop.getId(), exception);
+      }
+    }
+    this.entity = (ComplexEntity) e;
+    this.setValue(e);
+  }
+  
+  @Override
+  public void createWidget(Entity e, MetadataProperty prop, Vocabulary vocabulary, 
+		  final ModelVersion version) {
+    final FieldSet thisfs = this;
+  this.modelVersion = version;
+  this.inputs = new HashMap<String, List<IEntityInput>>();
+    this.property = prop;
+    this.vocabulary = vocabulary;
+    this.addStyleName("bordered-fieldset");
+    
+    MetadataType type = vocabulary.getType(this.property.getRange());
+    
+    List<MetadataProperty> subprops = vocabulary.getPropertiesForType(type);
+  subprops = vocabulary.orderProperties(subprops);
+    
+    for(final MetadataProperty subprop : subprops) {
+      List<Entity> propEntities = ((ComplexEntity) e).getPropertyValues(subprop.getId());
+      InputGroup labelpanel = new InputGroup();
+      InputGroupButton igbtn = new InputGroupButton();
+      
+      if(subprop.isMultiple()) {
+        final Button btn = new Button();
+        btn.addStyleName("btn-flat");
+        btn.setTabIndex(-2);
+        btn.setIcon(IconType.PLUS);
+        btn.setType(ButtonType.SUCCESS);
+        btn.setSize(ButtonSize.EXTRA_SMALL);
+        
+        igbtn.add(btn);
+        labelpanel.add(igbtn);
+        this.add(labelpanel);
+        final int index = this.getWidgetIndex(labelpanel);
+        
+        btn.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            Entity newEntity = getNewEntity(null, subprop);
+              addEntityEditor(newEntity, subprop, index);
+          }
+        });
+        
+        
+        //Entity newEntity = getNewEntity(null);
+        //addEntityEditor(e, subprop, version, form);
+      }
+      
+      int size = (propEntities != null)?propEntities.size():1;
+      
+      for (int i = 0; i < size; i++)
+      {
+        String subentityid = e.getId() + "-" + GUID.get();
+        Entity subentity = null;
+        try {
+          subentity = EntityRegistrar.getEntity(subentityid, null, subprop.getRange());
+        } catch (Exception ex) {
+          GWT.log("Could not get a new entity", ex);
+          continue;
+        }
+        try {
+          subprop.setRequired(prop.isRequired());
+          String tip = subprop.getQuestion();
+          if(tip == null)
+            tip = subprop.getLabel();
+          final Tooltip tooltip = new Tooltip(tip);
+          tooltip.setPlacement(Placement.BOTTOM);
+          tooltip.setTrigger(Trigger.FOCUS);
+          final IEntityInput ip = EntityRegistrar.getInput(subentity, subprop, vocabulary);
+          tooltip.add(ip.asWidget());
+          
+          if (subprop.isMultiple()) {
+            final InputGroup ig = new InputGroup();
+            final Button btn = new Button();
+            btn.addStyleName("btn-flat");
+            btn.setIcon(IconType.REMOVE);
+            btn.setColor("#5D7BA0");
+            btn.setSize(ButtonSize.EXTRA_SMALL);
+            btn.setTabIndex(-2);
+            btn.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                if(subprop.isMultiple()) {
+                  // Remove if multiple entities are there
+                  thisfs.remove(ig);
+                  ip.clearValue();
+                  //entities.remove(entity);
+                  inputs.remove(ip);
+                  if(entity.getValue() != null) {
+                    GWT.log("remove!");
+                    entity.setValue(null);
+                  }
+                  GWT.log("remove!");
+                }
+                else {
+                  // Clear contents (this will fire the entitychange event)
+                  if(entity.getValue() != null)
+                    entity.setValue(null);
+                  ip.clearValue();
+                }
+              }
+            });
+            
+            InputGroupButton igbtn2 = new InputGroupButton();
+            igbtn2.add(btn);
+            ig.add(tooltip);
+            ig.add(igbtn2);
+            
+            this.add(ig);
+          }
+          else {
+            this.add(tooltip);
+          }
+  
+          ip.addEntityChangeHandler(new EntityChangeHandler() {
+            @Override
+            public void onEntityChange(EntityChangeEvent event) {
+              fireEvent(new EntityChangeEvent(getValue()));
+            }
+          });
+          List<IEntityInput> entInputs = inputs.get(subprop.getId());
+          if (entInputs == null)
+          {
+            entInputs = new ArrayList<IEntityInput>();
+          }
+          entInputs.add(ip);
+          inputs.put(subprop.getId(), entInputs);
+        }
+        catch (Exception exception) {
+          GWT.log("Problem adding sub widget: "+subprop.getId()+" for "+prop.getId(), exception);
+        }
       }
     }
     this.entity = (ComplexEntity) e;

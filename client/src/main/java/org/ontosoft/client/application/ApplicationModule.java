@@ -22,6 +22,14 @@ import org.ontosoft.client.application.model.list.ModelListPresenter;
 import org.ontosoft.client.application.model.list.ModelListView;
 import org.ontosoft.client.application.model.publish.PublishModelPresenter;
 import org.ontosoft.client.application.model.publish.PublishModelView;
+import org.ontosoft.client.application.model.version.browse.ModelVersionBrowsePresenter;
+import org.ontosoft.client.application.model.version.browse.ModelVersionBrowseView;
+import org.ontosoft.client.application.model.version.compare.CompareModelVersionPresenter;
+import org.ontosoft.client.application.model.version.compare.CompareModelVersionView;
+import org.ontosoft.client.application.model.version.list.ModelVersionListPresenter;
+import org.ontosoft.client.application.model.version.list.ModelVersionListView;
+import org.ontosoft.client.application.model.version.publish.PublishModelVersionPresenter;
+import org.ontosoft.client.application.model.version.publish.PublishModelVersionView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListPresenter;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishPresenter;
@@ -88,6 +96,14 @@ public class ApplicationModule extends AbstractPresenterModule {
     		ModelBrowseView.class, ModelBrowsePresenter.MyProxy.class);
     bindPresenter(PublishModelPresenter.class, PublishModelPresenter.MyView.class,
             PublishModelView.class, PublishModelPresenter.MyProxy.class);
+    bindPresenter(PublishModelVersionPresenter.class, PublishModelVersionPresenter.MyView.class,
+            PublishModelVersionView.class, PublishModelVersionPresenter.MyProxy.class);
+    bindPresenter(ModelVersionBrowsePresenter.class, ModelVersionBrowsePresenter.MyView.class,
+        ModelVersionBrowseView.class, ModelVersionBrowsePresenter.MyProxy.class);
+    bindPresenter(CompareModelVersionPresenter.class, CompareModelVersionPresenter.MyView.class,
+            CompareModelVersionView.class, CompareModelVersionPresenter.MyProxy.class);
+    bindPresenter(ModelVersionListPresenter.class, ModelVersionListPresenter.MyView.class,
+        	ModelVersionListView.class, ModelVersionListPresenter.MyProxy.class);
   }
 
 }

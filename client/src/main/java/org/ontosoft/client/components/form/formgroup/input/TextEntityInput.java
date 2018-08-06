@@ -5,6 +5,7 @@ import org.gwtbootstrap3.client.ui.TextArea;
 import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeEvent;
 import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeHandler;
 import org.ontosoft.shared.classes.entities.Entity;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
 import org.ontosoft.shared.classes.entities.TextEntity;
 import org.ontosoft.shared.classes.vocabulary.MetadataProperty;
@@ -13,8 +14,8 @@ import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -222,6 +223,11 @@ public class TextEntityInput extends Container implements IEntityInput {
 
 @Override
 public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, SoftwareVersion version) {
+	// TODO Auto-generated method stub
+	
+}
+@Override
+public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, ModelVersion version) {
 	// TODO Auto-generated method stub
 	
 }

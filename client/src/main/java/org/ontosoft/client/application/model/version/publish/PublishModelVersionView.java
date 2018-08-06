@@ -1,4 +1,4 @@
-package org.ontosoft.client.application.model.publish;
+package org.ontosoft.client.application.model.version.publish;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,8 +25,8 @@ import org.ontosoft.client.authentication.SessionStorage;
 import org.ontosoft.client.components.chart.CategoryBarChart;
 import org.ontosoft.client.components.chart.CategoryPieChart;
 import org.ontosoft.client.components.chart.events.CategorySelectionEvent;
-import org.ontosoft.client.components.form.ModelForm;
-import org.ontosoft.client.components.form.events.ModelChangeEvent;
+import org.ontosoft.client.components.form.ModelVersionForm;
+import org.ontosoft.client.components.form.events.ModelVersionChangeEvent;
 import org.ontosoft.client.components.form.events.PluginResponseEvent;
 import org.ontosoft.client.components.form.notification.PluginNotifications;
 import org.ontosoft.client.place.NameTokens;
@@ -34,6 +34,7 @@ import org.ontosoft.client.rest.AppNotification;
 import org.ontosoft.client.rest.SoftwareREST;
 import org.ontosoft.client.rest.UserREST;
 import org.ontosoft.shared.classes.entities.Model;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.permission.AccessMode;
 import org.ontosoft.shared.classes.permission.Agent;
 import org.ontosoft.shared.classes.permission.Authorization;
@@ -47,6 +48,7 @@ import org.ontosoft.shared.utils.PermUtils;
 import com.github.gwtd3.api.D3;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -68,8 +70,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Inject;
 
-public class PublishModelView extends ParameterizedViewImpl 
-  implements PublishModelPresenter.MyView {
+public class PublishModelVersionView extends ParameterizedViewImpl 
+  implements PublishModelVersionPresenter.MyView {
 
   @UiField
   CategoryPieChart piechart;
@@ -84,7 +86,7 @@ public class PublishModelView extends ParameterizedViewImpl
   Breadcrumbs breadcrumbs;
 
   @UiField
-  ModelForm modelForm;
+  ModelVersionForm modelform;
   
   @UiField
   ButtonGroup buttons;
@@ -125,9 +127,11 @@ public class PublishModelView extends ParameterizedViewImpl
   SoftwareREST api = SoftwareREST.get(Config.getServerURL());
 
   Vocabulary vocabulary;
-  String modelName;
-  Model model;
+  String versionname;
+  String softwarename;
+  ModelVersion version;
   String loggedinuser;
+  Model model;
 
   private String allusers = "All Users(*)";
   
@@ -136,13 +140,19 @@ public class PublishModelView extends ParameterizedViewImpl
 
   private Comparator<Authorization> metacompare;
   
-  interface Binder extends UiBinder<Widget, PublishModelView> { }
+  interface Binder extends UiBinder<Widget, PublishModelVersionView> { }
 
   @Inject
-  public PublishModelView(Binder binder) {
+  public PublishModelVersionView(Binder binder) {
     initWidget(binder.createAndBindUi(this));
     initVocabulary();
     initTable();
+  }
+  
+  public static void setBrowserWindowTitle (String newTitle) {
+    if (Document.get() != null) {
+        Document.get().setTitle (newTitle + " - Admin - OntoSoft Portal");
+    }
   }
   
   // If some parameters are passed in, initialize the software and interface
@@ -163,7 +173,7 @@ public class PublishModelView extends ParameterizedViewImpl
     
     // Parse tokens
     if(params.length > 0) {
-      this.modelName = params[0];
+      this.versionname = params[0];
       String pfx = KBConstants.CATNS();
       String piecat = params.length > 1 ? pfx+params[1] : null;
       String barcat = params.length > 2 ? pfx+params[2] : null;
@@ -171,10 +181,10 @@ public class PublishModelView extends ParameterizedViewImpl
       piechart.setActiveCategoryId(piecat, false);
       barchart.setActiveCategoryId(barcat, false);
 
-      initModel(this.modelName);
+      initModel(this.versionname);
     }
     else {
-      model = null; 
+      version = null; 
     }
   }
   
@@ -235,7 +245,7 @@ public class PublishModelView extends ParameterizedViewImpl
 	      
       @Override
       public void render(Cell.Context context, Authorization auth, SafeHtmlBuilder sb) {
-        if(model.getPermission().ownernameExists(auth.getAgentName())) {
+        if(version.getPermission().ownernameExists(auth.getAgentName())) {
           sb.appendHtmlConstant("<i class=\"fa fa-check fa-1\"></i>");
         } else {
           sb.appendHtmlConstant("<i class=\"fa fa-times fa-1\"></i>");
@@ -255,7 +265,7 @@ public class PublishModelView extends ParameterizedViewImpl
   }
   
   private void initAgents() {
-    ArrayList<Authorization> authorizations = new ArrayList<Authorization>(this.model.getPermission().getAuthorizations().values());
+    ArrayList<Authorization> authorizations = new ArrayList<Authorization>(this.version.getPermission().getAuthorizations().values());
     ArrayList<Authorization> authlist = new ArrayList<Authorization>();
     HashSet<String> permusers = new HashSet<String>();
 	
@@ -263,21 +273,21 @@ public class PublishModelView extends ParameterizedViewImpl
       Authorization auth = iter.next();
       if (!permusers.contains(auth.getAgentName()) && 
         auth.getAccessMode().getMode().equals("Write") &&
-        auth.getAccessToObjId().equals(this.model.getId()) &&
+        auth.getAccessToObjId().equals(this.version.getId()) &&
         !auth.getAgentName().equals("*")) {
         authlist.add(auth);
         permusers.add(auth.getAgentName());
       }
     }
 	
-    for (Agent owner:model.getPermission().getOwners()) {
+    for (Agent owner:version.getPermission().getOwners()) {
       if (!permusers.contains(owner.getName())) {
         permusers.add(owner.getName());
 			
         Authorization auth = new Authorization();
         auth.setId("");
         auth.setAgentId("");
-        auth.setAccessToObjId(model.getId());
+        auth.setAccessToObjId(version.getId());
         auth.setAgentName(owner.getName());
         AccessMode mode = new AccessMode();
         mode.setMode("Write");
@@ -302,7 +312,7 @@ public class PublishModelView extends ParameterizedViewImpl
     heading.setVisible(false);
     piechart.setActiveCategoryId(null, false);
     barchart.setActiveCategoryId(null, false);
-    modelForm.setVisible(false);
+    modelform.setVisible(false);
     piechart.setVisible(false);
     buttons.setVisible(false);
     barchart.setVisible(false);
@@ -322,8 +332,8 @@ public class PublishModelView extends ParameterizedViewImpl
     }, false);
   }
   
-  private void initModel(String modelNameStr) {
-    initModel(modelNameStr, false);
+  private void initModel(String softwarename) {
+    initModel(softwarename, false);
   }
   
   private void setPermButtonVisibility() {
@@ -339,48 +349,64 @@ public class PublishModelView extends ParameterizedViewImpl
     	      
     	if(permEnabled && 
           ((session != null && session.getRoles().contains("admin")) || 
-    	  model.getPermission().ownernameExists(loggedinuser))) {
+    	  version.getPermission().ownernameExists(loggedinuser))) {
     	  permbutton.setVisible(true);
         }
       }
     });	  
   }
   
-  private void initModel(String modelNameStr, final boolean reload) {    
+  private void initModel(final String versionname, final boolean reload) {    
     if(!reload)
       loading.setVisible(true);
     else
       reloadbutton.setIconSpin(true);
     
-    this.api.getModel(modelNameStr, 
-        new Callback<Model, Throwable>() {
-      @Override
-      public void onSuccess(Model sw) {
-        reloadbutton.setIconSpin(false);
-        loading.setVisible(false);
-        savebutton.setEnabled(sw.isDirty());
-        
-        model = sw;
-        initialDraw();
-        
-        setPermButtonVisibility();
-        
-        notifications.showNotificationsForModel(model.getId());
-        String modelLabel = model.getLabel();
-        permissiondialog.setTitle("Set Permissions for " + 
-        		modelLabel.substring(0, 1).toUpperCase() + modelLabel.substring(1));
-      }
-      @Override
-      public void onFailure(Throwable reason) {
-        reloadbutton.setIconSpin(false);
-        loading.setVisible(false);
-      }
-    }, reload);
+    String[] swnames = versionname.split("\\s*:\\s*");
+    softwarename = swnames[0];
+    final String versionname1 = swnames[1];
+    this.versionname = versionname1;
+    
+    
+    api.getModel(softwarename, new Callback<Model, Throwable>() {
+        @Override
+        public void onSuccess(Model sw) {
+        	model = sw;
+        	
+        	api.getModelVersion(softwarename, versionname1, 
+    	        new Callback<ModelVersion, Throwable>() {
+    	      @Override
+    	      public void onSuccess(ModelVersion sw) {
+    	        reloadbutton.setIconSpin(false);
+    	        loading.setVisible(false);
+    	        savebutton.setEnabled(sw.isDirty());
+    	        
+    	        version = sw;
+    	        initialDraw();
+    	        
+    	        setPermButtonVisibility();
+    	        
+    	        notifications.showNotificationsForModelVersion(version.getId());
+    	        String swlabel = version.getLabel();
+    	        permissiondialog.setTitle("Set Permissions for " + swlabel.substring(0, 1).toUpperCase() + swlabel.substring(1));
+    	      }
+    	      @Override
+    	      public void onFailure(Throwable reason) {
+    	        reloadbutton.setIconSpin(false);
+    	        loading.setVisible(false);
+    	      }
+    	    }, reload);
+        }
+        @Override
+        public void onFailure(Throwable exception) {
+          GWT.log("Error fetching model", exception);
+        }
+      }, false);
   }
   
   private void setBrowsePermissionHeader() {
     String perm_header = "Default Permission: ";
-    String mode = PermUtils.getAccessLevelForUser(this.model, "*", this.model.getId());
+    String mode = PermUtils.getAccessLevelForUser(this.version, "*", this.version.getId());
     if (mode.equals("Write"))
       perm_header += "Write";
     else
@@ -390,18 +416,18 @@ public class PublishModelView extends ParameterizedViewImpl
   }
   
   private void initialDraw() {
-    if(this.vocabulary == null || this.model == null)
+    if(this.vocabulary == null || this.version == null)
       return;
 
     piechart.setVocabulary(vocabulary);
     barchart.setVocabulary(vocabulary);
-    modelForm.setVocabulary(vocabulary);
+    modelform.setVocabulary(vocabulary);
     
-    piechart.setSoftware(model);
-    barchart.setSoftware(model);
-    modelForm.setModel(model);
+    piechart.setSoftware(version);
+    barchart.setSoftware(version);
+    modelform.setModelVersion(version);
     
-    modelForm.createFormItems();
+    modelform.createFormItems();
     initializePiechart();
 
     setBreadCrumbs();
@@ -451,7 +477,7 @@ public class PublishModelView extends ParameterizedViewImpl
   void onPieSelect(CategorySelectionEvent event) {
     MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
     if(pcat != null) {
-      History.replaceItem(NameTokens.publishModel + "/" + modelName + "/" + pcat.getName(), false);
+      History.replaceItem(NameTokens.publishModelVersion+ "/" + softwarename + ":" + versionname + "/" + pcat.getName(), false);
       barchart.setActiveCategoryId(null, false);
       pieCategorySelected(pcat.getId());
       setBreadCrumbs();
@@ -463,7 +489,7 @@ public class PublishModelView extends ParameterizedViewImpl
     MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
     MetadataCategory bcat = vocabulary.getCategory(barchart.getActiveCategoryId());
     if(bcat != null && pcat != null) {
-      History.replaceItem(NameTokens.publishModel + "/" + modelName + "/"
+      History.replaceItem(NameTokens.publishModelVersion + "/" + softwarename + ":" + versionname + "/"
             + pcat.getName() + "/" + bcat.getName() , false);
       barCategorySelected(bcat.getId());
     }
@@ -472,17 +498,18 @@ public class PublishModelView extends ParameterizedViewImpl
 
   @UiHandler("savebutton")
   public void onSave(ClickEvent event) {
-    final Model tmpModel = modelForm.getModel();
-    tmpModel.setName(modelName);
+    final ModelVersion tmpsw = modelform.getModelVersion();
+    tmpsw.setName(versionname);
     //savebutton.state().loading();
-    this.api.updateModel(tmpModel, new Callback<Model, Throwable>() {
+    
+    this.api.updateModelVersion(softwarename, tmpsw, new Callback<ModelVersion, Throwable>() {
       @Override
-      public void onSuccess(Model sw) {
-		  model = sw;
-		  modelName = tmpModel.getName();
-        piechart.setSoftware(model);
-        barchart.setSoftware(model);
-        modelForm.setModel(model);
+      public void onSuccess(ModelVersion sw) {
+        version = sw;
+        //softwarename = tmpsw.getName();
+        piechart.setSoftware(version);
+        barchart.setSoftware(version);
+        modelform.setModelVersion(version);
         
         //savebutton.state().reset();
         savebutton.setEnabled(false);
@@ -500,33 +527,33 @@ public class PublishModelView extends ParameterizedViewImpl
   
   @UiHandler("reloadbutton")
   public void onReload(ClickEvent event) {
-    initModel(modelName, true);
+    initModel(versionname, true);
     //History.replaceItem(History.getToken(), false);
   }
   
-  @UiHandler("modelForm")
-  void onSoftwareChange(ModelChangeEvent event) {
-	  model = event.getModel();
-	  model.setDirty(true);
+  @UiHandler("modelform")
+  void onSoftwareChange(ModelVersionChangeEvent event) {
+    version = event.getModelVersion();
+    version.setDirty(true);
     savebutton.setEnabled(true);
-    modelName = model.getName();
-    piechart.setSoftware(model);
-    barchart.setSoftware(model);
-    modelForm.setModel(model);
+    versionname = version.getName();
+    piechart.setSoftware(version);
+    barchart.setSoftware(version);
+    modelform.setModelVersion(version);
     piechart.fillCategories();
     barchart.fillCategories();
     piechart.setActiveCategoryId(piechart.getActiveCategoryId(), false);
   }
   
-  @UiHandler("modelForm")
+  @UiHandler("modelform")
   void onPluginResponse(PluginResponseEvent event) {
     PluginResponse response = event.getPluginResponse();
-    notifications.addPluginResponse(response, modelForm);
+    notifications.addPluginResponse(response, modelform);
   }
   
   void pieCategorySelected(String categoryId) {
     // Show transition if bar and form aren't visible
-    if(!barchart.isVisible() && !modelForm.isVisible()) {
+    if(!barchart.isVisible() && !modelform.isVisible()) {
       easeIn(piechart);
     }
     
@@ -541,7 +568,7 @@ public class PublishModelView extends ParameterizedViewImpl
     barchart.setVisible(true);
     heading.setVisible(false);
 
-    modelForm.setVisible(false);
+    modelform.setVisible(false);
     
     piechart.updateDimensions();
     barchart.updateDimensions();
@@ -553,39 +580,45 @@ public class PublishModelView extends ParameterizedViewImpl
     piecolumn.setOffset("");
     barcolumn.setSize("XS_7 SM_12");
     
-    modelForm.showCategoryItems(categoryId);
-    easeIn(modelForm);
-    modelForm.setVisible(true);
+    modelform.showCategoryItems(categoryId);
+    easeIn(modelform);
+    modelform.setVisible(true);
     
     barchart.updateDimensions();
-  }
-  
-  public static void setBrowserWindowTitle (String newTitle) {
-    if (Document.get() != null) {
-        Document.get().setTitle (newTitle + " - Admin - OntoSoft Portal");
-    }
   }
   
   private void setBreadCrumbs() {
     breadcrumbs.clear();
     breadcrumbs.setVisible(true);
     
-    String modelLabel = piechart.getSoftware().getLabel();
-    String modelNameStr = piechart.getSoftware().getSoftwareName();
-    setBrowserWindowTitle(modelLabel);
-    if (modelNameStr != null)
-      modelLabel = modelNameStr;
-    else if (modelLabel == null)
-      modelLabel = piechart.getSoftware().getName();
+    //ModelVersion version = piechart.getSoftware().get
     
-    AnchorListItem anchor = new AnchorListItem(modelLabel);
+    String swlabel = piechart.getSoftware().getLabel();
+    setBrowserWindowTitle(swlabel);
+    String swname = piechart.getSoftware().getSoftwareName();
+    if (swname != null)
+      swlabel = swname;
+    else if (swlabel == null)
+      swlabel = piechart.getSoftware().getName();
+    
+    AnchorListItem anchor1 = new AnchorListItem(model.getLabel());
+    anchor1.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        History.newItem(NameTokens.publishModel + "/" + softwarename);
+      }
+    });
+    anchor1.setStyleName("first-crumb");
+    breadcrumbs.add(anchor1);
+    
+    AnchorListItem anchor = new AnchorListItem(swlabel);
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        History.newItem(NameTokens.modelbrowse + "/" + modelName);
+        History.newItem(NameTokens.modelversion + "/" + softwarename + ":" + versionname);
       }
     });
-    anchor.setStyleName("first-crumb");
+    //anchor.setStyleName("first-crumb");
     breadcrumbs.add(anchor);
 
     if(piechart != null && piechart.getSoftware() != null) {
@@ -593,7 +626,7 @@ public class PublishModelView extends ParameterizedViewImpl
       anchor.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          History.replaceItem(NameTokens.publish + "/" + modelName, false);
+          History.replaceItem(NameTokens.publishModelVersion + "/" + softwarename + ":" + versionname, false);
           clear();
           initialDraw();
           //initSoftware(softwarename);
@@ -702,13 +735,13 @@ public class PublishModelView extends ParameterizedViewImpl
           ownerrole.setValue(true);
           selectAccessLevel("Write");
           permlist.refresh();
-        } else if (model.getPermission().ownernameExists(username)) {
+        } else if (version.getPermission().ownernameExists(username)) {
           ownerrole.setValue(true);
           selectAccessLevel("Write");
           permlist.setEnabled(false);
           permlist.refresh();
         } else {
-          api.getSoftwareAccessLevelForUser(model.getName(), 
+          api.getSoftwareAccessLevelForUser(version.getName(), 
             username, new Callback<AccessMode, Throwable>() {
               @Override
               public void onFailure(Throwable reason) {
@@ -795,9 +828,9 @@ public class PublishModelView extends ParameterizedViewImpl
     UserSession session = SessionStorage.getSession();
 
     if ((session != null && session.getRoles().contains("admin")) || 
-		model.getPermission().ownernameExists(this.loggedinuser)) {
+      version.getPermission().ownernameExists(this.loggedinuser)) {
       if (ownerrole.getValue() == true) {
-        this.api.addSoftwareOwner(model.getName(), username, 
+        this.api.addSoftwareOwner(version.getName(), username, 
           new Callback<Boolean, Throwable>() {
           @Override
           public void onFailure(Throwable reason) {
@@ -810,22 +843,22 @@ public class PublishModelView extends ParameterizedViewImpl
             permissiondialog.hide();
             AppNotification.notifySuccess("Owner Added!", 2000);
             if (username.equals("*")) {
-            	model.getPermission().removeAllOwners();
+              version.getPermission().removeAllOwners();
             }
-            model.getPermission().addOwnerid(username);
+            version.getPermission().addOwnerid(username);
           }
         });
       } else {
         final Authorization authorization = new Authorization();
         authorization.setId("");
         authorization.setAgentId("");
-        authorization.setAccessToObjId(model.getId());
+        authorization.setAccessToObjId(version.getId());
         authorization.setAgentName(username);
         AccessMode mode = new AccessMode();
         mode.setMode(permtype);
         authorization.setAccessMode(mode);
 
-        this.api.setSoftwarePermissionForUser(model.getName(), authorization, 
+        this.api.setSoftwarePermissionForUser(version.getName(), authorization, 
           new Callback<Boolean, Throwable>() {
             @Override
             public void onFailure(Throwable reason) {
@@ -836,11 +869,11 @@ public class PublishModelView extends ParameterizedViewImpl
             @Override
             public void onSuccess(Boolean success) {
               if (username.equals("*")) {
-            	  model.getPermission().removeAuthsHavingTarget(authorization.getAccessToObjId());
+                version.getPermission().removeAuthsHavingTarget(authorization.getAccessToObjId());
               }
-              model.getPermission().addOrUpdateAuth(authorization);
+              version.getPermission().addOrUpdateAuth(authorization);
               
-              api.removeSoftwareOwner(model.getName(), username, 
+              api.removeSoftwareOwner(version.getName(), username, 
                 new Callback<Boolean, Throwable>() {
                @Override
                public void onFailure(Throwable reason) {
@@ -852,7 +885,7 @@ public class PublishModelView extends ParameterizedViewImpl
                public void onSuccess(Boolean success) {
                  permissiondialog.hide();
                  AppNotification.notifySuccess("Permission updated!", 2000);
-                 model.getPermission().removeOwnerid(username);
+                 version.getPermission().removeOwnerid(username);
                }
              });
            }

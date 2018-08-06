@@ -15,20 +15,22 @@ import org.ontosoft.shared.api.SoftwareService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.ModelConfigurationSummary;
 import org.ontosoft.shared.classes.ModelSummary;
+import org.ontosoft.shared.classes.ModelVersionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.ModelConfiguration;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
+import org.ontosoft.shared.classes.permission.AccessMode;
+import org.ontosoft.shared.classes.permission.Authorization;
+import org.ontosoft.shared.classes.permission.Permission;
 import org.ontosoft.shared.classes.vocabulary.MetadataEnumeration;
 import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import org.ontosoft.shared.plugins.PluginResponse;
 import org.ontosoft.shared.search.EnumerationFacet;
-import org.ontosoft.shared.classes.permission.Authorization;
-import org.ontosoft.shared.classes.permission.Permission;
-import org.ontosoft.shared.classes.permission.AccessMode;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -48,6 +50,7 @@ public class SoftwareREST {
   private List<SoftwareSummary> softwareList;
   private List<ModelSummary> modelList;
   private List<SoftwareVersionSummary> softwareVersionList;
+  private List<ModelVersionSummary> modelVersionList;
   private List<ModelConfigurationSummary> modelConfigurationList;
   private List<FunctionSummary> functionList;
   private List<ModelSummary> modelsList;
@@ -58,7 +61,9 @@ public class SoftwareREST {
   private HashMap<String, Model> modelCache = 
 	      new HashMap<String, Model>();
   private HashMap<String, SoftwareVersion> softwareVersionCache = 
-	      new HashMap<String, SoftwareVersion>();
+        new HashMap<String, SoftwareVersion>();
+  private HashMap<String, ModelVersion> modelVersionCache = 
+        new HashMap<String, ModelVersion>();
   private HashMap<String, ModelConfiguration> modelConfigurationCache = 
 	      new HashMap<String, ModelConfiguration>();
   private HashMap<String, SoftwareFunction> softwareFunctionCache = 
@@ -74,6 +79,8 @@ public class SoftwareREST {
 	      new ArrayList<Callback<List<ModelSummary>, Throwable>>();
   private ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>> list_version_callbacks =
 	      new ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>>();
+  private ArrayList<Callback<List<ModelVersionSummary>, Throwable>> list_modelversion_callbacks =
+	      new ArrayList<Callback<List<ModelVersionSummary>, Throwable>>();
   private ArrayList<Callback<List<ModelConfigurationSummary>, Throwable>> list_modelconfigurations_callbacks =
 	      new ArrayList<Callback<List<ModelConfigurationSummary>, Throwable>>();
   private ArrayList<Callback<List<FunctionSummary>, Throwable>> list_function_callbacks =
@@ -230,6 +237,36 @@ public class SoftwareREST {
       }
     }
   }
+
+  public void getModelVersionList(String model, final Callback<List<ModelVersionSummary>, Throwable> callback,
+      boolean reload) {
+    if(modelVersionList != null && !reload) {
+      callback.onSuccess(modelVersionList);
+    }
+    else {
+      modelVersionList = null;
+      if(list_modelversion_callbacks.isEmpty()) {
+        list_modelversion_callbacks.add(callback);
+        REST.withCallback(new MethodCallback<List<ModelVersionSummary>>() {
+          @Override
+          public void onSuccess(Method method, List<ModelVersionSummary> swlist) {
+            modelVersionList = swlist;
+            for(Callback<List<ModelVersionSummary>, Throwable> cb : list_modelversion_callbacks)
+              cb.onSuccess(modelVersionList);    
+            list_modelversion_callbacks.clear();
+          }
+          @Override
+          public void onFailure(Method method, Throwable exception) {
+            AppNotification.notifyFailure("Could not load model list");
+            callback.onFailure(exception);
+          }
+        }).call(this.service).versions(model);
+      }
+      else {
+    	  list_modelversion_callbacks.add(callback);
+      }
+    }
+  }
   
   public void getModelConfigurationList(String model,
 		  final Callback<List<ModelConfigurationSummary>, Throwable> callback,
@@ -333,6 +370,20 @@ public class SoftwareREST {
       }
     }).call(this.service).listSoftwareVersionWithFacets(facets, software);
   }
+
+  public void getModelVersionListFaceted(List<EnumerationFacet> facets, String model,
+      final Callback<List<ModelVersionSummary>, Throwable> callback) {
+    REST.withCallback(new MethodCallback<List<ModelVersionSummary>>() {
+      @Override
+      public void onSuccess(Method method, List<ModelVersionSummary> swlist) {
+        callback.onSuccess(swlist);            
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        callback.onFailure(exception);
+      }
+    }).call(this.service).listModelVersionWithFacets(facets, model);
+  }
   
   public void getModelConfigurationListFaceted(List<EnumerationFacet> facets, String model,
       final Callback<List<ModelConfigurationSummary>, Throwable> callback) {
@@ -362,8 +413,8 @@ public class SoftwareREST {
     }).call(this.service).listFunctionWithFacets(facets);
   }
 	  
-  public void getSoftware(final String swname, final Callback<Software, Throwable> callback,
-      final boolean reload) {
+  public void getSoftware(final String swname, 
+		  final Callback<Software, Throwable> callback, final boolean reload) {
     //GWT.log(softwareCache.keySet().toString() + ": "+reload);
     if(softwareCache.containsKey(swname) && !reload) {
       callback.onSuccess(softwareCache.get(swname));
@@ -395,8 +446,7 @@ public class SoftwareREST {
   }
   
   public void getModel(final String modelName,
-		  final Callback<Model, Throwable> callback,
-      final boolean reload) {
+		  final Callback<Model, Throwable> callback, final boolean reload) {
     //GWT.log(softwareCache.keySet().toString() + ": "+reload);
     if(modelCache.containsKey(modelName) && !reload) {
       callback.onSuccess(modelCache.get(modelName));
@@ -423,12 +473,45 @@ public class SoftwareREST {
           AppNotification.notifyFailure("Could not fetch model: "+ modelName);
           callback.onFailure(exception);
         }
-      }).call(this.service).getVersion(URL.encodeQueryString(modelName), URL.encodeQueryString(modelName));
+      }).call(this.service).getModelVersion(URL.encodeQueryString(modelName), URL.encodeQueryString(modelName));
     }
   }
   
-  public void getSoftwareVersion(final String swname, final String vname, final Callback<SoftwareVersion, Throwable> callback,
-      final boolean reload) {
+  public void getModelVersion(final String swname, final String vname, 
+		  final Callback<ModelVersion, Throwable> callback, final boolean reload) {
+    //GWT.log(softwareCache.keySet().toString() + ": "+reload);
+    if(modelVersionCache.containsKey(vname) && !reload) {
+      callback.onSuccess(modelVersionCache.get(vname));
+    }    
+    else {
+      REST.withCallback(new MethodCallback<ModelVersion>() {
+        @Override
+        public void onSuccess(Method method, ModelVersion sw) {
+          //GWT.log("caching "+sw.getName());
+          if(sw != null) {
+            modelVersionCache.put(sw.getName(), sw);
+            if(reload)
+              AppNotification.notifySuccess(sw.getLabel() + " reloaded", 1000);
+            callback.onSuccess(sw);
+          }
+          else {
+            AppNotification.notifyFailure("Could not find "+vname);
+            callback.onFailure(new Throwable("Model details could not be found"));
+          }
+        }
+        @Override
+        public void onFailure(Method method, Throwable exception) {
+          GWT.log("Could not fetch model: "+vname, exception);
+          AppNotification.notifyFailure("Could not fetch model: "+vname);
+          callback.onFailure(exception);
+        }
+      }).call(this.service).getModelVersion(URL.encodeQueryString(swname),
+    		  URL.encodeQueryString(vname));
+    }
+  }
+  
+  public void getSoftwareVersion(final String swname, final String vname,
+		  final Callback<SoftwareVersion, Throwable> callback, final boolean reload) {
     //GWT.log(softwareCache.keySet().toString() + ": "+reload);
     if(softwareVersionCache.containsKey(vname) && !reload) {
       callback.onSuccess(softwareVersionCache.get(vname));
@@ -645,6 +728,31 @@ public class SoftwareREST {
       }
     }).call(this.service).publishVersion(software, version);    
   }
+
+  public void publishModelVersion(final String model, 
+	  final ModelVersion version, 
+      final Callback<ModelVersion, Throwable> callback) {
+    REST.withCallback(new MethodCallback<ModelVersion>() {
+      @Override
+      public void onSuccess(Method method, ModelVersion sw) {
+        if(sw != null) {
+          modelVersionCache.put(sw.getName(), sw);
+          modelVersionList.add(new ModelVersionSummary(sw));
+          AppNotification.notifySuccess(version.getLabel() + " published. Now enter some details !", 1500);
+          callback.onSuccess(sw);
+        }
+        else {
+          AppNotification.notifyFailure("Could not publish");
+          callback.onFailure(new Throwable("Returned null"));
+        }
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not publish");
+        callback.onFailure(exception);
+      }
+    }).call(this.service).publishModelVersion(model, version);    
+  }
   
   public void updateSoftware(final Software software, 
       final Callback<Software, Throwable> callback) {
@@ -697,6 +805,23 @@ public class SoftwareREST {
     }).call(this.service).updateVersion(software, version.getName(), version);    
   }
   
+  public void updateModelVersion(final String model, final ModelVersion version, 
+      final Callback<ModelVersion, Throwable> callback) {
+    REST.withCallback(new MethodCallback<ModelVersion>() {
+      @Override
+      public void onSuccess(Method method, ModelVersion sw) {
+        modelVersionCache.put(sw.getName(), sw);
+        AppNotification.notifySuccess(version.getLabel() + " saved", 1000);
+        callback.onSuccess(sw);
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not save "+version.getLabel());
+        callback.onFailure(exception);
+      }
+    }).call(this.service).updateModelVersion(model, version.getName(), version);    
+  }
+  
   public void deleteSoftware(final String swname, 
       final Callback<Void, Throwable> callback) {
     REST.withCallback(new MethodCallback<Void>() {
@@ -735,6 +860,26 @@ public class SoftwareREST {
         callback.onFailure(exception);
       }
     }).call(this.service).deleteModel(modelName);    
+  }
+
+  public void deleteModelVersion(final String swname, final String vname, 
+      final Callback<Void, Throwable> callback) {
+    REST.withCallback(new MethodCallback<Void>() {
+      @Override
+      public void onSuccess(Method method, Void v) {
+        modelVersionCache.remove(swname);
+        for(ModelSummary sum: modelVersionList)
+          if(sum.getName().equals(swname))
+        	  modelVersionCache.remove(sum);
+        callback.onSuccess(v);
+        AppNotification.notifySuccess(swname+" deleted", 1000);
+      }
+      @Override
+      public void onFailure(Method method, Throwable exception) {
+        AppNotification.notifyFailure("Could not delete "+vname);
+        callback.onFailure(exception);
+      }
+    }).call(this.service).deleteSoftwareVersion(swname, vname);    
   }
   
   public void deleteSoftwareVersion(final String swname, final String vname, 

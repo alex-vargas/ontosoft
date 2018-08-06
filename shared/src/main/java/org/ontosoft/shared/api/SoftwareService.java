@@ -16,9 +16,11 @@ import org.fusesource.restygwt.client.DirectRestService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.ModelConfigurationSummary;
 import org.ontosoft.shared.classes.ModelSummary;
+import org.ontosoft.shared.classes.ModelVersionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Model;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
@@ -93,6 +95,14 @@ public interface SoftwareService extends DirectRestService {
   @Consumes("application/json")
   public List<SoftwareVersionSummary> listSoftwareVersionWithFacets(
       @JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("software") String software);
+
+  @POST
+  @Path("searchModelVersion")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public List<ModelVersionSummary> listModelVersionWithFacets(
+      @JsonProperty("facets") List<EnumerationFacet> facets, 
+      @PathParam("model") String model);
   
   @POST
   @Path("searchFunction")
@@ -110,6 +120,12 @@ public interface SoftwareService extends DirectRestService {
   @Path("software/{name}/version/{version}")
   @Produces("application/json")
   public SoftwareVersion getVersion(@PathParam("name") String name, @PathParam("version") String version);
+
+  @GET
+  @Path("model/{name}/version/{version}")
+  @Produces("application/json")
+  public ModelVersion getModelVersion(@PathParam("name") String name, 
+		  @PathParam("version") String version);
 
   @GET
   @Path("software/{name}/version/{version}/function/{function}")
@@ -135,13 +151,21 @@ public interface SoftwareService extends DirectRestService {
   @Path("software/{name}/provenance")
   @Produces("application/rdf+xml")
   public String getProvenanceGraph(@PathParam("name") String name);
-  
+
   /* versions */
   @POST
   @Path("software/{name}/version")
   @Produces("application/json")
   @Consumes("application/json")
   public SoftwareVersion publishVersion(@PathParam("name") String name, @JsonProperty("version") SoftwareVersion version);
+
+  /* model versions */
+  @POST
+  @Path("model/{name}/version")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public ModelVersion publishModelVersion(@PathParam("name") String name, 
+		  @JsonProperty("version") ModelVersion version);
   
   @GET
   @Path("vocabulary")
@@ -192,6 +216,13 @@ public interface SoftwareService extends DirectRestService {
   public Software updateVersion(@PathParam("swname") String swname, @PathParam("vname") String vname,
       @JsonProperty("version") SoftwareVersion version);
 
+  @PUT
+  @Path("model/{modelname}/version/{vname}")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public Model updateModelVersion(@PathParam("modelname") String modelname, @PathParam("vname") String vname,
+      @JsonProperty("version") ModelVersion version);
+
   @DELETE
   @Path("software/{name}")
   @Produces("text/html")
@@ -206,6 +237,12 @@ public interface SoftwareService extends DirectRestService {
   @Path("software/{name}/version/{vname}")
   @Produces("text/html")
   public void deleteSoftwareVersion(@PathParam("name") String name, @PathParam("vname") String vname);
+
+  @DELETE
+  @Path("model/{name}/version/{vname}")
+  @Produces("text/html")
+  public void deleteModelVersion(@PathParam("name") String name, 
+		  @PathParam("vname") String vname);
 
   @DELETE
   @Path("software/{name}/modelconfiguration/{vname}")

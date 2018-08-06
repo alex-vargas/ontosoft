@@ -5,6 +5,7 @@ public class NameTokens {
   public static final String publish = "publish";
   public static final String publishversion = "publishversion";
   public static final String publishModel = "publishmodel";
+  public static final String publishModelVersion = "publishmodelversion";
   public static final String publishModelConfiguration = "publishmodelconfiguration";
   public static final String browse = "browse";
   public static final String version = "version";
@@ -16,6 +17,7 @@ public class NameTokens {
   public static final String compare = "compare";
   public static final String comparefunction = "comparefunction";
   public static final String compareversion = "compareversion";
+  public static final String comparemodelversion = "comparemodelversion";
   public static final String users = "users";
   public static final String permission = "permission";
   public static final String versions = "versions";
@@ -23,6 +25,7 @@ public class NameTokens {
   public static final String models = "models";
   public static final String modelconfigurations = "modelconfigurations";
   public static final String modelbrowse = "modelbrowse";
+  public static final String modelversion = "modelversion";
   
   public static String getModelBrowse() {
 	  return modelbrowse;
@@ -43,10 +46,14 @@ public class NameTokens {
   public static String getPublish() {
     return publish;
   }
-  
+
   public static String getPublishVersion() {
     return publishversion;
   }
+  
+  public static String getPublishModelVersion() {
+	    return publishModelVersion;
+	  }
 
   public static String getBrowse() {
     return browse;

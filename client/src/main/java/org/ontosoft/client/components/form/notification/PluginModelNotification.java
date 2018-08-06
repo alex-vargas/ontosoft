@@ -18,8 +18,6 @@ import org.gwtbootstrap3.client.ui.gwt.ButtonCell;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.ontosoft.client.components.form.ModelForm;
-import org.ontosoft.client.components.form.SoftwareForm;
-import org.ontosoft.client.components.form.notification.PluginNotification.ResponseDetails;
 import org.ontosoft.shared.classes.util.GUID;
 import org.ontosoft.shared.classes.vocabulary.MetadataProperty;
 import org.ontosoft.shared.plugins.Plugin;

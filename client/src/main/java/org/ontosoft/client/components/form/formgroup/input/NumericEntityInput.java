@@ -4,6 +4,7 @@ import org.gwtbootstrap3.client.ui.DoubleBox;
 import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeEvent;
 import org.ontosoft.client.components.form.formgroup.input.events.EntityChangeHandler;
 import org.ontosoft.shared.classes.entities.Entity;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.NumericEntity;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
 import org.ontosoft.shared.classes.vocabulary.MetadataProperty;
@@ -103,6 +104,11 @@ public class NumericEntityInput implements IEntityInput {
 
 @Override
 public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, SoftwareVersion version) {
+	// TODO Auto-generated method stub
+	
+}
+@Override
+public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, ModelVersion version) {
 	// TODO Auto-generated method stub
 	
 }

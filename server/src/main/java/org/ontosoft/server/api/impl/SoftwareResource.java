@@ -26,9 +26,11 @@ import org.ontosoft.shared.api.SoftwareService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.ModelConfigurationSummary;
 import org.ontosoft.shared.classes.ModelSummary;
+import org.ontosoft.shared.classes.ModelVersionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Model;
+import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
@@ -163,6 +165,20 @@ public class SoftwareResource implements SoftwareService {
   }
   
   @POST
+  @Path("searchModelVersion")
+  @Produces("application/json")
+  @Consumes("application/json")
+  @Override
+  public List<ModelVersionSummary> listModelVersionWithFacets(@JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("version") String software) {
+    try {
+      return this.repo.getAllModelVersionWithFacets(facets, software);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception: " + e.getMessage());
+    }
+  }
+  
+  @POST
   @Path("searchModelConfiguration")
   @Produces("application/json")
   @Consumes("application/json")
@@ -219,6 +235,25 @@ public class SoftwareResource implements SoftwareService {
       if(!name.startsWith("http:"))
           vid = swid + "/version/" + version;
       return this.repo.getSoftwareVersion(swid, vid);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Exception: " + e.getMessage());
+    }
+  }
+  
+  @GET
+  @Path("model/{name}/version/{version}")
+  @Produces("application/json")
+  @Override
+  public ModelVersion getModelVersion(@PathParam("name") String name, @PathParam("version") String version) {
+    try {
+      String vid = version;
+      String swid = name;
+      if(!name.startsWith("http:"))
+          swid = repo.LIBNS() + name;
+      if(!name.startsWith("http:"))
+          vid = swid + "/version/" + version;
+      return this.repo.getModelVersion(swid, vid);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Exception: " + e.getMessage());
@@ -541,6 +576,26 @@ public class SoftwareResource implements SoftwareService {
   }
   
   @DELETE
+  @Path("model/{name}/version/{vname}")
+  @Produces("text/html")
+  @RolesAllowed("user")
+  @Override
+  public void deleteModelVersion(@PathParam("name") String name,
+		  @PathParam("vname") String vname) {
+    try {
+      String swid = name;
+      if(!name.startsWith("http:"))
+        swid = repo.LIBNS() + name;
+      String vid = swid + "/version/" + vname;
+      if (!this.repo.deleteModelVersion(swid,vid, (User) securityContext.getUserPrincipal()))
+        throw new RuntimeException("Could not delete " + name);
+    } catch (Exception e) {
+      //e.printStackTrace();
+      throw new RuntimeException("Exception in delete: " + e.getMessage());
+    }
+  }
+  
+  @DELETE
   @Path("model/{name}/modelconfiguration/{vname}")
   @Produces("text/html")
   @RolesAllowed("user")
@@ -731,12 +786,26 @@ public class SoftwareResource implements SoftwareService {
     return this.repo.getPermissionFeatureEnabled();
   }
 
-
 @Override
 public List<ModelConfigurationSummary> modelConfigurations(String model) {
 	// TODO Auto-generated method stub
 	return null;
 }
+
+
+@Override
+public ModelVersion publishModelVersion(String name, ModelVersion version) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public Model updateModelVersion(String modelname, String vname, ModelVersion version) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+
 
   
   /**

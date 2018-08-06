@@ -4,6 +4,7 @@ import org.gwtbootstrap3.client.ui.PanelGroup;
 import org.gwtbootstrap3.extras.animate.client.ui.Animate;
 import org.gwtbootstrap3.extras.animate.client.ui.constants.Animation;
 import org.ontosoft.client.components.form.ModelForm;
+import org.ontosoft.client.components.form.ModelVersionForm;
 import org.ontosoft.client.components.form.SoftwareForm;
 import org.ontosoft.client.components.form.SoftwareVersionForm;
 import org.ontosoft.shared.classes.util.GUID;
@@ -34,6 +35,12 @@ public class PluginNotifications extends PanelGroup {
     Animate.animate(notification, Animation.FADE_IN_DOWN, 1, 400);
   }
   
+  public void addPluginResponse(PluginResponse response, ModelVersionForm form) {
+    PluginModelVersionNotification notification = new PluginModelVersionNotification(response, this.id, form);
+    this.add(notification);
+    Animate.animate(notification, Animation.FADE_IN_DOWN, 1, 400);
+  }
+  
   public void showNotificationsForSoftware(String softwareid) {
     for(int i=0; i<this.getWidgetCount(); i++) {
       PluginNotification notification = (PluginNotification) this.getWidget(i);
@@ -44,9 +51,29 @@ public class PluginNotifications extends PanelGroup {
     }
   }
   
+  public void showNotificationsForModel(String softwareid) {
+    for(int i=0; i<this.getWidgetCount(); i++) {
+      PluginModelNotification notification = (PluginModelNotification) this.getWidget(i);
+      if(notification.getPluginResponse().getSoftwareInfo().getId().equals(softwareid))
+        notification.setVisible(true);
+      else
+        notification.setVisible(false);
+    }
+  }
+  
   public void showNotificationsForSoftwareVersion(String softwareid) {
     for(int i=0; i<this.getWidgetCount(); i++) {
       PluginSoftwareVersionNotification notification = (PluginSoftwareVersionNotification) this.getWidget(i);
+      if(notification.getPluginResponse().getSoftwareInfo().getId().equals(softwareid))
+        notification.setVisible(true);
+      else
+        notification.setVisible(false);
+    }
+  }
+  
+  public void showNotificationsForModelVersion(String softwareid) {
+    for(int i=0; i<this.getWidgetCount(); i++) {
+      PluginModelVersionNotification notification = (PluginModelVersionNotification) this.getWidget(i);
       if(notification.getPluginResponse().getSoftwareInfo().getId().equals(softwareid))
         notification.setVisible(true);
       else

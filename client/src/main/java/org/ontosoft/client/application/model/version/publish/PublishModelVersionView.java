@@ -367,41 +367,41 @@ public class PublishModelVersionView extends ParameterizedViewImpl
     final String versionname1 = swnames[1];
     this.versionname = versionname1;
     
-    
-    api.getModel(softwarename, new Callback<Model, Throwable>() {
-        @Override
-        public void onSuccess(Model sw) {
-        	model = sw;
-        	
-        	api.getModelVersion(softwarename, versionname1, 
-    	        new Callback<ModelVersion, Throwable>() {
-    	      @Override
-    	      public void onSuccess(ModelVersion sw) {
-    	        reloadbutton.setIconSpin(false);
-    	        loading.setVisible(false);
-    	        savebutton.setEnabled(sw.isDirty());
-    	        
-    	        version = sw;
-    	        initialDraw();
-    	        
-    	        setPermButtonVisibility();
-    	        
-    	        notifications.showNotificationsForModelVersion(version.getId());
-    	        String swlabel = version.getLabel();
-    	        permissiondialog.setTitle("Set Permissions for " + swlabel.substring(0, 1).toUpperCase() + swlabel.substring(1));
-    	      }
-    	      @Override
-    	      public void onFailure(Throwable reason) {
-    	        reloadbutton.setIconSpin(false);
-    	        loading.setVisible(false);
-    	      }
-    	    }, reload);
-        }
-        @Override
-        public void onFailure(Throwable exception) {
-          GWT.log("Error fetching model", exception);
-        }
-      }, false);
+    //alex commented here
+//    api.getModel(softwarename, new Callback<Model, Throwable>() {
+//        @Override
+//        public void onSuccess(Model sw) {
+//        	model = sw;
+//        	
+//        	api.getModelVersion(softwarename, versionname1, 
+//    	        new Callback<ModelVersion, Throwable>() {
+//    	      @Override
+//    	      public void onSuccess(ModelVersion sw) {
+//    	        reloadbutton.setIconSpin(false);
+//    	        loading.setVisible(false);
+//    	        savebutton.setEnabled(sw.isDirty());
+//    	        
+//    	        version = sw;
+//    	        initialDraw();
+//    	        
+//    	        setPermButtonVisibility();
+//    	        
+//    	        notifications.showNotificationsForModelVersion(version.getId());
+//    	        String swlabel = version.getLabel();
+//    	        permissiondialog.setTitle("Set Permissions for " + swlabel.substring(0, 1).toUpperCase() + swlabel.substring(1));
+//    	      }
+//    	      @Override
+//    	      public void onFailure(Throwable reason) {
+//    	        reloadbutton.setIconSpin(false);
+//    	        loading.setVisible(false);
+//    	      }
+//    	    }, reload);
+//        }
+//        @Override
+//        public void onFailure(Throwable exception) {
+//          GWT.log("Error fetching model", exception);
+//        }
+//      }, false);
   }
   
   private void setBrowsePermissionHeader() {

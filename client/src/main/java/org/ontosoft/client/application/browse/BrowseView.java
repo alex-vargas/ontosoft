@@ -57,8 +57,12 @@ import com.google.inject.Inject;
 
 public class BrowseView extends ParameterizedViewImpl 
   implements BrowsePresenter.MyView {
+	
+	private boolean isModel = false;
+	
+	private String publishPlace, versionsPlace, publishVersionsPlace;
 
-  interface Binder extends UiBinder<Widget, BrowseView> {}
+  public interface Binder extends UiBinder<Widget, BrowseView> {}
   
   @UiField
   PageHeader softwareTitle;
@@ -100,11 +104,20 @@ public class BrowseView extends ParameterizedViewImpl
   public BrowseView(Binder binder) {
     initWidget(binder.createAndBindUi(this));
     initVocabulary();
+    initPlaces();
     
     this.codec = GWT.create(SoftwareCodec.class);
   }
+  
+  public void initPlaces() {
+	setPublishPlace(NameTokens.publish);
+	setVersionsPlace(NameTokens.versions);
+	setPublishVersionsPlace(NameTokens.publishversion);
+  }
 
-  // If some parameters are passed in, initialize the software and interface
+
+
+// If some parameters are passed in, initialize the software and interface
   public void initializeParameters(String[] params) {    
     clear();
     if(params.length > 0) {
@@ -193,13 +206,13 @@ public class BrowseView extends ParameterizedViewImpl
 
     initializePieChart();
     
-    Entity swName = sw.getPropertyValue(KBConstants.ONTNS()+"hasName");
+    Entity swName = sw.getPropertyValue(getHasNameNameSpace());
     if (swName != null)
     	softwareTitle.setText(swName.getValue().toString());
     else
     	softwareTitle.setText(sw.getLabel());
     
-    List<Entity> authorlist = sw.getPropertyValues(KBConstants.ONTNS()+"hasCreator");
+    List<Entity> authorlist = sw.getPropertyValues(getHasCreatorNameSpace());
     String authors = authorlist.toString();
     if(authorlist.isEmpty())
       authors = "[No author listed]";
@@ -320,8 +333,23 @@ public class BrowseView extends ParameterizedViewImpl
     bigpublishbutton.getParent().setVisible(true);
   }
   
-  
-  private boolean hasSomePropertyValues(List<MetadataProperty> props, Software sw) {
+  /**
+   * Returns the namespace for "hasCreator" using OntoSoft NameSpace 
+   * @return
+   */
+  	public String getHasCreatorNameSpace() {
+	  return KBConstants.ONTNS()+"hasCreator";
+	}
+
+    /**
+     * Returns the namespace for "hasName" using OntoSoft NameSpace 
+     * @return
+     */
+  	public String getHasNameNameSpace() {
+		return KBConstants.ONTNS()+"hasName";
+	}
+
+private boolean hasSomePropertyValues(List<MetadataProperty> props, Software sw) {
     for(MetadataProperty prop : props) {
       if(sw.getPropertyValues(prop.getId()).size() > 0) {
         return true;
@@ -332,7 +360,7 @@ public class BrowseView extends ParameterizedViewImpl
 
   @UiHandler("editbutton")
   void onEditButtonClick(ClickEvent event) {
-    History.newItem(NameTokens.publish + "/" + software.getName());
+    History.newItem(publishPlace + "/" + software.getName());
   }
   
   @UiHandler("rdfbutton")
@@ -440,7 +468,7 @@ public class BrowseView extends ParameterizedViewImpl
   
   @UiHandler("softwareVersions")
   void onSoftwareVersionsClick(ClickEvent event) {
-    History.newItem(NameTokens.versions + "/" + softwarename);
+    History.newItem(versionsPlace + "/" + softwarename);
   }
   
   private void submitPublishForm() {
@@ -458,7 +486,7 @@ public class BrowseView extends ParameterizedViewImpl
           //updateList();
           
           // Go to the new item
-          History.newItem(NameTokens.publishversion + "/" + softwarename + ":" + sw.getName());
+          History.newItem(publishVersionsPlace+ "/" + softwarename + ":" + sw.getName());
           
           publishdialog.hide();
           softwarelabel.setValue(null);
@@ -469,4 +497,29 @@ public class BrowseView extends ParameterizedViewImpl
     } 
   }
 
+public String getPublishPlace() {
+	return publishPlace;
+}
+
+public void setPublishPlace(String publishPlace) {
+	this.publishPlace = publishPlace;
+}
+
+public String getVersionsPlace() {
+	return versionsPlace;
+}
+
+public void setVersionsPlace(String versionsPlace) {
+	this.versionsPlace = versionsPlace;
+}
+
+public String getPublishVersionsPlace() {
+	return publishVersionsPlace;
+}
+
+public void setPublishVersionsPlace(String publishVersionsPlace) {
+	this.publishVersionsPlace = publishVersionsPlace;
+}
+
+  
 }

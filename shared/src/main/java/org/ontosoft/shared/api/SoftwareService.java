@@ -122,12 +122,6 @@ public interface SoftwareService extends DirectRestService {
   public SoftwareVersion getVersion(@PathParam("name") String name, @PathParam("version") String version);
 
   @GET
-  @Path("model/{name}/version/{version}")
-  @Produces("application/json")
-  public ModelVersion getModelVersion(@PathParam("name") String name, 
-		  @PathParam("version") String version);
-
-  @GET
   @Path("software/{name}/version/{version}/function/{function}")
   @Produces("application/json")
   public SoftwareFunction getSoftwareFunction(@PathParam("name") String name, @PathParam("version") String version, @PathParam("function") String function);

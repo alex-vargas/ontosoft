@@ -73,6 +73,8 @@ import com.google.inject.Inject;
 
 public class PublishView extends ParameterizedViewImpl 
   implements PublishPresenter.MyView {
+		
+	private String publishPlace, browsePlace;
 
   @UiField
   CategoryPieChart piechart;
@@ -139,13 +141,19 @@ public class PublishView extends ParameterizedViewImpl
 
   private Comparator<Authorization> metacompare;
   
-  interface Binder extends UiBinder<Widget, PublishView> { }
+  public interface Binder extends UiBinder<Widget, PublishView> { }
 
   @Inject
   public PublishView(Binder binder) {
     initWidget(binder.createAndBindUi(this));
     initVocabulary();
     initTable();
+    initPlaces();
+  }
+  
+  public void initPlaces() {
+	  setBrowsePlace(NameTokens.browse);
+	  setPublishPlace(NameTokens.publish);
   }
   
   // If some parameters are passed in, initialize the software and interface
@@ -453,7 +461,7 @@ public class PublishView extends ParameterizedViewImpl
   void onPieSelect(CategorySelectionEvent event) {
     MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
     if(pcat != null) {
-      History.replaceItem(NameTokens.publish + "/" + softwarename + "/" + pcat.getName(), false);
+      History.replaceItem(publishPlace + "/" + softwarename + "/" + pcat.getName(), false);
       barchart.setActiveCategoryId(null, false);
       pieCategorySelected(pcat.getId());
       setBreadCrumbs();
@@ -465,7 +473,7 @@ public class PublishView extends ParameterizedViewImpl
     MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
     MetadataCategory bcat = vocabulary.getCategory(barchart.getActiveCategoryId());
     if(bcat != null && pcat != null) {
-      History.replaceItem(NameTokens.publish + "/" + softwarename + "/"
+      History.replaceItem(publishPlace + "/" + softwarename + "/"
             + pcat.getName() + "/" + bcat.getName() , false);
       barCategorySelected(bcat.getId());
     }
@@ -577,7 +585,7 @@ public class PublishView extends ParameterizedViewImpl
     anchor.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        History.newItem(NameTokens.browse + "/" + softwarename);
+        History.newItem(browsePlace + "/" + softwarename);
       }
     });
     anchor.setStyleName("first-crumb");
@@ -588,7 +596,7 @@ public class PublishView extends ParameterizedViewImpl
       anchor.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          History.replaceItem(NameTokens.publish + "/" + softwarename, false);
+          History.replaceItem(publishPlace + "/" + softwarename, false);
           clear();
           initialDraw();
           //initSoftware(softwarename);
@@ -863,4 +871,21 @@ public class PublishView extends ParameterizedViewImpl
     permissiondialog.hide();
     event.stopPropagation();
   }
+  
+public String getPublishPlace() {
+	return publishPlace;
+}
+
+public void setPublishPlace(String publishPlace) {
+	this.publishPlace = publishPlace;
+}
+
+public String getBrowsePlace() {
+	return browsePlace;
+}
+
+public void setBrowsePlace(String browsePlace) {
+	this.browsePlace = browsePlace;
+}
+  
 }

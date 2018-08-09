@@ -27,6 +27,10 @@ public class NameTokens {
   public static final String modelbrowse = "modelbrowse";
   public static final String modelversion = "modelversion";
   
+  public static String getModelVersion() {
+	  return modelversion;
+  }
+  
   public static String getModelBrowse() {
 	  return modelbrowse;
   }

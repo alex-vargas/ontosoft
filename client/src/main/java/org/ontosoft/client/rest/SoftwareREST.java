@@ -444,72 +444,7 @@ public class SoftwareREST {
       }).call(this.service).get(URL.encodeQueryString(swname));
     }
   }
-  
-  public void getModel(final String modelName,
-		  final Callback<Model, Throwable> callback, final boolean reload) {
-    //GWT.log(softwareCache.keySet().toString() + ": "+reload);
-    if(modelCache.containsKey(modelName) && !reload) {
-      callback.onSuccess(modelCache.get(modelName));
-    }    
-    else {
-      REST.withCallback(new MethodCallback<Model>() {
-        @Override
-        public void onSuccess(Method method, Model model) {
-          //GWT.log("caching "+sw.getName());
-          if(model != null) {
-        	  modelCache.put(model.getName(), model);
-            if(reload)
-              AppNotification.notifySuccess(model.getLabel() + " reloaded", 1000);
-            callback.onSuccess(model);
-          }
-          else {
-            AppNotification.notifyFailure("Could not find "+modelName);
-            callback.onFailure(new Throwable("Model details could not be found"));
-          }
-        }
-        @Override
-        public void onFailure(Method method, Throwable exception) {
-          GWT.log("Could not fetch model: "+ modelName, exception);
-          AppNotification.notifyFailure("Could not fetch model: "+ modelName);
-          callback.onFailure(exception);
-        }
-      }).call(this.service).getModelVersion(URL.encodeQueryString(modelName), URL.encodeQueryString(modelName));
-    }
-  }
-  
-  public void getModelVersion(final String swname, final String vname, 
-		  final Callback<ModelVersion, Throwable> callback, final boolean reload) {
-    //GWT.log(softwareCache.keySet().toString() + ": "+reload);
-    if(modelVersionCache.containsKey(vname) && !reload) {
-      callback.onSuccess(modelVersionCache.get(vname));
-    }    
-    else {
-      REST.withCallback(new MethodCallback<ModelVersion>() {
-        @Override
-        public void onSuccess(Method method, ModelVersion sw) {
-          //GWT.log("caching "+sw.getName());
-          if(sw != null) {
-            modelVersionCache.put(sw.getName(), sw);
-            if(reload)
-              AppNotification.notifySuccess(sw.getLabel() + " reloaded", 1000);
-            callback.onSuccess(sw);
-          }
-          else {
-            AppNotification.notifyFailure("Could not find "+vname);
-            callback.onFailure(new Throwable("Model details could not be found"));
-          }
-        }
-        @Override
-        public void onFailure(Method method, Throwable exception) {
-          GWT.log("Could not fetch model: "+vname, exception);
-          AppNotification.notifyFailure("Could not fetch model: "+vname);
-          callback.onFailure(exception);
-        }
-      }).call(this.service).getModelVersion(URL.encodeQueryString(swname),
-    		  URL.encodeQueryString(vname));
-    }
-  }
-  
+      
   public void getSoftwareVersion(final String swname, final String vname,
 		  final Callback<SoftwareVersion, Throwable> callback, final boolean reload) {
     //GWT.log(softwareCache.keySet().toString() + ": "+reload);
@@ -656,6 +591,12 @@ public class SoftwareREST {
     }
   }
   
+  /**
+   * Publish a software into OntoSoft
+   * @param software Software to publish
+   * @param callback Actions to be done after executing publishing
+   * @param isModel Boolean value to indicate if software is of type model
+   */
   public void publishSoftware(final Software software, 
       final Callback<Software, Throwable> callback, boolean isModel) {
 	  
@@ -750,23 +691,6 @@ public class SoftwareREST {
         callback.onFailure(exception);
       }
     }).call(this.service).update(software.getName(), software);    
-  }
-  
-  public void updateModel(final Model model, 
-      final Callback<Model, Throwable> callback) {
-    REST.withCallback(new MethodCallback<Model>() {
-      @Override
-      public void onSuccess(Method method, Model model) {
-        modelCache.put(model.getName(), model);
-        AppNotification.notifySuccess(model.getLabel() + " saved", 1000);
-        callback.onSuccess(model);
-      }
-      @Override
-      public void onFailure(Method method, Throwable exception) {
-        AppNotification.notifyFailure("Could not save "+model.getLabel());
-        callback.onFailure(exception);
-      }
-    }).call(this.service).update(model.getName(), model);    
   }
   
   public void updateSoftwareVersion(final String software, final SoftwareVersion version, 

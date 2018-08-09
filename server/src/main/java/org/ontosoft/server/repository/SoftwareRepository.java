@@ -644,13 +644,18 @@ public class SoftwareRepository {
             MetadataType type = vocabulary.getType(entity.getType());
 	          
             // Treat software entities specially 
-            if(vocabulary.isA(type, vocabulary.getType(topclass))) {
+            if(vocabulary.isA(type, vocabulary.getType(topclass)) ||
+            	vocabulary.isA(type, vocabulary.getType(topClassModel)) ){
               if(!this.hasSoftware(entity.getId())) {
                 Software subsw = new Software();
                 subsw.setId(entity.getId());
                 subsw.setLabel((String)entity.getValue());
                 subsw.setType(entity.getType());
-                String swid = this.addSoftware(subsw, user, false);
+                String swid = "";
+                if(vocabulary.isA(type, vocabulary.getType(topClassModel)) )
+            		swid = this.addSoftware(subsw, user, true);
+                else
+                	swid = this.addSoftware(subsw, user, false);
                 entity.setId(swid);
               }
 	
@@ -1280,7 +1285,6 @@ public class SoftwareRepository {
 	    
 	    
 	    System.out.println("try to find me please - model");
-	       System.out.println(query);
 	       
 	       
 	    ArrayList<ModelSummary> list = new ArrayList<ModelSummary>();
@@ -1391,7 +1395,6 @@ public class SoftwareRepository {
         + " WHERE {\n" + swquery + facetquery + "}"
         + " GROUP BY ?x\n";
     System.out.println("try to find me please - software");
-    System.out.println(query);
        
     ArrayList<SoftwareSummary> list = new ArrayList<SoftwareSummary>();
     KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);

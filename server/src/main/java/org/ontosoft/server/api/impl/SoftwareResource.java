@@ -240,26 +240,7 @@ public class SoftwareResource implements SoftwareService {
       throw new RuntimeException("Exception: " + e.getMessage());
     }
   }
-  
-  @GET
-  @Path("model/{name}/version/{version}")
-  @Produces("application/json")
-  @Override
-  public ModelVersion getModelVersion(@PathParam("name") String name, @PathParam("version") String version) {
-    try {
-      String vid = version;
-      String swid = name;
-      if(!name.startsWith("http:"))
-          swid = repo.LIBNS() + name;
-      if(!name.startsWith("http:"))
-          vid = swid + "/version/" + version;
-      return this.repo.getModelVersion(swid, vid);
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException("Exception: " + e.getMessage());
-    }
-  }
-  
+    
   @GET
   @Path("software/{name}/version/{version}/function/{function}")
   @Produces("application/json")

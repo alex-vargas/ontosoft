@@ -97,12 +97,14 @@ public class ApplicationPresenter extends
             sectionview = userview;
         else if(nametoken.equals(NameTokens.models))
             sectionview = modellistview;
-        else if(nametoken.equals(NameTokens.modelconfigurations))
-            sectionview = modelConfigurationListView;
         else if(nametoken.equals(NameTokens.modelbrowse))
         	sectionview = modelbrowse;
         else if(nametoken.equals(NameTokens.publishModel))
         	sectionview = publishmodel;
+        else if(nametoken.equals(NameTokens.modelversion))
+        	sectionview = publishmodel;
+        else if(nametoken.equals(NameTokens.modelconfigurations))
+            sectionview = modelConfigurationListView;
 
         // Reveal called view with parameters
         if(sectionview != null) {

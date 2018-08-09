@@ -146,41 +146,41 @@ public class ModelVersionBrowseView extends ParameterizedViewImpl
     loading.setVisible(true);
     
     String[] swnames = modelName.split("\\s*:\\s*");
-
-    this.api.getModelVersion(swnames[0], swnames[1], 
-		new Callback<ModelVersion, Throwable>() {
-		  @Override
-		  public void onSuccess(ModelVersion v) {
-		    version = v;
-		    initModelRDF();
-		    loading.setVisible(false);
-		    if(vocabulary != null)
-		        showModel(version);
-		  }
-		  @Override
-		  public void onFailure(Throwable exception) {
-		    GWT.log("Error fetching Software", exception);
-		  }
-		  }, false);
-    
-    this.api.getModel(swnames[0], new Callback<Model, Throwable>() {
-        @Override
-        public void onSuccess(Model sw) {
-          model = sw;
-          modelNameVP.clear();
-          String softwareLink = "#" + NameTokens.modelbrowse + "/" + model.getName();
-
-          if (model.getSoftwareName() != null)
-          	softwareLink = "<a href='" + softwareLink + "'>" + model.getSoftwareName() + "</a>";
-          else
-          	softwareLink = "<a href='" + softwareLink + "'>" + model.getLabel() + "</a>";
-          modelNameVP.add(new HTML(softwareLink + " >> "));
-        }
-        @Override
-        public void onFailure(Throwable exception) {
-          GWT.log("Error fetching Model", exception);
-        }
-      }, false);
+//alex commented here
+//    this.api.getModelVersion(swnames[0], swnames[1], 
+//		new Callback<ModelVersion, Throwable>() {
+//		  @Override
+//		  public void onSuccess(ModelVersion v) {
+//		    version = v;
+//		    initModelRDF();
+//		    loading.setVisible(false);
+//		    if(vocabulary != null)
+//		        showModel(version);
+//		  }
+//		  @Override
+//		  public void onFailure(Throwable exception) {
+//		    GWT.log("Error fetching Software", exception);
+//		  }
+//		  }, false);
+//    
+//    this.api.getModel(swnames[0], new Callback<Model, Throwable>() {
+//        @Override
+//        public void onSuccess(Model sw) {
+//          model = sw;
+//          modelNameVP.clear();
+//          String softwareLink = "#" + NameTokens.modelbrowse + "/" + model.getName();
+//
+//          if (model.getSoftwareName() != null)
+//          	softwareLink = "<a href='" + softwareLink + "'>" + model.getSoftwareName() + "</a>";
+//          else
+//          	softwareLink = "<a href='" + softwareLink + "'>" + model.getLabel() + "</a>";
+//          modelNameVP.add(new HTML(softwareLink + " >> "));
+//        }
+//        @Override
+//        public void onFailure(Throwable exception) {
+//          GWT.log("Error fetching Model", exception);
+//        }
+//      }, false);
   }
   
   private void initModelRDF() {

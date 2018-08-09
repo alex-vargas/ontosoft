@@ -123,21 +123,23 @@ public class CompareModelVersionView extends ParameterizedViewImpl
 //        api = this.apis.get(nsname[0]);
 //        swname = nsname[1];
 //      }
-      api.getModelVersion(urlname[0],urlname[1], new Callback<ModelVersion, Throwable>() {
-        @Override
-        public void onSuccess(ModelVersion f) {
-          models.add(f);
-          if(models.size() == swnames.length) {
-            swloaded = true;
-            if(vocabulary != null)
-              showComparisonMatrix();
-          }
-        }
-        @Override
-        public void onFailure(Throwable exception) {
-          GWT.log("Error fetching model", exception);
-        }
-      }, false);
+      
+      //alex commented here
+//      api.getModelVersion(urlname[0],urlname[1], new Callback<ModelVersion, Throwable>() {
+//        @Override
+//        public void onSuccess(ModelVersion f) {
+//          models.add(f);
+//          if(models.size() == swnames.length) {
+//            swloaded = true;
+//            if(vocabulary != null)
+//              showComparisonMatrix();
+//          }
+//        }
+//        @Override
+//        public void onFailure(Throwable exception) {
+//          GWT.log("Error fetching model", exception);
+//        }
+//      }, false);
     }
   }
   

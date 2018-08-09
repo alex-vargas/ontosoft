@@ -37,7 +37,9 @@
 								<b:DropDownMenu>
 									<b:AnchorListItem icon="DATABASE" text="Models"
 										targetHistoryToken="{nameTokens.getModelsList}" />
-									<b:AnchorListItem icon="COPY" text="Model Configurations"
+									<b:AnchorListItem icon="COPY" text="Model versions"
+										targetHistoryToken="{nameTokens.getModelVersion}" />
+									<b:AnchorListItem icon="GEARS" text="Model Configurations"
 										targetHistoryToken="{nameTokens.getModelConfigurations}"/>
 								</b:DropDownMenu>
 							</b:ListDropDown>

@@ -63,7 +63,8 @@ public class FacetedSearchPanel extends PanelGroup
       List<MetadataProperty> props = facetProperties.get(facetId);
       MetadataType type = vocabulary.getType(props.get(0).getRange());
       if(type == null || type.getName().equals("Software")
-          || (type.getName().equals("SoftwareVersion")))
+          || (type.getName().equals("SoftwareVersion"))
+          || type.getName().equals("Model"))
         continue;
 
       if(vocabulary.isA(type, enumtype)) { //TODO: && type.getEnumerations().size() > 0) {

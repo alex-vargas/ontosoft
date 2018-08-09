@@ -48,7 +48,7 @@ public class SoftwareREST {
   
   private Vocabulary vocabulary;
   private List<SoftwareSummary> softwareList;
-  private List<ModelSummary> modelList;
+  private List<SoftwareSummary> modelList;
   private List<SoftwareVersionSummary> softwareVersionList;
   private List<ModelVersionSummary> modelVersionList;
   private List<ModelConfigurationSummary> modelConfigurationList;
@@ -75,8 +75,8 @@ public class SoftwareREST {
       new ArrayList<Callback<Vocabulary, Throwable>>();  
   private ArrayList<Callback<List<SoftwareSummary>, Throwable>> list_callbacks =
 	      new ArrayList<Callback<List<SoftwareSummary>, Throwable>>();
-  private ArrayList<Callback<List<ModelSummary>, Throwable>> list_models_callbacks =
-	      new ArrayList<Callback<List<ModelSummary>, Throwable>>();
+  private ArrayList<Callback<List<SoftwareSummary>, Throwable>> list_models_callbacks =
+	      new ArrayList<Callback<List<SoftwareSummary>, Throwable>>();
   private ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>> list_version_callbacks =
 	      new ArrayList<Callback<List<SoftwareVersionSummary>, Throwable>>();
   private ArrayList<Callback<List<ModelVersionSummary>, Throwable>> list_modelversion_callbacks =
@@ -147,21 +147,21 @@ public class SoftwareREST {
     }
   }
   
-  public void getModelsList(final Callback<List<ModelSummary>, Throwable> callback,
+  public void getModelsList(final Callback<List<SoftwareSummary>, Throwable> callback,
       boolean reload) {
 
-    if(modelsList != null && !reload) {
-      callback.onSuccess(modelsList);
+    if(modelList != null && !reload) {
+      callback.onSuccess(modelList);
     }
     else {
-      modelsList = null;
+    	modelList = null;
       if(list_models_callbacks.isEmpty()) {
-    	list_models_callbacks.add(callback);
-        REST.withCallback(new MethodCallback<List<ModelSummary>>() {
+    	  list_models_callbacks.add(callback);
+        REST.withCallback(new MethodCallback<List<SoftwareSummary>>() {
           @Override
-          public void onSuccess(Method method, List<ModelSummary> mModelList) {
+          public void onSuccess(Method method, List<SoftwareSummary> mModelList) {
         	  modelList = mModelList;
-            for(Callback<List<ModelSummary>, Throwable> cb : list_models_callbacks)
+            for(Callback<List<SoftwareSummary>, Throwable> cb : list_models_callbacks)
               cb.onSuccess(modelList);    
             list_models_callbacks.clear();
           }
@@ -657,53 +657,34 @@ public class SoftwareREST {
   }
   
   public void publishSoftware(final Software software, 
-      final Callback<Software, Throwable> callback) {
-    REST.withCallback(new MethodCallback<Software>() {
-      @Override
-      public void onSuccess(Method method, Software sw) {
-        if(sw != null) {
-          softwareCache.put(sw.getName(), sw);
-          softwareList.add(new SoftwareSummary(sw));
-          AppNotification.notifySuccess(software.getLabel() + " published. Now enter some details !", 1500);
-          callback.onSuccess(sw);
-        }
-        else {
-          AppNotification.notifyFailure("Could not publish");
-          callback.onFailure(new Throwable("Returned null"));
-        }
-      }
-      @Override
-      public void onFailure(Method method, Throwable exception) {
-        AppNotification.notifyFailure("Could not publish");
-        callback.onFailure(exception);
-      }
-    }).call(this.service).publish(software);    
+      final Callback<Software, Throwable> callback, boolean isModel) {
+	  
+	  MethodCallback<Software> methodCallback = new MethodCallback<Software>() {
+	      @Override
+	      public void onSuccess(Method method, Software sw) {
+	        if(sw != null) {
+	          softwareCache.put(sw.getName(), sw);
+	          softwareList.add(new SoftwareSummary(sw));
+	          AppNotification.notifySuccess(software.getLabel() + " published. Now enter some details !", 1500);
+	          callback.onSuccess(sw);
+	        }
+	        else {
+	          AppNotification.notifyFailure("Could not publish");
+	          callback.onFailure(new Throwable("Returned null"));
+	        }
+	      }
+	      @Override
+	      public void onFailure(Method method, Throwable exception) {
+	        AppNotification.notifyFailure("Could not publish");
+	        callback.onFailure(exception);
+	      }
+	    };
+	    if(isModel)
+	    	REST.withCallback(methodCallback).call(this.service).publishModel(software);
+	    else
+	    	REST.withCallback(methodCallback).call(this.service).publish(software);
   }
-  
-  public void publishModel(final Model model, 
-      final Callback<Model, Throwable> callback) {
-    REST.withCallback(new MethodCallback<Model>() {
-      @Override
-      public void onSuccess(Method method, Model model) {
-        if(model != null) {
-          modelCache.put(model.getName(), model);
-          modelList.add(new ModelSummary(model));
-          AppNotification.notifySuccess(model.getLabel() + " published. Now enter some details !", 1500);
-          callback.onSuccess(model);
-        }
-        else {
-          AppNotification.notifyFailure("Could not publish");
-          callback.onFailure(new Throwable("Returned null"));
-        }
-      }
-      @Override
-      public void onFailure(Method method, Throwable exception) {
-        AppNotification.notifyFailure("Could not publish");
-        callback.onFailure(exception);
-      }
-    }).call(this.service).publishModel(model);    
-  }
-    
+
   public void publishSoftwareVersion(final String software, 
 	  final SoftwareVersion version, 
       final Callback<SoftwareVersion, Throwable> callback) {
@@ -848,7 +829,7 @@ public class SoftwareREST {
       @Override
       public void onSuccess(Method method, Void v) {
         modelCache.remove(modelName);
-        for(ModelSummary sum: modelList)
+        for(SoftwareSummary sum: modelList)
           if(sum.getName().equals(modelName))
             modelList.remove(sum);
         callback.onSuccess(v);
@@ -868,7 +849,7 @@ public class SoftwareREST {
       @Override
       public void onSuccess(Method method, Void v) {
         modelVersionCache.remove(swname);
-        for(ModelSummary sum: modelVersionList)
+        for(SoftwareSummary sum: modelVersionList)
           if(sum.getName().equals(swname))
         	  modelVersionCache.remove(sum);
         callback.onSuccess(v);
@@ -908,7 +889,7 @@ public class SoftwareREST {
       @Override
       public void onSuccess(Method method, Void v) {
         modelConfigurationCache.remove(modelConfigurationName);
-        for(ModelSummary sum: modelConfigurationList)
+        for(SoftwareSummary sum: modelConfigurationList)
           if(sum.getName().equals(modelConfigurationName))
             modelConfigurationList.remove(sum);
         callback.onSuccess(v);

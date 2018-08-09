@@ -25,8 +25,10 @@ import org.ontosoft.client.components.chart.CategoryBarChart;
 import org.ontosoft.client.components.chart.CategoryPieChart;
 import org.ontosoft.client.place.NameTokens;
 import org.ontosoft.client.rest.SoftwareREST;
+import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.entities.Entity;
 import org.ontosoft.shared.classes.entities.Model;
+import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.users.UserSession;
 import org.ontosoft.shared.classes.util.KBConstants;
 import org.ontosoft.shared.classes.vocabulary.MetadataCategory;
@@ -446,30 +448,29 @@ public class ModelBrowseView extends ParameterizedViewImpl
 	}
 	
 	private void submitPublishForm() {
-//	    String label = modellabel.getValue();
-//	    if(modellabel.validate(true)) {
-////	      SoftwareVersion tmpsw = new SoftwareVersion();
-////	      tmpsw.setLabel(label);
-//	      this.api.publishSoftwareVersion(modelNameStr, 
-//	    		  tmpsw, new Callback<SoftwareVersion, Throwable>() {
-//	        public void onSuccess(SoftwareVersion sw) {
-//	          // Add item to list
-//	          SoftwareSummary newsw = new SoftwareSummary(sw);
-//	          newsw.setExternalRepositoryId(SoftwareREST.LOCAL);
-//	          // TODO: do the same to versions
-//	          //addToList(newsw);
-//	          //updateList();
-//	          
-//	          // Go to the new item
-//	          History.newItem(NameTokens.publishversion + "/" + softwarename + ":" + sw.getName());
-//	          
-//	          publishdialog.hide();
-//	          softwarelabel.setValue(null);
-//	        }
-//	        @Override
-//	        public void onFailure(Throwable exception) { }
-//	      });
-//	    }
+	    String label = modellabel.getValue();
+	    if(modellabel.validate(true)) {
+	    	Software tmpsw = new Software();
+	      tmpsw.setLabel(label);
+	      this.api.publishSoftware(tmpsw, new Callback<Software, Throwable>() {
+	        public void onSuccess(Software sw) {
+	          // Add item to list
+	        	SoftwareSummary newsw = new SoftwareSummary(sw);
+	          newsw.setExternalRepositoryId(SoftwareREST.LOCAL);
+	          // TODO: do the same to versions
+	          //addToList(newsw);
+	          //updateList();
+	          
+	          // Go to the new item
+	          History.newItem(NameTokens.publishModelVersion + "/" + modelNameStr + ":" + sw.getName());
+	          
+	          publishdialog.hide();
+	          modellabel.setValue(null);
+	        }
+	        @Override
+	        public void onFailure(Throwable exception) { }
+	      }, true);
+	    }
 	}
 
 }

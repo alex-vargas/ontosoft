@@ -408,20 +408,29 @@ public class SoftwareResource implements SoftwareService {
   @RolesAllowed("user")
   @Override
   public Software publish(@JsonProperty("software") Software software) {
-    try {
-      String swid = this.repo.addSoftware(software,
-          (User) securityContext.getUserPrincipal());
-      if(swid != null) {
-        software.setId(swid);
-        return this.repo.getSoftware(swid);
-        //response.sendRedirect(swid);
-        //return software;
-      }
-      return null;
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException("Exception in add: " + e.getMessage());
-    }
+    return publishSoftware(software, false);
+  }
+  
+  private Software publishSoftware(Software software, boolean isModel) {
+	  try {
+	      String swid = "";
+	      if(isModel)
+	    	  swid = this.repo.addModel(software,
+	    	          (User) securityContext.getUserPrincipal());
+	      else
+	    	  swid = this.repo.addSoftware(software, 
+	    			  (User) securityContext.getUserPrincipal(), false);
+	      if(swid != null) {
+	        software.setId(swid);
+	        return this.repo.getSoftware(swid);
+	        //response.sendRedirect(swid);
+	        //return software;
+	      }
+	      return null;
+	    } catch (Exception e) {
+	      e.printStackTrace();
+	      throw new RuntimeException("Exception in add: " + e.getMessage());
+	    }
   }
 
   @POST
@@ -430,21 +439,8 @@ public class SoftwareResource implements SoftwareService {
   @Consumes("application/json")
   @RolesAllowed("user")
   @Override
-  public Model publishModel(@JsonProperty("model") Model model) {
-    try {
-      String modelId = this.repo.addModel(model,
-          (User) securityContext.getUserPrincipal());
-      if(modelId != null) {
-    	  model.setId(modelId);
-        return this.repo.getModel(modelId);
-        //response.sendRedirect(swid);
-        //return software;
-      }
-      return null;
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException("Exception in add: " + e.getMessage());
-    }
+  public Software publishModel(@JsonProperty("model") Software model) {
+    return publishSoftware(model, true);
   }
   
   @POST

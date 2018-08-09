@@ -171,7 +171,7 @@ public class ModelVersionBrowseView extends ParameterizedViewImpl
           String softwareLink = "#" + NameTokens.modelbrowse + "/" + model.getName();
 
           if (model.getSoftwareName() != null)
-          	softwareLink = "<a href='" + softwareLink + "'>" + model.getModelName() + "</a>";
+          	softwareLink = "<a href='" + softwareLink + "'>" + model.getSoftwareName() + "</a>";
           else
           	softwareLink = "<a href='" + softwareLink + "'>" + model.getLabel() + "</a>";
           modelNameVP.add(new HTML(softwareLink + " >> "));
@@ -352,7 +352,7 @@ public class ModelVersionBrowseView extends ParameterizedViewImpl
   }
   
   
-  private boolean hasSomePropertyValues(List<MetadataProperty> props, Model sw) {
+  private boolean hasSomePropertyValues(List<MetadataProperty> props, ModelVersion sw) {
     for(MetadataProperty prop : props) {
       if(sw.getPropertyValues(prop.getId()).size() > 0) {
         return true;

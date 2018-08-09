@@ -247,8 +247,8 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
         public SafeHtml getValue(ModelConfigurationSummary summary) {
             SafeHtmlBuilder sb = new SafeHtmlBuilder();
             
-            String link = "#" + NameTokens.modelconfigurations + "/" + summary.getModelSummary().getName() + ":" + summary.getName();
-            String modelLink = "#" + NameTokens.modelbrowse + "/" + summary.getModelSummary().getName();
+            String link = "#" + NameTokens.modelconfigurations + "/" + summary.getSoftwareSummary().getName() + ":" + summary.getName();
+            String modelLink = "#" + NameTokens.modelbrowse + "/" + summary.getSoftwareSummary().getName();
 
             String extralabel = "";
             
@@ -261,14 +261,14 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
             sb.appendHtmlConstant("<div class='software-list-item'>");
             sb.appendHtmlConstant("<div class='software-name'>");
             sb.appendHtmlConstant(extralabel);
-            if (summary.getModelSummary().getModelName() != null)
-              sb.appendHtmlConstant("<a href='" + modelLink + "'>" + summary.getModelSummary().getModelName() + "</a>");
+            if (summary.getSoftwareSummary().getSoftwareName() != null)
+              sb.appendHtmlConstant("<a href='" + modelLink + "'>" + summary.getSoftwareSummary().getSoftwareName() + "</a>");
             else
-              sb.appendHtmlConstant("<a href='" + modelLink + "'>" + summary.getModelSummary().getLabel() + "</a>");
+              sb.appendHtmlConstant("<a href='" + modelLink + "'>" + summary.getSoftwareSummary().getLabel() + "</a>");
             sb.appendHtmlConstant(" >> ");
             
-            if (summary.getModelName() != null)
-              sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getModelName() + "</a>");
+            if (summary.getSoftwareName() != null)
+              sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getSoftwareName() + "</a>");
             else
               sb.appendHtmlConstant("<a href='" + link + "'>" + summary.getLabel() + "</a>");
             sb.appendHtmlConstant("</div>");
@@ -371,7 +371,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
       @Override
       public void update(int index, ModelConfigurationSummary summary, String value) {
         String vname = summary.getName();
-        String modelName = summary.getModelSummary().getName();
+        String modelName = summary.getSoftwareSummary().getName();
         History.newItem(NameTokens.publishModelConfiguration + "/" + modelName + ":" + vname);
       }
     });
@@ -418,7 +418,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
   
   private void deleteModelConfiguration(final ModelConfigurationSummary modelConfig) {
   if (Window.confirm("Are you sure you want to delete the model configuration?")) {
-      this.api.deleteModelConfiguration(modelConfig.getModelSummary().getName(), modelConfig.getName(),
+      this.api.deleteModelConfiguration(modelConfig.getSoftwareSummary().getName(), modelConfig.getName(),
           new Callback<Void, Throwable>() {
             @Override
             public void onSuccess(Void v) {
@@ -481,11 +481,11 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
   private void submitPublishForm() {
     String label = modellabel.getValue();
     if(modellabel.validate(true)) {
-      Model tmpModel = new Model();
+    	Software tmpModel = new Software();
       tmpModel.setLabel(label);
       // TODO: provide Model name, instead of an empty string
-      this.api.publishModel(tmpModel, new Callback<Model, Throwable>() {
-        public void onSuccess(Model sw) {
+      this.api.publishSoftware(tmpModel, new Callback<Software, Throwable>() {
+        public void onSuccess(Software sw) {
           // Add item to list
           //SoftwareSummary newsw = new SoftwareSummary(sw);
           //newsw.setExternalRepositoryId(SoftwareREST.LOCAL);
@@ -500,7 +500,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
         }
         @Override
         public void onFailure(Throwable exception) { }
-      });
+      }, true); //Have to check this when I move to model configuration
     } 
   }
   
@@ -523,7 +523,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
         if((value == null || value.equals("") ||
             summary.getLabel().toLowerCase().contains(value.toLowerCase())) 
         		&& (modelName == null 
-        		|| (modelName != null && modelName != "" && summary.getModelSummary().getName() == modelName))
+        		|| (modelName != null && modelName != "" && summary.getSoftwareSummary().getName() == modelName))
         		)
         listProvider.getList().add(summary);
       }
@@ -598,7 +598,7 @@ public class ModelConfigurationListView extends ParameterizedViewImpl
         if(i > 0) idtext += ",";
         if(!summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL))
           idtext += summary.getExternalRepositoryId()+":";
-        idtext += summary.getModelSummary().getName() + ":" + summary.getName();
+        idtext += summary.getSoftwareSummary().getName() + ":" + summary.getName();
         i++;
       }
       History.newItem(NameTokens.compareversion + "/" + idtext);

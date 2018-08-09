@@ -152,7 +152,7 @@ public class SoftwareRepository {
     topclass = ontns + "Software";
     topclassversion = ontns + "SoftwareVersion";
     topClassModel = KBConstants.MODELCATALOGURINS() + "Model";
-    topClassModelVersion = ontns + "ModelVersion";
+    topClassModelVersion = ontns + "SoftwareVersion";
     topClassModelConfiguration = KBConstants.MODELCATALOGURINS() + "ModelConfiguration";
     
     uniongraph = "urn:x-arq:UnionGraph";
@@ -549,21 +549,24 @@ public class SoftwareRepository {
    * @return
    * @throws Exception
    */
-  public String addSoftware(Software sw, User user) throws Exception {
-    if(sw.getId() == null) 
-      sw.setId(this.LIBNS() + "Software-" + GUID.get());
-    
-    if(sw.getType() == null)
-      sw.setType(topclass);
+  public String addSoftware(Software sw, User user, boolean isModel) throws Exception {
+	  String typeSoftware = isModel ? "Model" : "Software";
+	  String topClassStr = isModel ? topClassModel : topclass;
+		if(sw.getId() == null) 
+			sw.setId(this.LIBNS() + typeSoftware + "-" + GUID.get());
+		  
+		if(sw.getType() == null)
+			sw.setType(topClassStr);
     
     // First Look for existing software with same label
-    for(MetadataEnumeration menum : enumerations.get(topclass)) {
+    for(MetadataEnumeration menum : enumerations.get(topClassStr)) {
       if(menum.getLabel().equalsIgnoreCase(sw.getLabel())) {
         sw.setId(menum.getId());
         return sw.getId();
       }
     }
-    String swid = updateOrAddSoftware(sw, user, false);
+    String swid = isModel ? updateOrAddModel(sw, user, false) 
+    		: updateOrAddSoftware(sw, user, false);
     if(swid != null)  {
       Provenance prov = this.prov.getAddProvenance(sw, user);
       this.prov.addProvenance(prov);
@@ -581,28 +584,8 @@ public class SoftwareRepository {
    * @return
    * @throws Exception
    */
-  public String addModel(Model model, User user) throws Exception {
-    if(model.getId() == null) 
-      model.setId(this.LIBNS() + "Model-" + GUID.get());
-    
-    if(model.getType() == null)
-      model.setType(topClassModel);
-    
-    // First Look for existing model with same label
-    for(MetadataEnumeration menum : enumerations.get(topClassModel)) {
-      if(menum.getLabel().equalsIgnoreCase(model.getLabel())) {
-        model.setId(menum.getId());
-        return model.getId();
-      }
-    }
-    String modelID = updateOrAddModel(model, user, false);
-    if(modelID != null)  {
-      Provenance prov = this.prov.getAddProvenance(model, user);
-      this.prov.addProvenance(prov);
-      Permission perm = this.perm_repo.createSoftwarePermisson(model.getId(), user);
-      this.perm_repo.commitPermission(perm, model.getId());
-    }
-    return modelID;
+  public String addModel(Software model, User user) throws Exception {
+	  return addSoftware(model, user, true);
   }
   
   public String createEntityId(String swid, Entity entity) {
@@ -667,7 +650,7 @@ public class SoftwareRepository {
                 subsw.setId(entity.getId());
                 subsw.setLabel((String)entity.getValue());
                 subsw.setType(entity.getType());
-                String swid = this.addSoftware(subsw, user);
+                String swid = this.addSoftware(subsw, user, false);
                 entity.setId(swid);
               }
 	
@@ -734,7 +717,7 @@ public class SoftwareRepository {
     return null;    
   }
   
-  private String updateOrAddModel(Model model, User user, boolean update) throws Exception {
+  private String updateOrAddModel(Software model, User user, boolean update) throws Exception {
     boolean isModerator = false;
     Boolean permFetureEnabled = getPermissionFeatureEnabled();
     
@@ -1241,6 +1224,7 @@ public class SoftwareRepository {
 	      List<EnumerationFacet> facets) throws Exception {
 	    /*if(facets == null || facets.size() == 0)
 	      return getAllSoftware();*/
+		String mcNS = KBConstants.MODELCATALOGURINS();
 		String ons = KBConstants.ONTNS();
 	    String pns = KBConstants.PROVNS();
 	    String facetquery = "";
@@ -1270,19 +1254,19 @@ public class SoftwareRepository {
 	      }
 	    }
 	    
-	    String swquery = "\t ?x a <" + ons +"Software> .\n"
+	    String swquery = "\t ?x a <" + mcNS +"Model> .\n"
 	                   + "\t OPTIONAL {\n"
 	                   + "\t\t ?x <" + ons + "hasShortDescription> ?dobj .\n"
 	                   + "\t\t ?dobj <" + ons + "hasTextValue> ?desc \n"
 	                   + "\t } .\n"
 	                   + "\t OPTIONAL {\n"
-	                   + "\t\t ?x <" + ons + "hasCreator> ?creator .\n"
+	                   + "\t\t ?x <" + ons + "hasModelCreator> ?creator .\n"
 	                   + "\t } .\n"
 	                   + "\t ?x <" + pns + "wasGeneratedBy> ?act .\n"
 	                   + "\t ?act <" + pns + "wasAssociatedWith> ?agent .\n"
 	                   + "\t ?act <" + pns + "endedAtTime> ?time .\n"
 	                   + "\t OPTIONAL {\n"
-	                   + "\t\t ?x <" + ons + "hasName> ?nobj .\n"
+	                   + "\t\t ?x <" + ons + "hasModelName> ?nobj .\n"
 	                   + "\t\t ?nobj <" + ons + "hasTextValue> ?name \n"
 	                   + "\t } .\n"
 	                   + "\t FILTER (STRSTARTS(STR(?act), CONCAT(STR(?x), '/" + ProvenanceRepository.PROV_GRAPH + "')))";
@@ -1293,6 +1277,11 @@ public class SoftwareRepository {
 	        + " (SAMPLE(?name) as ?swname)"
 	        + " WHERE {\n" + swquery + facetquery + "}"
 	        + " GROUP BY ?x\n";
+	    
+	    
+	    System.out.println("try to find me please - model");
+	       System.out.println(query);
+	       
 	       
 	    ArrayList<ModelSummary> list = new ArrayList<ModelSummary>();
 	    KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
@@ -1315,7 +1304,7 @@ public class SoftwareRepository {
 	      summary.setPermission(this.perm_repo.getSoftwarePermission(sw.getID()));
 	      
 	      if(name != null && name.getValue() != null) {
-	    	  summary.setModelName(name.getValueAsString());
+	    	  summary.setSoftwareName(name.getValueAsString());
 	      }
 	      
 	      if(desc != null && desc.getValue() != null) {
@@ -1401,6 +1390,8 @@ public class SoftwareRepository {
         + " (SAMPLE(?name) as ?swname)"
         + " WHERE {\n" + swquery + facetquery + "}"
         + " GROUP BY ?x\n";
+    System.out.println("try to find me please - software");
+    System.out.println(query);
        
     ArrayList<SoftwareSummary> list = new ArrayList<SoftwareSummary>();
     KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
@@ -1657,7 +1648,7 @@ public class SoftwareRepository {
       swsummary.setType(topclass);
       
       ModelVersionSummary summary = new ModelVersionSummary();
-      summary.setModelSummary(swsummary);
+      summary.setSoftwareSummary(swsummary);
       summary.setId(version.getID());
       summary.setName(version.getName());
       summary.setLabel(allkb.getLabel(version));
@@ -1665,7 +1656,7 @@ public class SoftwareRepository {
       summary.setPermission(this.perm_repo.getSoftwarePermission(version.getID()));
       
       if(name != null && name.getValue() != null) {
-        summary.setModelName(name.getValueAsString());
+        summary.setSoftwareName(name.getValueAsString());
       }
       
       if(desc != null && desc.getValue() != null) {
@@ -1778,7 +1769,7 @@ public class SoftwareRepository {
       modelSummary.setType(topClassModel);
       
       ModelConfigurationSummary summary = new ModelConfigurationSummary();
-      summary.setModelSummary(modelSummary);
+      summary.setSoftwareSummary(modelSummary);
       summary.setId(version.getID());
       summary.setName(version.getName());
       summary.setLabel(allkb.getLabel(version));
@@ -1786,7 +1777,7 @@ public class SoftwareRepository {
       summary.setPermission(this.perm_repo.getSoftwarePermission(version.getID()));
       
       if(name != null && name.getValue() != null) {
-    	  summary.setModelName(name.getValueAsString());
+    	  summary.setSoftwareName(name.getValueAsString());
       }
       
       if(desc != null && desc.getValue() != null) {
@@ -1968,7 +1959,9 @@ public class SoftwareRepository {
           
           MetadataType type = vocabulary.getType(prop.getRange());
           // Treat software entities specially 
-          if(vocabulary.isA(type, vocabulary.getType(topclass)) || vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+          if(vocabulary.isA(type, vocabulary.getType(topclass)) || 
+        		  vocabulary.isA(type, vocabulary.getType(topclassversion)) ||
+        		  vocabulary.isA(type, vocabulary.getType(topClassModel)) ) {
             KBAPI tmpkb = fac.getKB(valobj.getID(), OntSpec.PLAIN);
             KBObject valswobj = tmpkb.getIndividual(valobj.getID());
             if(valswobj != null) {
@@ -1991,63 +1984,14 @@ public class SoftwareRepository {
       Entity swName = sw.getPropertyValue(KBConstants.ONTNS()+"hasName");
       if (swName != null)
     	  sw.setSoftwareName(swName.getValue().toString());
+      else if(sw.getPropertyValue(KBConstants.MODELCATALOGURINS() + "hasModelName") != null)
+    	  sw.setSoftwareName(
+    			  sw.getPropertyValue(KBConstants.MODELCATALOGURINS() + "hasModelName")
+    			  .getValue().toString());
       
       sw.setProvenance(this.prov.getSoftwareProvenance(swid));
       sw.setPermission(this.perm_repo.getSoftwarePermission(swid));
       return sw;
-    }
-    return null;
-  }
-  
-  public Model getModel(String modelId) throws Exception {
-    KBAPI modelKB = fac.getKB(modelId, OntSpec.PLAIN);
-    KBObject modelObj = modelKB.getIndividual(modelId);
-    if(modelObj != null) {
-      Model model = new Model();
-      model.setId(modelId);
-      model.setLabel(modelKB.getLabel(modelObj));
-      model.setName(modelObj.getName());
-      
-      KBObject typeobj = modelKB.getPropertyValue(modelObj, ontkb.getProperty(rdfns+"type"));
-      model.setType(typeobj.getID());
-
-      MetadataType modelType = this.vocabulary.getType(model.getType());
-      
-      for(MetadataProperty prop : this.vocabulary.getPropertiesForType(modelType)) {
-        
-        KBObject propobj = modelKB.getProperty(prop.getId());
-        ArrayList<Entity> entities = new ArrayList<Entity>();
-        for(KBObject valobj: modelKB.getPropertyValues(modelObj, propobj)) {
-          
-          MetadataType type = vocabulary.getType(prop.getRange());
-          // Treat model entities specially 
-          if(vocabulary.isA(type, vocabulary.getType(topClassModel)) || vocabulary.isA(type, vocabulary.getType(topclassversion))) {
-            KBAPI tmpkb = fac.getKB(valobj.getID(), OntSpec.PLAIN);
-            KBObject valswobj = tmpkb.getIndividual(valobj.getID());
-            if(valswobj != null) {
-              Entity entity = new EnumerationEntity();
-              entity.setId(valobj.getID());
-              entity.setLabel(tmpkb.getLabel(valswobj));
-              entity.setType(prop.getRange());
-              entities.add(entity);
-            }
-          }
-          else {
-            Entity entity = this.getModelEntity(modelKB, valobj, prop.getRange());
-            if(entity != null)
-              entities.add(entity);
-          }
-        }
-        model.addPropertyValues(prop.getId(), entities);
-      }
-      
-      Entity modelName = model.getPropertyValue(KBConstants.ONTNS()+"hasName");
-      if (modelName != null)
-    	  model.setModelName(modelName.getValue().toString());
-      
-      model.setProvenance(this.prov.getSoftwareProvenance(modelId));
-      model.setPermission(this.perm_repo.getSoftwarePermission(modelId));
-      return model;
     }
     return null;
   }
@@ -2122,7 +2066,7 @@ public class SoftwareRepository {
       version.setId(vid);
       version.setLabel(vkb.getLabel(vobj));
       version.setName(vobj.getName());
-      version.setModel(swid);
+      version.setSoftware(swid);
       
       KBObject typeobj = vkb.getPropertyValue(vobj, ontkb.getProperty(rdfns+"type"));
       version.setType(typeobj.getID());

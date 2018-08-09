@@ -32,10 +32,10 @@ import org.ontosoft.shared.classes.users.UserSession;
 import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import org.ontosoft.shared.utils.PermUtils;
 
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -50,8 +50,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -62,7 +62,11 @@ import com.google.inject.Inject;
 
 public class SoftwareListView extends ParameterizedViewImpl 
   implements SoftwareListPresenter.MyView {
-  
+	
+	private boolean isModel = false;
+	
+	private String browsePlace, publishPlace, comparePlace;
+	  
   boolean isreguser, isadmin;
   
   @UiField
@@ -77,13 +81,16 @@ public class SoftwareListView extends ParameterizedViewImpl
   boolean selectionmode = false;
 
   @UiField
-  VerticalPanel loading;
+  public VerticalPanel loading;
   
   @UiField
-  Row content;
+  public Row content;
   
   @UiField
-  TextBox softwarelabel, searchbox;
+  TextBox softwarelabel;
+
+  @UiField
+	TextBox searchbox;
   
   @UiField
   FacetedSearchPanel facets;
@@ -95,8 +102,8 @@ public class SoftwareListView extends ParameterizedViewImpl
   SimplePager pager;
   
   SoftwareREST api;
-  Map<String, SoftwareREST> apis;
-  Map<String, String> clientUrls;
+  protected Map<String, SoftwareREST> apis;
+  private Map<String, String> clientUrls;
   
   private List<SoftwareSummary> allSoftwareList;
   private HashMap<String, Boolean> filteredSoftwareIdMap =
@@ -108,7 +115,7 @@ public class SoftwareListView extends ParameterizedViewImpl
   
   private Comparator<SoftwareSummary> swcompare;
   
-  interface Binder extends UiBinder<Widget, SoftwareListView> {
+  public interface Binder extends UiBinder<Widget, SoftwareListView> {
   }
 
   @Inject
@@ -118,14 +125,52 @@ public class SoftwareListView extends ParameterizedViewImpl
     initVocabulary();
     initTable();
     initList();
+    initPlaces();
   }
   
-  private void initAPIs() {
+  public void initPlaces() {
+	  setBrowsePlace(NameTokens.browse);
+	  setPublishPlace(NameTokens.publish);
+	  setComparePlace(NameTokens.compare);
+  }
+    
+  public String getBrowsePlace() {
+	return browsePlace;
+}
+
+public void setBrowsePlace(String browsePlace) {
+	this.browsePlace = browsePlace;
+}
+
+public String getPublishPlace() {
+	return publishPlace;
+}
+
+public void setPublishPlace(String publishPlace) {
+	this.publishPlace = publishPlace;
+}
+
+public String getComparePlace() {
+	return comparePlace;
+}
+
+public void setComparePlace(String comparePlace) {
+	this.comparePlace = comparePlace;
+}
+
+	public void setIsModel(boolean value) {
+		isModel = value;
+	}
+	public boolean isModel() {
+		return isModel;
+	}
+
+private void initAPIs() {
     this.api = SoftwareREST.get(Config.getServerURL());
     
     this.apis = new HashMap<String, SoftwareREST>();
     this.apis.put(SoftwareREST.LOCAL, this.api);
-    this.clientUrls = new HashMap<String, String>();
+    this.setClientUrls(new HashMap<String, String>());
     
     final List<Map<String, String>> xservers = Config.getExternalServers();
     for(Map<String, String> xserver : xservers) {
@@ -134,7 +179,7 @@ public class SoftwareListView extends ParameterizedViewImpl
       String xclient = xserver.get("client");
       SoftwareREST xapi = SoftwareREST.get(xurl);
       this.apis.put(xname, xapi);
-      clientUrls.put(xname, xclient);
+      getClientUrls().put(xname, xclient);
     }    
   }
   
@@ -156,37 +201,43 @@ public class SoftwareListView extends ParameterizedViewImpl
     
     for(final String sname : apis.keySet()) {
       SoftwareREST sapi = apis.get(sname);
-      allSoftwareList = new ArrayList<SoftwareSummary>();
-      sapi.getSoftwareList(new Callback<List<SoftwareSummary>, Throwable>() {
-        @Override
-        public void onSuccess(List<SoftwareSummary> list) {
-          for(SoftwareSummary sum : list) {
-            sum.setExternalRepositoryId(sname);
-            sum.setExternalRepositoryUrl(clientUrls.get(sname));
-          }
-          allSoftwareList.addAll(list);
-          Collections.sort(allSoftwareList, swcompare);
-          for(SoftwareSummary sum : list)
-            filteredSoftwareIdMap.put(sum.getId(), true);
-          
-          loaded.add(sname);
-          if(loaded.size() == apis.size()) {
-            listProvider.getList().clear();
-            listProvider.getList().addAll(allSoftwareList);
-            listProvider.flush();
-            initMaterial();
-            loading.setVisible(false);
-            content.setVisible(true);
-            Window.scrollTo(0, 0);              
-          }
-        }
-        @Override
-        public void onFailure(Throwable reason) { }
-      }, false);       
+      setAllSoftwareList(new ArrayList<SoftwareSummary>());
+	  Callback<List<SoftwareSummary>, Throwable> callback = 
+			  new Callback<List<SoftwareSummary>, Throwable>() {
+		        @Override
+		        public void onSuccess(List<SoftwareSummary> list) {
+		          for(SoftwareSummary sum : list) {
+		            sum.setExternalRepositoryId(sname);
+		            sum.setExternalRepositoryUrl(getClientUrls().get(sname));
+		          }
+		          getAllSoftwareList().addAll(list);
+		          Collections.sort(getAllSoftwareList(), getSwcompare());
+		          for(SoftwareSummary sum : list)
+		            getFilteredSoftwareIdMap().put(sum.getId(), true);
+		          
+		          loaded.add(sname);
+		          if(loaded.size() == apis.size()) {
+		            getListProvider().getList().clear();
+		            getListProvider().getList().addAll(getAllSoftwareList());
+		            getListProvider().flush();
+		            initMaterial();
+		            getLoading().setVisible(false);
+		            getContent().setVisible(true);
+		            Window.scrollTo(0, 0);              
+		          }
+		        }
+		        @Override
+		        public void onFailure(Throwable reason) { }
+		      };
+      setSoftwareList(sapi, callback);       
     }   
   }
-
   
+  public void setSoftwareList(SoftwareREST sapi,
+		  Callback<List<SoftwareSummary>, Throwable> callback) {
+	  sapi.getSoftwareList(callback, false);
+  }
+    
   @Override
   public void initializeParameters(String[] params) {
     UserSession session = SessionStorage.getSession();
@@ -217,21 +268,21 @@ public class SoftwareListView extends ParameterizedViewImpl
   
   private void initTable() {
     ListHandler<SoftwareSummary> sortHandler =
-        new ListHandler<SoftwareSummary>(listProvider.getList());
+        new ListHandler<SoftwareSummary>(getListProvider().getList());
     
     selections = new ArrayList<SoftwareSummary>();
     
     table.addColumnSortHandler(sortHandler);
     table.setEmptyTableWidget(new Label("No Software found.."));
     
-    this.swcompare = new Comparator<SoftwareSummary>() {
+    this.setSwcompare(new Comparator<SoftwareSummary>() {
       @Override
       public int compare(SoftwareSummary sw1, SoftwareSummary sw2) {
         if(sw1.getLabel() != null && sw2.getLabel() != null)
           return sw1.getLabel().compareToIgnoreCase(sw2.getLabel());
         return 0;
       }
-    };
+    });
     
     /*SafeHtmlRenderer<String> anchorRenderer = new AbstractSafeHtmlRenderer<String>() {
       @Override
@@ -251,7 +302,7 @@ public class SoftwareListView extends ParameterizedViewImpl
         public SafeHtml getValue(SoftwareSummary summary) {
             SafeHtmlBuilder sb = new SafeHtmlBuilder();
             
-            String link = "#" + NameTokens.browse + "/" + summary.getName();
+            String link = "#" + browsePlace + "/" + summary.getName();
             String extralabel = "";
             
             if(!summary.getExternalRepositoryId().equals(SoftwareREST.LOCAL)) {
@@ -306,7 +357,7 @@ public class SoftwareListView extends ParameterizedViewImpl
 
     table.addColumn(namecol);
     namecol.setSortable(true);
-    sortHandler.setComparator(namecol, this.swcompare);
+    sortHandler.setComparator(namecol, this.getSwcompare());
     table.getColumnSortList().push(namecol);
     
     // Delete Button Column
@@ -367,7 +418,7 @@ public class SoftwareListView extends ParameterizedViewImpl
       @Override
       public void update(int index, SoftwareSummary summary, String value) {
         String swname = summary.getName();
-        History.newItem(NameTokens.publish + "/" + swname);
+        History.newItem(publishPlace + "/" + swname);
       }
     });
     table.addColumn(editcol);
@@ -408,7 +459,7 @@ public class SoftwareListView extends ParameterizedViewImpl
     
     // Bind list & pager to table
     pager.setDisplay(table);
-    listProvider.addDataDisplay(table);
+    getListProvider().addDataDisplay(table);
   }
   
   private void deleteSoftware(final SoftwareSummary sw) {
@@ -456,47 +507,54 @@ public class SoftwareListView extends ParameterizedViewImpl
   }
   
   private void submitPublishForm() {
-    String label = softwarelabel.getValue();
     if(softwarelabel.validate(true)) {
-      Software tmpsw = new Software();
-      tmpsw.setLabel(label);
-      this.api.publishSoftware(tmpsw, new Callback<Software, Throwable>() {
-        public void onSuccess(Software sw) {
-          // Add item to list
-          SoftwareSummary newsw = new SoftwareSummary(sw);
-          newsw.setExternalRepositoryId(SoftwareREST.LOCAL);
-          addToList(newsw);
-          updateList();
-          
-          // Go to the new item
-          History.newItem(NameTokens.publish + "/" + sw.getName());
-          
-          publishdialog.hide();
-          softwarelabel.setValue(null);
-        }
-        @Override
-        public void onFailure(Throwable exception) { }
-      });
+      publishSoftware();
     } 
   }
   
-  private void addToList(SoftwareSummary summary) {
+  public void publishSoftware() {
+	  Software tmpsw = new Software();
+	  tmpsw.setLabel(softwarelabel.getValue());
+	  Callback<Software, Throwable> callback = new Callback<Software, Throwable>() {
+		  public void onSuccess(Software sw) {
+			  // Add item to list
+			  SoftwareSummary newsw = new SoftwareSummary(sw);
+			  newsw.setExternalRepositoryId(SoftwareREST.LOCAL);
+			  addToList(newsw);
+			  updateList();
+			
+			  // Go to the new item
+			  History.newItem(publishPlace + "/" + sw.getName());
+			  publishdialog.hide();
+			  softwarelabel.setValue(null);
+		  }
+		  @Override
+		  public void onFailure(Throwable exception) { }
+	  };
+	  
+	  if(isModel)
+		  this.api.publishSoftware(tmpsw, callback, true);
+	  else 
+		  this.api.publishSoftware(tmpsw, callback, false);
+  }
+
+private void addToList(SoftwareSummary summary) {
     boolean contains = false;
-    for(SoftwareSummary sum : allSoftwareList) {
+    for(SoftwareSummary sum : getAllSoftwareList()) {
       if(sum.getId().equals(summary.getId())) {
         contains = true;
         break;
       }
     }
     if(!contains)
-      allSoftwareList.add(summary);
-    filteredSoftwareIdMap.put(summary.getId(), true);
-    Collections.sort(allSoftwareList, swcompare);    
+      getAllSoftwareList().add(summary);
+    getFilteredSoftwareIdMap().put(summary.getId(), true);
+    Collections.sort(getAllSoftwareList(), getSwcompare());    
   }
   
   private void removeFromList(SoftwareSummary summary) {
-    filteredSoftwareIdMap.remove(summary);
-    allSoftwareList.remove(summary);
+    getFilteredSoftwareIdMap().remove(summary);
+    getAllSoftwareList().remove(summary);
   }
   
   @UiHandler("searchbox")
@@ -506,21 +564,21 @@ public class SoftwareListView extends ParameterizedViewImpl
   
   @UiHandler("clearsearch")
   void onClearSearch(ClickEvent event) {
-    searchbox.setValue("");
+    getSearchbox().setValue("");
     updateList();
   }
   
-  void updateList() {
-    listProvider.getList().clear();
-    String value = searchbox.getValue();
-    for(SoftwareSummary summary : allSoftwareList) {
-      if(filteredSoftwareIdMap.containsKey(summary.getId())) {
+  public void updateList() {
+    getListProvider().getList().clear();
+    String value = getSearchbox().getValue();
+    for(SoftwareSummary summary : getAllSoftwareList()) {
+      if(getFilteredSoftwareIdMap().containsKey(summary.getId())) {
         if(value == null || value.equals("") ||
             summary.getLabel().toLowerCase().contains(value.toLowerCase()))
-        listProvider.getList().add(summary);
+        getListProvider().getList().add(summary);
       }
     }
-    this.listProvider.flush();    
+    this.getListProvider().flush();    
   }
   
   void updateCompareButton() {
@@ -544,9 +602,9 @@ public class SoftwareListView extends ParameterizedViewImpl
           facetList.addAll(list);
           loaded.add(sname);
           if(loaded.size() == apis.size()) {
-            filteredSoftwareIdMap.clear();
+            getFilteredSoftwareIdMap().clear();
             for(SoftwareSummary flist: facetList)
-              filteredSoftwareIdMap.put(flist.getId(), true);
+              getFilteredSoftwareIdMap().put(flist.getId(), true);
             updateList();
           }
         }
@@ -593,8 +651,72 @@ public class SoftwareListView extends ParameterizedViewImpl
         idtext += summary.getName();
         i++;
       }
-      History.newItem(NameTokens.compare + "/" + idtext);
+      History.newItem(comparePlace + "/" + idtext);
     }
   }
+
+public Map<String, String> getClientUrls() {
+	return clientUrls;
+}
+
+public void setClientUrls(Map<String, String> clientUrls) {
+	this.clientUrls = clientUrls;
+}
+
+public Comparator<SoftwareSummary> getSwcompare() {
+	return swcompare;
+}
+
+public void setSwcompare(Comparator<SoftwareSummary> swcompare) {
+	this.swcompare = swcompare;
+}
+
+public VerticalPanel getLoading() {
+	return loading;
+}
+
+public void setLoading(VerticalPanel loading) {
+	this.loading = loading;
+}
+
+public Row getContent() {
+	return content;
+}
+
+public void setContent(Row content) {
+	this.content = content;
+}
+
+public TextBox getSearchbox() {
+	return searchbox;
+}
+
+public void setSearchbox(TextBox searchbox) {
+	this.searchbox = searchbox;
+}
+
+public HashMap<String, Boolean> getFilteredSoftwareIdMap() {
+	return filteredSoftwareIdMap;
+}
+
+public void setFilteredSoftwareIdMap(HashMap<String, Boolean> filteredSoftwareIdMap) {
+	this.filteredSoftwareIdMap = filteredSoftwareIdMap;
+}
+
+public List<SoftwareSummary> getAllSoftwareList() {
+	return allSoftwareList;
+}
+
+public void setAllSoftwareList(List<SoftwareSummary> allSoftwareList) {
+	this.allSoftwareList = allSoftwareList;
+}
+
+public ListDataProvider<SoftwareSummary> getListProvider() {
+	return listProvider;
+}
+
+public void setListProvider(ListDataProvider<SoftwareSummary> listProvider) {
+	this.listProvider = listProvider;
+}
 
 }

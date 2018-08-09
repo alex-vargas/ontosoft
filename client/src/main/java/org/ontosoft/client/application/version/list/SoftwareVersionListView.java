@@ -499,7 +499,7 @@ public class SoftwareVersionListView extends ParameterizedViewImpl
         }
         @Override
         public void onFailure(Throwable exception) { }
-      });
+      }, false);
     } 
   }
   

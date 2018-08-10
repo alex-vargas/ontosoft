@@ -28,152 +28,148 @@ import org.ontosoft.shared.classes.users.UserSession;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Path("")
-@Api(value="")
-@DeclareRoles({"user", "admin", "importer"})
+@Api(value = "")
+@DeclareRoles({ "user", "admin", "importer" })
 public class UserResource implements UserService {
-  @Context
-  HttpServletResponse response;
-  
-  @Context
-  HttpServletRequest request;
-  
-  @Context
-  SecurityContext securityContext;
-  
-  /**
-   * Authentication
-   */
-  @POST
-  @Path("login")
-  @Produces("application/json")
-  @Consumes("application/json")
-  @Override
-  public UserSession login(
-      @JsonProperty("credentials") UserCredentials credentials) {
-    return UserDatabase.get().login(credentials);
-  }
-  
-  @POST
-  @Path("validate")
-  @Produces("application/json")
-  @Consumes("application/json")
-  @Override
-  public UserSession validateSession(
-      @JsonProperty("session") UserSession session) {
-    return UserDatabase.get().validateSession(session);
-  }
-  
-  @POST
-  @Path("logout")
-  @Consumes("application/json")
-  @Override
-  public void logout(UserSession session) {
-    UserDatabase.get().logout(session);
-  }
-  
-  /**
-   * Query users
-   */
-  
-  @GET
-  @Path("users")
-  @Produces("application/json")
-  @RolesAllowed("user")
-  public List<String> getUsers() {
-    return UserDatabase.get().getUsers();
-  }
-  
-  @GET
-  @Path("users/{username}")
-  @Produces("application/json")
-  @RolesAllowed("user")
-  @Override  
-  public UserCredentials getUser(@PathParam("username") String username) {
-    User loggedinuser = (User)securityContext.getUserPrincipal();
-    if(loggedinuser != null) {
-      if(loggedinuser.getName().equals(username) || loggedinuser.getRoles().contains("admin"))
-        return UserDatabase.get().getUser(username);
-    }
-    return null;
-  }
-  
-  @GET
-  @Path("users/{username}/check")
-  @Produces("application/json")
-  @Override  
-  public String userExists(@PathParam("username") String username) {
-    return new Boolean(UserDatabase.get().userExists(username)).toString();
-  }
-  
-  /**
-   * Edit users
-   */
-  @DELETE
-  @Path("users/{username}")
-  @RolesAllowed("admin")
-  @Override
-  public void deleteUser(@PathParam("username") String username) {
-    if(username != null) {
-      // Cannot delete yourself
-      User loggedinuser = (User) securityContext.getUserPrincipal();
-      if(loggedinuser.getName().equals(username))
-        return;
-      
-      UserDatabase.get().deleteUser(username);
-    }
-  }
-  
-  @POST
-  @Path("users")
-  @Consumes("application/json")
-  @Produces("application/json")
-  @Override  
-  public UserCredentials addUser(@JsonProperty("user") UserCredentials user) {
-    if(UserDatabase.get().userExists(user.getName()))
-      return null;
-    
-    User loggedinuser = (User) securityContext.getUserPrincipal();
-    user = this.sanitizeUserCredentials(user, loggedinuser);
-    return UserDatabase.get().addUser(user);
-  }
-  
-  @PUT
-  @Path("users/{username}")
-  @Consumes("application/json")
-  @Produces("application/json")
-  @RolesAllowed("user")
-  @Override  
-  public UserCredentials updateUser(@PathParam("username") String username,
-      @JsonProperty("user") UserCredentials user) {
-    User loggedinuser = (User) securityContext.getUserPrincipal();
-    if (loggedinuser != null) {
-      // Allow updating for same user or admins
-      if (loggedinuser.getName().equals(username)
-          || loggedinuser.getRoles().contains("admin")) {
-        user = this.sanitizeUserCredentials(user, loggedinuser);
-        return UserDatabase.get().updateUser(username, user);
-      }
-    }
-    return null;
-  }
+	@Context
+	HttpServletResponse response;
 
-  @GET
-  @Path("users/{username}/roles")
-  @Produces("application/json")
-  @RolesAllowed("user")
-  public List<String> getUserRoles(@PathParam("username") String username) {
-    UserCredentials user = UserDatabase.get().getUser(username);
-    if (user != null)
-      return user.getRoles();
-    return null;
-  }
-  
-  private UserCredentials sanitizeUserCredentials(UserCredentials user, User loggedinuser) {
-    // If the user wants to set admin role, and the logged in user isn't admin
-    // - then do not set the admin role
-    if(user.getRoles().contains("admin") && 
-        (loggedinuser == null || !loggedinuser.getRoles().contains("admin")))
-      user.getRoles().remove("admin");
-    return user;
-  }
+	@Context
+	HttpServletRequest request;
+
+	@Context
+	SecurityContext securityContext;
+
+	/**
+	 * Authentication
+	 */
+	@POST
+	@Path("login")
+	@Produces("application/json")
+	@Consumes("application/json")
+	@Override
+	public UserSession login(@JsonProperty("credentials") UserCredentials credentials) {
+		return UserDatabase.get().login(credentials);
+	}
+
+	@POST
+	@Path("validate")
+	@Produces("application/json")
+	@Consumes("application/json")
+	@Override
+	public UserSession validateSession(@JsonProperty("session") UserSession session) {
+		return UserDatabase.get().validateSession(session);
+	}
+
+	@POST
+	@Path("logout")
+	@Consumes("application/json")
+	@Override
+	public void logout(UserSession session) {
+		UserDatabase.get().logout(session);
+	}
+
+	/**
+	 * Query users
+	 */
+
+	@GET
+	@Path("users")
+	@Produces("application/json")
+	@RolesAllowed("user")
+	public List<String> getUsers() {
+		return UserDatabase.get().getUsers();
+	}
+
+	@GET
+	@Path("users/{username}")
+	@Produces("application/json")
+	@RolesAllowed("user")
+	@Override
+	public UserCredentials getUser(@PathParam("username") String username) {
+		User loggedinuser = (User) securityContext.getUserPrincipal();
+		if (loggedinuser != null) {
+			if (loggedinuser.getName().equals(username) || loggedinuser.getRoles().contains("admin"))
+				return UserDatabase.get().getUser(username);
+		}
+		return null;
+	}
+
+	@GET
+	@Path("users/{username}/check")
+	@Produces("application/json")
+	@Override
+	public String userExists(@PathParam("username") String username) {
+		return new Boolean(UserDatabase.get().userExists(username)).toString();
+	}
+
+	/**
+	 * Edit users
+	 */
+	@DELETE
+	@Path("users/{username}")
+	@RolesAllowed("admin")
+	@Override
+	public void deleteUser(@PathParam("username") String username) {
+		if (username != null) {
+			// Cannot delete yourself
+			User loggedinuser = (User) securityContext.getUserPrincipal();
+			if (loggedinuser.getName().equals(username))
+				return;
+
+			UserDatabase.get().deleteUser(username);
+		}
+	}
+
+	@POST
+	@Path("users")
+	@Consumes("application/json")
+	@Produces("application/json")
+	@Override
+	public UserCredentials addUser(@JsonProperty("user") UserCredentials user) {
+		if (UserDatabase.get().userExists(user.getName()))
+			return null;
+
+		User loggedinuser = (User) securityContext.getUserPrincipal();
+		user = this.sanitizeUserCredentials(user, loggedinuser);
+		return UserDatabase.get().addUser(user);
+	}
+
+	@PUT
+	@Path("users/{username}")
+	@Consumes("application/json")
+	@Produces("application/json")
+	@RolesAllowed("user")
+	@Override
+	public UserCredentials updateUser(@PathParam("username") String username,
+			@JsonProperty("user") UserCredentials user) {
+		User loggedinuser = (User) securityContext.getUserPrincipal();
+		if (loggedinuser != null) {
+			// Allow updating for same user or admins
+			if (loggedinuser.getName().equals(username) || loggedinuser.getRoles().contains("admin")) {
+				user = this.sanitizeUserCredentials(user, loggedinuser);
+				return UserDatabase.get().updateUser(username, user);
+			}
+		}
+		return null;
+	}
+
+	@GET
+	@Path("users/{username}/roles")
+	@Produces("application/json")
+	@RolesAllowed("user")
+	public List<String> getUserRoles(@PathParam("username") String username) {
+		UserCredentials user = UserDatabase.get().getUser(username);
+		if (user != null)
+			return user.getRoles();
+		return null;
+	}
+
+	private UserCredentials sanitizeUserCredentials(UserCredentials user, User loggedinuser) {
+		// If the user wants to set admin role, and the logged in user isn't admin
+		// - then do not set the admin role
+		if (user.getRoles().contains("admin") && (loggedinuser == null || !loggedinuser.getRoles().contains("admin")))
+			user.getRoles().remove("admin");
+		return user;
+	}
 }

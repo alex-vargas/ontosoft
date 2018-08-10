@@ -11,17 +11,18 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-public class VersionBrowsePresenter extends
-    Presenter<VersionBrowsePresenter.MyView, VersionBrowsePresenter.MyProxy> {
+public class VersionBrowsePresenter extends Presenter<VersionBrowsePresenter.MyView, VersionBrowsePresenter.MyProxy> {
 
-  @ProxyCodeSplit
-  @NameToken(NameTokens.version)
-  public interface MyProxy extends ProxyPlace<VersionBrowsePresenter> { }
+	@ProxyCodeSplit
+	@NameToken(NameTokens.version)
+	public interface MyProxy extends ProxyPlace<VersionBrowsePresenter> {
+	}
 
-  public interface MyView extends ParameterizedView { }
-  
-  @Inject
-  public VersionBrowsePresenter(EventBus eventBus, MyView view, MyProxy proxy) {
-    super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
-  }
+	public interface MyView extends ParameterizedView {
+	}
+
+	@Inject
+	public VersionBrowsePresenter(EventBus eventBus, MyView view, MyProxy proxy) {
+		super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
+	}
 }

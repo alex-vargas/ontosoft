@@ -1,93 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
- 	<ui:with field="nameTokens" type="org.ontosoft.client.place.NameTokens"/>
+	<ui:with field="nameTokens"
+		type="org.ontosoft.client.place.NameTokens" />
 
 	<g:ScrollPanel>
 		<b:Container>
 			<b:Navbar position="FIXED_TOP" styleName="navbar navbar-xs">
 				<b:Container>
 					<b:NavbarHeader>
-						<b:NavbarBrand targetHistoryToken="{nameTokens.getHome}" 
-							ui:field="brand">
+						<b:NavbarBrand
+							targetHistoryToken="{nameTokens.getHome}" ui:field="brand">
 							<img height="100%" src="customise/Logo.png" />
 						</b:NavbarBrand>
-						<b:NavbarCollapseButton dataTarget="#navbar-collapse" />
+						<b:NavbarCollapseButton
+							dataTarget="#navbar-collapse" />
 					</b:NavbarHeader>
 					<b:NavbarCollapse b:id="navbar-collapse">
 						<b:NavbarNav>
-							<b:ListDropDown ui:field="softwaredropdown" visible="true">
-								<b:AnchorButton icon="DATABASE" 
+							<b:ListDropDown ui:field="softwaredropdown"
+								visible="true">
+								<b:AnchorButton icon="DATABASE"
 									dataToggle="DROPDOWN">Software</b:AnchorButton>
 								<b:DropDownMenu>
-									<b:AnchorListItem icon="DATABASE" text="Software"
-										targetHistoryToken="{nameTokens.getList}" />
-									<b:AnchorListItem icon="COPY" text="Software Versions"
+									<b:AnchorListItem icon="DATABASE"
+										text="Software" targetHistoryToken="{nameTokens.getList}" />
+									<b:AnchorListItem icon="COPY"
+										text="Software Versions"
 										targetHistoryToken="{nameTokens.getVersions}" />
-									<b:AnchorListItem icon="GEARS" text="Software Functions"
+									<b:AnchorListItem icon="GEARS"
+										text="Software Functions"
 										targetHistoryToken="{nameTokens.getFunctions}" />
 								</b:DropDownMenu>
 							</b:ListDropDown>
-							
-							<b:ListDropDown ui:field="modeldropdown" visible="true">
-								<b:AnchorButton icon="DATABASE" 
+
+							<b:ListDropDown ui:field="modeldropdown"
+								visible="true">
+								<b:AnchorButton icon="DATABASE"
 									dataToggle="DROPDOWN">Models</b:AnchorButton>
 								<b:DropDownMenu>
-									<b:AnchorListItem icon="DATABASE" text="Models"
-										targetHistoryToken="{nameTokens.getModelsList}" />
-									<b:AnchorListItem icon="COPY" text="Model versions"
+									<b:AnchorListItem icon="DATABASE"
+										text="Models" targetHistoryToken="{nameTokens.getModelsList}" />
+									<b:AnchorListItem icon="COPY"
+										text="Model Versions"
 										targetHistoryToken="{nameTokens.getModelVersion}" />
-									<b:AnchorListItem icon="GEARS" text="Model Configurations"
-										targetHistoryToken="{nameTokens.getModelConfigurations}"/>
+									<b:AnchorListItem icon="GEARS"
+										text="Model Configurations"
+										targetHistoryToken="{nameTokens.getModelConfigurations}" />
 								</b:DropDownMenu>
 							</b:ListDropDown>
-							
-							
+
+
 						</b:NavbarNav>
 						<b:NavbarNav pull="RIGHT">
 							<b:AnchorListItem icon="USERS" text="Community"
 								targetHistoryToken="{nameTokens.getCommunity}" />
-							<b:AnchorListItem icon="GRADUATION_CAP" text="Training"
-								targetHistoryToken="{nameTokens.getTraining}" />
-							<b:AnchorListItem icon="SIGN_IN" text="Login" ui:field="login" />
-							<b:AnchorListItem icon="USER_PLUS" text="Register" ui:field="register" 
-								targetHistoryToken="{nameTokens.getUsers}" />	
-							<b:ListDropDown ui:field="userdropdown" visible="true">
-								<b:AnchorButton icon="USER" ui:field="usertext" 
+							<b:AnchorListItem icon="GRADUATION_CAP"
+								text="Training" targetHistoryToken="{nameTokens.getTraining}" />
+							<b:AnchorListItem icon="SIGN_IN" text="Login"
+								ui:field="login" />
+							<b:AnchorListItem icon="USER_PLUS"
+								text="Register" ui:field="register"
+								targetHistoryToken="{nameTokens.getUsers}" />
+							<b:ListDropDown ui:field="userdropdown"
+								visible="true">
+								<b:AnchorButton icon="USER" ui:field="usertext"
 									dataToggle="DROPDOWN">[User]</b:AnchorButton>
 								<b:DropDownMenu>
 									<b:AnchorListItem icon="EDIT" text="Edit"
 										targetHistoryToken="{nameTokens.getUsers}" />
-									<b:AnchorListItem icon="SIGN_OUT" text="Logout" ui:field="logout"/>
+									<b:AnchorListItem icon="SIGN_OUT"
+										text="Logout" ui:field="logout" />
 								</b:DropDownMenu>
-							</b:ListDropDown>							
+							</b:ListDropDown>
 						</b:NavbarNav>
 					</b:NavbarCollapse>
 				</b:Container>
 			</b:Navbar>
-			
-			<b:Modal title="Login" closable="true" fade="true" ui:field="loginform">
+
+			<b:Modal title="Login" closable="true" fade="true"
+				ui:field="loginform">
 				<b:ModalBody>
 					<b:FormGroup>
-						<b:HelpBlock />					
-						<b:TextBox ui:field="username" placeholder="User name" allowBlank="false" />
+						<b:HelpBlock />
+						<b:TextBox ui:field="username" placeholder="User name"
+							allowBlank="false" />
 					</b:FormGroup>
 					<b:FormGroup>
-						<b:Input type="PASSWORD" ui:field="password" placeholder="Password" allowBlank="false" />
+						<b:Input type="PASSWORD" ui:field="password"
+							placeholder="Password" allowBlank="false" />
 						<b:HelpBlock />
 					</b:FormGroup>
 				</b:ModalBody>
 				<b:ModalFooter>
-					<b:Button type="INFO" dataDismiss="MODAL" ui:field="cancelbutton" text="Cancel" />				
-					<b:Button type="SUCCESS" dataDismiss="MODAL" ui:field="loginbutton" text="Login" />
+					<b:Button type="INFO" dataDismiss="MODAL"
+						ui:field="cancelbutton" text="Cancel" />
+					<b:Button type="SUCCESS" dataDismiss="MODAL"
+						ui:field="loginbutton" text="Login" />
 				</b:ModalFooter>
 			</b:Modal>
 
 			<!-- Container Content -->
 			<g:SimplePanel ui:field="contentContainer" />
-			
+
 		</b:Container>
 	</g:ScrollPanel>
 

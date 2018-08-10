@@ -32,203 +32,208 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-public class CompareFunctionView extends ParameterizedViewImpl 
-  implements CompareFunctionPresenter.MyView {
+public class CompareFunctionView extends ParameterizedViewImpl implements CompareFunctionPresenter.MyView {
 
-  @UiField
-  FlexTable table;
-  
-  @UiField
-  PageHeader heading;
-  
-  @UiField
-  Panel matrixpanel;
-  
-  @UiField
-  VerticalPanel loading;
-  
-  SoftwareREST api;
-  Map<String, SoftwareREST> apis;
+	@UiField
+	FlexTable table;
 
-  Vocabulary vocabulary;
-  List<SoftwareFunction> softwares;
-  boolean swloaded;
-  
-  interface Binder extends UiBinder<Widget, CompareFunctionView> {
-  }
+	@UiField
+	PageHeader heading;
 
-  @Inject
-  public CompareFunctionView(Binder binder) {
-    initWidget(binder.createAndBindUi(this));
-    initAPIs();
-    initVocabulary();
-    softwares = new ArrayList<SoftwareFunction>();
-  }
-  
-  private void initAPIs() {
-    this.api = SoftwareREST.get(Config.getServerURL());
-    
-    this.apis = new HashMap<String, SoftwareREST>();
-    this.apis.put(SoftwareREST.LOCAL, this.api);
-    
-    final List<Map<String, String>> xservers = Config.getExternalServers();
-    for(Map<String, String> xserver : xservers) {
-      String xname = xserver.get("name");
-      String xurl = xserver.get("server");
-      SoftwareREST xapi = SoftwareREST.get(xurl);
-      this.apis.put(xname, xapi);
-    }    
-  }
+	@UiField
+	Panel matrixpanel;
 
-  @Override
-  public void initializeParameters(String[] params) {
-    reset();
-    if(params.length > 0) {
-      String[] swnames = params[0].split("\\s*,\\s*");
-      initSoftwares(swnames);
-    }
-  }
-  
-  private void reset() {
-    swloaded = false;
-    softwares.clear();
-    table.removeAllRows();
-  }
-  
-  private void initVocabulary() {
-    this.api.getVocabulary(new Callback<Vocabulary, Throwable>() {
-      @Override
-      public void onSuccess(Vocabulary vocab) {
-        vocabulary = vocab;
-        if(swloaded)
-          showComparisonMatrix();
-      }
-      @Override
-      public void onFailure(Throwable reason) {
-        GWT.log("Error fetching Vocabulary", reason);
-      }
-    }, false);
-  }
-  
-  private void initSoftwares(final String[] swnames) {
-    loading.setVisible(true);
-    matrixpanel.setVisible(false);
-    for(int i=0; i<swnames.length; i++) {
-      String swname = swnames[i];
-//      String[] nsname = swname.split(":");
-      String[] urlname = swname.split(":");
-      SoftwareREST api = this.api;
-//      if(nsname.length > 1) {
-//        api = this.apis.get(nsname[0]);
-//        swname = nsname[1];
-//      }
-      api.getSoftwareFunction(urlname[0],urlname[1],urlname[2], new Callback<SoftwareFunction, Throwable>() {
-        @Override
-        public void onSuccess(SoftwareFunction f) {
-          softwares.add(f);
-          if(softwares.size() == swnames.length) {
-            swloaded = true;
-            if(vocabulary != null)
-              showComparisonMatrix();
-          }
-        }
-        @Override
-        public void onFailure(Throwable exception) {
-          GWT.log("Error fetching Software", exception);
-        }
-      }, false);
-    }
-  }
-  
-  private void showComparisonMatrix() {
-    if(softwares == null || softwares.size() < 2)
-      return;
-    
-    Collections.sort(softwares, new Comparator<SoftwareFunction>() {
-      @Override
-      public int compare(SoftwareFunction sw1, SoftwareFunction sw2) {
-        return sw1.getPropertyValue(KBConstants.ONTNS()+"hasFunctionName").getValue().toString().compareToIgnoreCase(sw2.getPropertyValue(KBConstants.ONTNS()+"hasFunctionName").getValue().toString());
-      }
-    });
-    
-    String txt = "";
-    int i=0;
-    for(SoftwareFunction sw : softwares) {
-      if(i > 0) txt += ", ";
-      txt += sw.getPropertyValue(KBConstants.ONTNS()+"hasFunctionName").getValue().toString();
-      i++;
-    }
-    heading.setSubText(txt);
-    
-    addHeading();
-    
-    EntityBrowser browser = new EntityBrowser(vocabulary);
-    MetadataType type = vocabulary.getType(softwares.get(0).getType());
-    List<MetadataProperty> swprops = vocabulary.getPropertiesForType(type);
-    
-    MetadataCategory topcat  = vocabulary.getCategory(KBConstants.CATNS()+"MetadataCategory");
-    topcat = vocabulary.orderChildCategories(topcat);
-    for(String lvl1catid : topcat.getChildren()) {
-      MetadataCategory lvl1cat = vocabulary.getCategory(lvl1catid);
-      lvl1cat = vocabulary.orderChildCategories(lvl1cat);
-      for(String lvl2catid : lvl1cat.getChildren()) {
-        MetadataCategory lvl2cat = vocabulary.getCategory(lvl2catid);
-        List<MetadataProperty> catprops = vocabulary.getPropertiesInCategory(lvl2cat);
-        catprops.retainAll(swprops);
-        catprops = vocabulary.orderProperties(catprops);
-        // First add required properties
-        for(MetadataProperty prop : catprops) {
-          if(prop.isRequired())
-            addRow(prop, browser);
-        }
-        // Then add not optional properties
-        for(MetadataProperty prop : catprops) {
-          if(!prop.isRequired())
-            addRow(prop, browser);
-        }        
-      }
-    }
-    
-    loading.setVisible(false);
-    matrixpanel.setVisible(true);
-  }
-  
-  private void addHeading() {
-    int i=0;
-    FlexCellFormatter cellFormatter = table.getFlexCellFormatter();    
-    for(SoftwareFunction sw : softwares) {
-      cellFormatter.addStyleName(0, i, "header-cell wrap-long-words");
-      cellFormatter.setWidth(0, i, 100/softwares.size()+"%");
-      table.setWidget(0, i++, new Heading(HeadingSize.H4, sw.getPropertyValue(KBConstants.ONTNS()+"hasFunctionName").getValue().toString()));
-    }
-    cellFormatter.addStyleName(0, i-1, "no-border-cell");    
-  }
-  
-  private void addRow(MetadataProperty prop, EntityBrowser browser) {
-    int numRows = table.getRowCount();
-    boolean novalue = true;
-    for(SoftwareFunction sw : softwares) {
-      if(sw.getPropertyValues(prop.getId()).size() > 0) {
-        novalue = false;
-        break;
-      }
-    }
-    if(novalue)
-      return;
-      
-    FlexCellFormatter cellFormatter = table.getFlexCellFormatter();
-    int i=0;
-    String prophtml = browser.getPropertyHTML(prop, false, false);
-    table.setHTML(numRows, 0, prophtml);
-    cellFormatter.addStyleName(numRows, 0, "no-border-cell no-padding-cell");
-    cellFormatter.setColSpan(numRows, 0, softwares.size());
-    for(SoftwareFunction sw : softwares) {
-      if(sw.getPropertyValues(prop.getId()).size() == 0)
-        cellFormatter.addStyleName(numRows+1, i, "empty-cell");
-      String html = browser.getEntityValuesHTML(prop, sw.getPropertyValues(prop.getId()), true);
-      table.setHTML(numRows+1, i++, html);
-    }
-    cellFormatter.addStyleName(numRows+1, i-1, "no-border-cell");
-  }
-  
+	@UiField
+	VerticalPanel loading;
+
+	SoftwareREST api;
+	Map<String, SoftwareREST> apis;
+
+	Vocabulary vocabulary;
+	List<SoftwareFunction> softwares;
+	boolean swloaded;
+
+	interface Binder extends UiBinder<Widget, CompareFunctionView> {
+	}
+
+	@Inject
+	public CompareFunctionView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
+		initAPIs();
+		initVocabulary();
+		softwares = new ArrayList<SoftwareFunction>();
+	}
+
+	private void initAPIs() {
+		this.api = SoftwareREST.get(Config.getServerURL());
+
+		this.apis = new HashMap<String, SoftwareREST>();
+		this.apis.put(SoftwareREST.LOCAL, this.api);
+
+		final List<Map<String, String>> xservers = Config.getExternalServers();
+		for (Map<String, String> xserver : xservers) {
+			String xname = xserver.get("name");
+			String xurl = xserver.get("server");
+			SoftwareREST xapi = SoftwareREST.get(xurl);
+			this.apis.put(xname, xapi);
+		}
+	}
+
+	@Override
+	public void initializeParameters(String[] params) {
+		reset();
+		if (params.length > 0) {
+			String[] swnames = params[0].split("\\s*,\\s*");
+			initSoftwares(swnames);
+		}
+	}
+
+	private void reset() {
+		swloaded = false;
+		softwares.clear();
+		table.removeAllRows();
+	}
+
+	private void initVocabulary() {
+		this.api.getVocabulary(new Callback<Vocabulary, Throwable>() {
+			@Override
+			public void onSuccess(Vocabulary vocab) {
+				vocabulary = vocab;
+				if (swloaded)
+					showComparisonMatrix();
+			}
+
+			@Override
+			public void onFailure(Throwable reason) {
+				GWT.log("Error fetching Vocabulary", reason);
+			}
+		}, false);
+	}
+
+	private void initSoftwares(final String[] swnames) {
+		loading.setVisible(true);
+		matrixpanel.setVisible(false);
+		for (int i = 0; i < swnames.length; i++) {
+			String swname = swnames[i];
+			// String[] nsname = swname.split(":");
+			String[] urlname = swname.split(":");
+			SoftwareREST api = this.api;
+			// if(nsname.length > 1) {
+			// api = this.apis.get(nsname[0]);
+			// swname = nsname[1];
+			// }
+			api.getSoftwareFunction(urlname[0], urlname[1], urlname[2], new Callback<SoftwareFunction, Throwable>() {
+				@Override
+				public void onSuccess(SoftwareFunction f) {
+					softwares.add(f);
+					if (softwares.size() == swnames.length) {
+						swloaded = true;
+						if (vocabulary != null)
+							showComparisonMatrix();
+					}
+				}
+
+				@Override
+				public void onFailure(Throwable exception) {
+					GWT.log("Error fetching Software", exception);
+				}
+			}, false);
+		}
+	}
+
+	private void showComparisonMatrix() {
+		if (softwares == null || softwares.size() < 2)
+			return;
+
+		Collections.sort(softwares, new Comparator<SoftwareFunction>() {
+			@Override
+			public int compare(SoftwareFunction sw1, SoftwareFunction sw2) {
+				return sw1.getPropertyValue(KBConstants.ONTNS() + "hasFunctionName").getValue().toString()
+						.compareToIgnoreCase(
+								sw2.getPropertyValue(KBConstants.ONTNS() + "hasFunctionName").getValue().toString());
+			}
+		});
+
+		String txt = "";
+		int i = 0;
+		for (SoftwareFunction sw : softwares) {
+			if (i > 0)
+				txt += ", ";
+			txt += sw.getPropertyValue(KBConstants.ONTNS() + "hasFunctionName").getValue().toString();
+			i++;
+		}
+		heading.setSubText(txt);
+
+		addHeading();
+
+		EntityBrowser browser = new EntityBrowser(vocabulary);
+		MetadataType type = vocabulary.getType(softwares.get(0).getType());
+		List<MetadataProperty> swprops = vocabulary.getPropertiesForType(type);
+
+		MetadataCategory topcat = vocabulary.getCategory(KBConstants.CATNS() + "MetadataCategory");
+		topcat = vocabulary.orderChildCategories(topcat);
+		for (String lvl1catid : topcat.getChildren()) {
+			MetadataCategory lvl1cat = vocabulary.getCategory(lvl1catid);
+			lvl1cat = vocabulary.orderChildCategories(lvl1cat);
+			for (String lvl2catid : lvl1cat.getChildren()) {
+				MetadataCategory lvl2cat = vocabulary.getCategory(lvl2catid);
+				List<MetadataProperty> catprops = vocabulary.getPropertiesInCategory(lvl2cat);
+				catprops.retainAll(swprops);
+				catprops = vocabulary.orderProperties(catprops);
+				// First add required properties
+				for (MetadataProperty prop : catprops) {
+					if (prop.isRequired())
+						addRow(prop, browser);
+				}
+				// Then add not optional properties
+				for (MetadataProperty prop : catprops) {
+					if (!prop.isRequired())
+						addRow(prop, browser);
+				}
+			}
+		}
+
+		loading.setVisible(false);
+		matrixpanel.setVisible(true);
+	}
+
+	private void addHeading() {
+		int i = 0;
+		FlexCellFormatter cellFormatter = table.getFlexCellFormatter();
+		for (SoftwareFunction sw : softwares) {
+			cellFormatter.addStyleName(0, i, "header-cell wrap-long-words");
+			cellFormatter.setWidth(0, i, 100 / softwares.size() + "%");
+			table.setWidget(0, i++, new Heading(HeadingSize.H4,
+					sw.getPropertyValue(KBConstants.ONTNS() + "hasFunctionName").getValue().toString()));
+		}
+		cellFormatter.addStyleName(0, i - 1, "no-border-cell");
+	}
+
+	private void addRow(MetadataProperty prop, EntityBrowser browser) {
+		int numRows = table.getRowCount();
+		boolean novalue = true;
+		for (SoftwareFunction sw : softwares) {
+			if (sw.getPropertyValues(prop.getId()).size() > 0) {
+				novalue = false;
+				break;
+			}
+		}
+		if (novalue)
+			return;
+
+		FlexCellFormatter cellFormatter = table.getFlexCellFormatter();
+		int i = 0;
+		String prophtml = browser.getPropertyHTML(prop, false, false);
+		table.setHTML(numRows, 0, prophtml);
+		cellFormatter.addStyleName(numRows, 0, "no-border-cell no-padding-cell");
+		cellFormatter.setColSpan(numRows, 0, softwares.size());
+		for (SoftwareFunction sw : softwares) {
+			if (sw.getPropertyValues(prop.getId()).size() == 0)
+				cellFormatter.addStyleName(numRows + 1, i, "empty-cell");
+			String html = browser.getEntityValuesHTML(prop, sw.getPropertyValues(prop.getId()), true);
+			table.setHTML(numRows + 1, i++, html);
+		}
+		cellFormatter.addStyleName(numRows + 1, i - 1, "no-border-cell");
+	}
+
 }

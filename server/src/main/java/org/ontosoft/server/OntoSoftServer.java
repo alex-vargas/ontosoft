@@ -17,38 +17,38 @@ import org.ontosoft.server.users.UserDatabase;
 
 class OntoSoftServer extends ResourceConfig {
 
-  public OntoSoftServer() {
-    // Headers
-    register(AcceptHeaderFilter.class);
-    register(CORSResponseFilter.class);
-    
-    // User roles and authentication
-    register(RolesAllowedDynamicFeature.class);
-    register(UserAuthenticationFilter.class);
+	public OntoSoftServer() {
+		// Headers
+		register(AcceptHeaderFilter.class);
+		register(CORSResponseFilter.class);
 
-    // Main Resources
-    register(UserResource.class);
-    register(SoftwareResource.class);
-    
-    // OpenAPI documentation
-    register(ApiListingResource.class);   
-    register(SwaggerSerializers.class);
-    initializeSwagger();
-  }
-  
-  private void initializeSwagger() {
-    BeanConfig beanConfig = new BeanConfig();
-    beanConfig.setVersion("1.0.0");
-    beanConfig.setSchemes(new String[]{"http"});
-    beanConfig.setBasePath("/repository");
-    beanConfig.setResourcePackage("org.ontosoft.server.api.impl");
-    beanConfig.setScan(true);    
-  }
+		// User roles and authentication
+		register(RolesAllowedDynamicFeature.class);
+		register(UserAuthenticationFilter.class);
 
-  @PreDestroy
-  public void onDestroy() {
-    // Cleanup tasks
-    UserDatabase.shutdownDB();
-  }
+		// Main Resources
+		register(UserResource.class);
+		register(SoftwareResource.class);
+
+		// OpenAPI documentation
+		register(ApiListingResource.class);
+		register(SwaggerSerializers.class);
+		initializeSwagger();
+	}
+
+	private void initializeSwagger() {
+		BeanConfig beanConfig = new BeanConfig();
+		beanConfig.setVersion("1.0.0");
+		beanConfig.setSchemes(new String[] { "http" });
+		beanConfig.setBasePath("/repository");
+		beanConfig.setResourcePackage("org.ontosoft.server.api.impl");
+		beanConfig.setScan(true);
+	}
+
+	@PreDestroy
+	public void onDestroy() {
+		// Cleanup tasks
+		UserDatabase.shutdownDB();
+	}
 
 }

@@ -5,18 +5,17 @@ import org.ontosoft.client.place.NameTokens;
 
 import com.google.inject.Inject;
 
-public class PublishModelView extends PublishView 
-	implements PublishModelPresenter.MyView{
+public class PublishModelView extends PublishView implements PublishModelPresenter.MyView {
 
-  @Inject
-  public PublishModelView(Binder binder) {
-	  super(binder);
-	  
-  }
-  
-  @Override
-  public void initPlaces() {
-	  setBrowsePlace(NameTokens.modelbrowse);
-	  setPublishPlace(NameTokens.publishModel);
-  }
+	@Inject
+	public PublishModelView(Binder binder) {
+		super(binder);
+
+	}
+
+	@Override
+	public void initPlaces() {
+		setBrowsePlace(NameTokens.modelBrowse);
+		setPublishPlace(NameTokens.publishModel);
+	}
 }

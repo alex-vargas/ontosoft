@@ -4,8 +4,8 @@ import edu.isi.wings.ontapi.KBAPI;
 
 public class AgentAdapter extends EnumerationEntityAdapter {
 
-  public AgentAdapter(KBAPI kb, KBAPI ontkb, KBAPI enumkb, String clsid) {
-    super(kb, ontkb, enumkb, clsid);
-  }
+	public AgentAdapter(KBAPI kb, KBAPI ontkb, KBAPI enumkb, String clsid) {
+		super(kb, ontkb, enumkb, clsid);
+	}
 
 }

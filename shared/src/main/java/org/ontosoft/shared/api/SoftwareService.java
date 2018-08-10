@@ -56,10 +56,10 @@ public interface SoftwareService extends DirectRestService {
   public List<SoftwareVersionSummary> versions(String software);
   
   @GET
-  @Path("modelconfigurations")
+  @Path("modelversions")
   @Produces("application/json")
-  public List<ModelConfigurationSummary> modelConfigurations(String model);
-  
+  public List<SoftwareVersionSummary> listModelVersions(String software);
+    
   @GET
   @Path("functions")
   @Produces("application/json")
@@ -94,15 +94,10 @@ public interface SoftwareService extends DirectRestService {
   @Produces("application/json")
   @Consumes("application/json")
   public List<SoftwareVersionSummary> listSoftwareVersionWithFacets(
-      @JsonProperty("facets") List<EnumerationFacet> facets, @PathParam("software") String software);
+      @JsonProperty("facets") List<EnumerationFacet> facets,
+      @PathParam("software") String software,
+      @PathParam("isModel") boolean isModel);
 
-  @POST
-  @Path("searchModelVersion")
-  @Produces("application/json")
-  @Consumes("application/json")
-  public List<ModelVersionSummary> listModelVersionWithFacets(
-      @JsonProperty("facets") List<EnumerationFacet> facets, 
-      @PathParam("model") String model);
   
   @POST
   @Path("searchFunction")
@@ -152,14 +147,6 @@ public interface SoftwareService extends DirectRestService {
   @Produces("application/json")
   @Consumes("application/json")
   public SoftwareVersion publishVersion(@PathParam("name") String name, @JsonProperty("version") SoftwareVersion version);
-
-  /* model versions */
-  @POST
-  @Path("model/{name}/version")
-  @Produces("application/json")
-  @Consumes("application/json")
-  public ModelVersion publishModelVersion(@PathParam("name") String name, 
-		  @JsonProperty("version") ModelVersion version);
   
   @GET
   @Path("vocabulary")
@@ -210,12 +197,6 @@ public interface SoftwareService extends DirectRestService {
   public Software updateVersion(@PathParam("swname") String swname, @PathParam("vname") String vname,
       @JsonProperty("version") SoftwareVersion version);
 
-  @PUT
-  @Path("model/{modelname}/version/{vname}")
-  @Produces("application/json")
-  @Consumes("application/json")
-  public Model updateModelVersion(@PathParam("modelname") String modelname, @PathParam("vname") String vname,
-      @JsonProperty("version") ModelVersion version);
 
   @DELETE
   @Path("software/{name}")

@@ -6,25 +6,25 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class ModelChangeEvent extends GwtEvent<ModelChangeHandler> {
 
-  public static Type<ModelChangeHandler> TYPE = new Type<ModelChangeHandler>();
-  
-  private Model model;
-  
-  public ModelChangeEvent(Model model) {
-    this.model = model;
-  }
-  
-  @Override
-  public Type<ModelChangeHandler> getAssociatedType() {
-    return TYPE;
-  }
+	public static Type<ModelChangeHandler> TYPE = new Type<ModelChangeHandler>();
 
-  @Override
-  protected void dispatch(ModelChangeHandler handler) {
-    handler.onModelChange(this);
-  }
+	private Model model;
 
-  public Model getModel() {
-    return model;
-  }
+	public ModelChangeEvent(Model model) {
+		this.model = model;
+	}
+
+	@Override
+	public Type<ModelChangeHandler> getAssociatedType() {
+		return TYPE;
+	}
+
+	@Override
+	protected void dispatch(ModelChangeHandler handler) {
+		handler.onModelChange(this);
+	}
+
+	public Model getModel() {
+		return model;
+	}
 }

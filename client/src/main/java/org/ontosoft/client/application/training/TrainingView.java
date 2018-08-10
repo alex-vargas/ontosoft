@@ -9,22 +9,21 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-public class TrainingView extends ParameterizedViewImpl 
-  implements TrainingPresenter.MyView {
+public class TrainingView extends ParameterizedViewImpl implements TrainingPresenter.MyView {
 
-  @UiField
-  PageHeader title;
-  
-  interface Binder extends UiBinder<Widget, TrainingView> {
-  }
+	@UiField
+	PageHeader title;
 
-  @Inject
-  public TrainingView(Binder binder) {
-    initWidget(binder.createAndBindUi(this));
-    title.setText(Config.getPortalTitle() + " Training");
-  }
+	interface Binder extends UiBinder<Widget, TrainingView> {
+	}
 
-  @Override
-  public void initializeParameters(String[] parameters) {
-  }
+	@Inject
+	public TrainingView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
+		title.setText(Config.getPortalTitle() + " Training");
+	}
+
+	@Override
+	public void initializeParameters(String[] parameters) {
+	}
 }

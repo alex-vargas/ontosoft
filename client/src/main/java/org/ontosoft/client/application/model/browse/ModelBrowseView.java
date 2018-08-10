@@ -6,35 +6,38 @@ import org.ontosoft.shared.classes.util.KBConstants;
 
 import com.google.inject.Inject;
 
-public class ModelBrowseView extends BrowseView 
-	implements ModelBrowsePresenter.MyView {
-	
+public class ModelBrowseView extends BrowseView implements ModelBrowsePresenter.MyView {
+
 	@Inject
 	public ModelBrowseView(Binder binder) {
 		super(binder);
-		
+
 	}
-	
+
 	@Override
 	public void initPlaces() {
 		setPublishPlace(NameTokens.publishModel);
-		setVersionsPlace(NameTokens.modelversion);
+		setVersionsPlace(NameTokens.modelVersion);
 		setPublishVersionsPlace(NameTokens.publishModelVersion);
 	}
-	  /**
-	   * Returns the namespace for "hasCreator" using OntoSoft Ontology NameSpace 
-	   * @return
-	   */
+
+	/**
+	 * Returns the namespace for "hasCreator" using OntoSoft Ontology NameSpace
+	 * 
+	 * @return
+	 */
 	@Override
-  	public String getHasCreatorNameSpace() {
-	  return KBConstants.ONTNS() + "hasModelCreator";
+	public String getHasCreatorNameSpace() {
+		return KBConstants.ONTNS() + "hasModelCreator";
 	}
-    /**
-     * Returns the namespace for "hasName" using OntoSoft Ontology NameSpace 
-     * @return
-     */
+
+	/**
+	 * Returns the namespace for "hasName" using OntoSoft Ontology NameSpace
+	 * 
+	 * @return
+	 */
 	@Override
-  	public String getHasNameNameSpace() {
-		return KBConstants.ONTNS()+"hasModelName";
+	public String getHasNameNameSpace() {
+		return KBConstants.ONTNS() + "hasModelName";
 	}
 }

@@ -12,24 +12,24 @@ import com.google.inject.Inject;
 
 public class HomeView extends ParameterizedViewImpl implements HomePresenter.MyView {
 
-  @UiField
-  HTML html;
-  
-  @UiField
-  PageHeader title;
-  
-  interface Binder extends UiBinder<Widget, HomeView> {
-  }
+	@UiField
+	HTML html;
 
-  @Inject
-  public HomeView(Binder binder) {
-    initWidget(binder.createAndBindUi(this));
-    initMaterial();
-    title.setText(Config.getPortalTitle() + " Portal");
-    html.setHTML(Config.getHomeHTML());
-  }
+	@UiField
+	PageHeader title;
 
-  @Override
-  public void initializeParameters(String[] parameters) {
-  }
+	interface Binder extends UiBinder<Widget, HomeView> {
+	}
+
+	@Inject
+	public HomeView(Binder binder) {
+		initWidget(binder.createAndBindUi(this));
+		initMaterial();
+		title.setText(Config.getPortalTitle() + " Portal");
+		html.setHTML(Config.getHomeHTML());
+	}
+
+	@Override
+	public void initializeParameters(String[] parameters) {
+	}
 }

@@ -12,18 +12,20 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-public class PublishVersionPresenter extends
-    Presenter<PublishVersionPresenter.MyView, PublishVersionPresenter.MyProxy> {
-  
-  @ProxyCodeSplit
-  @NameToken(NameTokens.publishversion)
-  public interface MyProxy extends ProxyPlace<PublishVersionPresenter> { }
+public class PublishVersionPresenter
+		extends Presenter<PublishVersionPresenter.MyView, PublishVersionPresenter.MyProxy> {
 
-  public interface MyView extends ParameterizedView { }
-  
-  @Inject
-  public PublishVersionPresenter(EventBus eventBus, MyView view, final MyProxy proxy,
-      final PlaceManager placemanager) {
-    super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
-  }
+	@ProxyCodeSplit
+	@NameToken(NameTokens.publishversion)
+	public interface MyProxy extends ProxyPlace<PublishVersionPresenter> {
+	}
+
+	public interface MyView extends ParameterizedView {
+	}
+
+	@Inject
+	public PublishVersionPresenter(EventBus eventBus, MyView view, final MyProxy proxy,
+			final PlaceManager placemanager) {
+		super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
+	}
 }

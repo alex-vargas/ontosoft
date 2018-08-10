@@ -50,60 +50,58 @@ import org.ontosoft.client.application.version.publish.PublishVersionView;
 import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 
 public class ApplicationModule extends AbstractPresenterModule {
-  
-  @Override
-  protected void configure() {
-    // Main Application
-    bindPresenter(ApplicationPresenter.class, ApplicationPresenter.MyView.class, 
-        ApplicationView.class, ApplicationPresenter.MyProxy.class);
-    
-    // Home, Publish, Browse, Community, Training, //Search
-    bindPresenter(HomePresenter.class, HomePresenter.MyView.class,
-        HomeView.class, HomePresenter.MyProxy.class);
-    bindPresenter(PublishPresenter.class, PublishPresenter.MyView.class,
-        PublishView.class, PublishPresenter.MyProxy.class);
-    bindPresenter(PublishVersionPresenter.class, PublishVersionPresenter.MyView.class,
-        PublishVersionView.class, PublishVersionPresenter.MyProxy.class);
-    bindPresenter(BrowsePresenter.class, BrowsePresenter.MyView.class,
-        BrowseView.class, BrowsePresenter.MyProxy.class);
-    bindPresenter(VersionBrowsePresenter.class, VersionBrowsePresenter.MyView.class,
-        VersionBrowseView.class, VersionBrowsePresenter.MyProxy.class);
-    bindPresenter(CommunityPresenter.class, CommunityPresenter.MyView.class,
-        CommunityView.class, CommunityPresenter.MyProxy.class);
-    bindPresenter(TrainingPresenter.class, TrainingPresenter.MyView.class,
-        TrainingView.class, TrainingPresenter.MyProxy.class);
-    bindPresenter(LoaderPresenter.class, LoaderPresenter.MyView.class,
-        LoaderView.class, LoaderPresenter.MyProxy.class);
-    bindPresenter(SoftwareListPresenter.class, SoftwareListPresenter.MyView.class,
-        SoftwareListView.class, SoftwareListPresenter.MyProxy.class);
-    bindPresenter(SoftwareVersionListPresenter.class, SoftwareVersionListPresenter.MyView.class,
-    	SoftwareVersionListView.class, SoftwareVersionListPresenter.MyProxy.class);
-    bindPresenter(FunctionListPresenter.class, FunctionListPresenter.MyView.class,
-    		FunctionListView.class, FunctionListPresenter.MyProxy.class);
-    bindPresenter(ComparePresenter.class, ComparePresenter.MyView.class,
-        CompareView.class, ComparePresenter.MyProxy.class);
-    bindPresenter(CompareFunctionPresenter.class, CompareFunctionPresenter.MyView.class,
-        CompareFunctionView.class, CompareFunctionPresenter.MyProxy.class);
-    bindPresenter(CompareVersionPresenter.class, CompareVersionPresenter.MyView.class,
-        CompareVersionView.class, CompareVersionPresenter.MyProxy.class);
-    bindPresenter(UserPresenter.class, UserPresenter.MyView.class,
-        UserView.class, UserPresenter.MyProxy.class);
-    bindPresenter(ModelListPresenter.class, ModelListPresenter.MyView.class,
-            ModelListView.class, ModelListPresenter.MyProxy.class); 
-    bindPresenter(ModelConfigurationListPresenter.class, ModelConfigurationListPresenter.MyView.class,
-            ModelConfigurationListView.class, ModelConfigurationListPresenter.MyProxy.class);
-    bindPresenter(ModelBrowsePresenter.class, ModelBrowsePresenter.MyView.class,
-    		ModelBrowseView.class, ModelBrowsePresenter.MyProxy.class);
-    bindPresenter(PublishModelPresenter.class, PublishModelPresenter.MyView.class,
-            PublishModelView.class, PublishModelPresenter.MyProxy.class);
-    bindPresenter(PublishModelVersionPresenter.class, PublishModelVersionPresenter.MyView.class,
-            PublishModelVersionView.class, PublishModelVersionPresenter.MyProxy.class);
-    bindPresenter(ModelVersionBrowsePresenter.class, ModelVersionBrowsePresenter.MyView.class,
-        ModelVersionBrowseView.class, ModelVersionBrowsePresenter.MyProxy.class);
-    bindPresenter(CompareModelVersionPresenter.class, CompareModelVersionPresenter.MyView.class,
-            CompareModelVersionView.class, CompareModelVersionPresenter.MyProxy.class);
-    bindPresenter(ModelVersionListPresenter.class, ModelVersionListPresenter.MyView.class,
-        	ModelVersionListView.class, ModelVersionListPresenter.MyProxy.class);
-  }
+
+	@Override
+	protected void configure() {
+		// Main Application
+		bindPresenter(ApplicationPresenter.class, ApplicationPresenter.MyView.class, ApplicationView.class,
+				ApplicationPresenter.MyProxy.class);
+
+		// Home, Publish, Browse, Community, Training, //Search
+		bindPresenter(HomePresenter.class, HomePresenter.MyView.class, HomeView.class, HomePresenter.MyProxy.class);
+		bindPresenter(PublishPresenter.class, PublishPresenter.MyView.class, PublishView.class,
+				PublishPresenter.MyProxy.class);
+		bindPresenter(PublishVersionPresenter.class, PublishVersionPresenter.MyView.class, PublishVersionView.class,
+				PublishVersionPresenter.MyProxy.class);
+		bindPresenter(BrowsePresenter.class, BrowsePresenter.MyView.class, BrowseView.class,
+				BrowsePresenter.MyProxy.class);
+		bindPresenter(VersionBrowsePresenter.class, VersionBrowsePresenter.MyView.class, VersionBrowseView.class,
+				VersionBrowsePresenter.MyProxy.class);
+		bindPresenter(CommunityPresenter.class, CommunityPresenter.MyView.class, CommunityView.class,
+				CommunityPresenter.MyProxy.class);
+		bindPresenter(TrainingPresenter.class, TrainingPresenter.MyView.class, TrainingView.class,
+				TrainingPresenter.MyProxy.class);
+		bindPresenter(LoaderPresenter.class, LoaderPresenter.MyView.class, LoaderView.class,
+				LoaderPresenter.MyProxy.class);
+		bindPresenter(SoftwareListPresenter.class, SoftwareListPresenter.MyView.class, SoftwareListView.class,
+				SoftwareListPresenter.MyProxy.class);
+		bindPresenter(SoftwareVersionListPresenter.class, SoftwareVersionListPresenter.MyView.class,
+				SoftwareVersionListView.class, SoftwareVersionListPresenter.MyProxy.class);
+		bindPresenter(FunctionListPresenter.class, FunctionListPresenter.MyView.class, FunctionListView.class,
+				FunctionListPresenter.MyProxy.class);
+		bindPresenter(ComparePresenter.class, ComparePresenter.MyView.class, CompareView.class,
+				ComparePresenter.MyProxy.class);
+		bindPresenter(CompareFunctionPresenter.class, CompareFunctionPresenter.MyView.class, CompareFunctionView.class,
+				CompareFunctionPresenter.MyProxy.class);
+		bindPresenter(CompareVersionPresenter.class, CompareVersionPresenter.MyView.class, CompareVersionView.class,
+				CompareVersionPresenter.MyProxy.class);
+		bindPresenter(UserPresenter.class, UserPresenter.MyView.class, UserView.class, UserPresenter.MyProxy.class);
+		bindPresenter(ModelListPresenter.class, ModelListPresenter.MyView.class, ModelListView.class,
+				ModelListPresenter.MyProxy.class);
+		bindPresenter(ModelConfigurationListPresenter.class, ModelConfigurationListPresenter.MyView.class,
+				ModelConfigurationListView.class, ModelConfigurationListPresenter.MyProxy.class);
+		bindPresenter(ModelBrowsePresenter.class, ModelBrowsePresenter.MyView.class, ModelBrowseView.class,
+				ModelBrowsePresenter.MyProxy.class);
+		bindPresenter(PublishModelPresenter.class, PublishModelPresenter.MyView.class, PublishModelView.class,
+				PublishModelPresenter.MyProxy.class);
+		bindPresenter(PublishModelVersionPresenter.class, PublishModelVersionPresenter.MyView.class,
+				PublishModelVersionView.class, PublishModelVersionPresenter.MyProxy.class);
+		bindPresenter(ModelVersionBrowsePresenter.class, ModelVersionBrowsePresenter.MyView.class,
+				ModelVersionBrowseView.class, ModelVersionBrowsePresenter.MyProxy.class);
+		bindPresenter(CompareModelVersionPresenter.class, CompareModelVersionPresenter.MyView.class,
+				CompareModelVersionView.class, CompareModelVersionPresenter.MyProxy.class);
+		bindPresenter(ModelVersionListPresenter.class, ModelVersionListPresenter.MyView.class,
+				ModelVersionListView.class, ModelVersionListPresenter.MyProxy.class);
+	}
 
 }

@@ -14,17 +14,17 @@ import org.ontosoft.shared.classes.users.UserSession;
 
 @PreMatching
 public class UserAuthenticationFilter implements ContainerRequestFilter {
-  @Context 
-  HttpServletRequest request;
-  
-  @Override
-  public void filter(ContainerRequestContext context) throws IOException {
-    Config.load(request);
-    String token = context.getHeaderString(UserSession.SESSION_HEADER);
-    if(token != null) {
-      UserSession session = UserSession.getSession(token);
-      context.setSecurityContext(new UserAuthenticator(session));
-    }
-  }
+	@Context
+	HttpServletRequest request;
+
+	@Override
+	public void filter(ContainerRequestContext context) throws IOException {
+		Config.load(request);
+		String token = context.getHeaderString(UserSession.SESSION_HEADER);
+		if (token != null) {
+			UserSession session = UserSession.getSession(token);
+			context.setSecurityContext(new UserAuthenticator(session));
+		}
+	}
 
 }

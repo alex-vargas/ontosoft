@@ -10,25 +10,23 @@ import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import com.google.gwt.user.client.ui.IsWidget;
 
 public interface IEntityInput extends IsWidget, HasEntityHandlers {
-  
-  public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary);
 
-  public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, 
-		  SoftwareVersion version);
-  
-  public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, 
-		  ModelVersion version);
-  
-  public Entity getValue();
+	public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary);
 
-  public void setValue(Entity entity);
-  
-  public void clearValue();
-  
-  public boolean validate(boolean show);
-  
-  public void layout();
-  
-  public void disable();
-  
+	public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, SoftwareVersion version);
+
+	public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, ModelVersion version);
+
+	public Entity getValue();
+
+	public void setValue(Entity entity);
+
+	public void clearValue();
+
+	public boolean validate(boolean show);
+
+	public void layout();
+
+	public void disable();
+
 }

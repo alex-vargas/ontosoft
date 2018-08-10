@@ -6,25 +6,25 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class SoftwareSaveEvent extends GwtEvent<SoftwareSaveHandler> {
 
-  public static Type<SoftwareSaveHandler> TYPE = new Type<SoftwareSaveHandler>();
-  
-  private final Software software;
-  
-  public SoftwareSaveEvent(Software software) {
-    this.software = software;
-  }
-  
-  @Override
-  public Type<SoftwareSaveHandler> getAssociatedType() {
-    return TYPE;
-  }
+	public static Type<SoftwareSaveHandler> TYPE = new Type<SoftwareSaveHandler>();
 
-  @Override
-  protected void dispatch(SoftwareSaveHandler handler) {
-    handler.onSave(this);
-  }
+	private final Software software;
 
-  public Software getSoftware() {
-    return software;
-  }
+	public SoftwareSaveEvent(Software software) {
+		this.software = software;
+	}
+
+	@Override
+	public Type<SoftwareSaveHandler> getAssociatedType() {
+		return TYPE;
+	}
+
+	@Override
+	protected void dispatch(SoftwareSaveHandler handler) {
+		handler.onSave(this);
+	}
+
+	public Software getSoftware() {
+		return software;
+	}
 }

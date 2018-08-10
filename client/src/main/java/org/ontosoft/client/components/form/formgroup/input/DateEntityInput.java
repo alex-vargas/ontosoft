@@ -19,95 +19,97 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DateEntityInput implements IEntityInput {
-  private HandlerManager handlerManager;
-  DateEntity entity;
-  DatePicker dateinput;
-  MetadataProperty property;
-  
-  public DateEntityInput() {
-    handlerManager = new HandlerManager(this);
-  }
-  
-  @Override
-  public void createWidget(Entity e, MetadataProperty prop, Vocabulary vocab)  {
-    this.property = prop;
-    this.entity = (DateEntity) e;
-    dateinput = new DatePicker();
-    dateinput.setPlaceholder(prop.getLabel());
-    dateinput.setAutoClose(true);
-    dateinput.setFormat("yyyy-mm-dd");
-    dateinput.setPosition(DatePickerPosition.TOP_AUTO);
-    dateinput.addChangeDateHandler(new ChangeDateHandler() {
-      @Override
-      public void onChangeDate(ChangeDateEvent event) {
-        fireEvent(new EntityChangeEvent(getValue()));
-      }
-    });
-    
-    this.setValue(e);
-  }
-  
-  @Override
-  public Entity getValue() {
-    if(dateinput.getValue() != null) {
-      entity.setValue(dateinput.getValue());
-    }
-    return entity;
-  }
-  
-  @Override
-  public void setValue(Entity entity) {
-    DateEntity de = (DateEntity) entity;
-    if(de.getValue() != null) {
-      dateinput.setValue(de.getValue());
-    }
-    this.entity = de;
-  }
+	private HandlerManager handlerManager;
+	DateEntity entity;
+	DatePicker dateinput;
+	MetadataProperty property;
 
-  @Override
-  public void clearValue() {
-    if(dateinput.getValue() != null) {
-      dateinput.setValue(null);
-      fireEvent(new EntityChangeEvent(getValue()));
-    }
-  }
-  
-  @Override
-  public boolean validate(boolean show) {
-    return true; // No validation for this ?
-  }
-  
-  @Override
-  public Widget asWidget() {
-    return this.dateinput;
-  }
+	public DateEntityInput() {
+		handlerManager = new HandlerManager(this);
+	}
 
-  @Override
-  public void fireEvent(GwtEvent<?> event) {
-    handlerManager.fireEvent(event);
-  }
+	@Override
+	public void createWidget(Entity e, MetadataProperty prop, Vocabulary vocab) {
+		this.property = prop;
+		this.entity = (DateEntity) e;
+		dateinput = new DatePicker();
+		dateinput.setPlaceholder(prop.getLabel());
+		dateinput.setAutoClose(true);
+		dateinput.setFormat("yyyy-mm-dd");
+		dateinput.setPosition(DatePickerPosition.TOP_AUTO);
+		dateinput.addChangeDateHandler(new ChangeDateHandler() {
+			@Override
+			public void onChangeDate(ChangeDateEvent event) {
+				fireEvent(new EntityChangeEvent(getValue()));
+			}
+		});
 
-  @Override
-  public HandlerRegistration addEntityChangeHandler(EntityChangeHandler handler) {
-    return handlerManager.addHandler(EntityChangeEvent.TYPE, handler);
-  }
-  
-  @Override
-  public void layout() { }
-  
-  @Override
-  public void disable() {
-    dateinput.setEnabled(false);
-  }
+		this.setValue(e);
+	}
+
+	@Override
+	public Entity getValue() {
+		if (dateinput.getValue() != null) {
+			entity.setValue(dateinput.getValue());
+		}
+		return entity;
+	}
+
+	@Override
+	public void setValue(Entity entity) {
+		DateEntity de = (DateEntity) entity;
+		if (de.getValue() != null) {
+			dateinput.setValue(de.getValue());
+		}
+		this.entity = de;
+	}
+
+	@Override
+	public void clearValue() {
+		if (dateinput.getValue() != null) {
+			dateinput.setValue(null);
+			fireEvent(new EntityChangeEvent(getValue()));
+		}
+	}
+
+	@Override
+	public boolean validate(boolean show) {
+		return true; // No validation for this ?
+	}
+
+	@Override
+	public Widget asWidget() {
+		return this.dateinput;
+	}
+
+	@Override
+	public void fireEvent(GwtEvent<?> event) {
+		handlerManager.fireEvent(event);
+	}
+
+	@Override
+	public HandlerRegistration addEntityChangeHandler(EntityChangeHandler handler) {
+		return handlerManager.addHandler(EntityChangeEvent.TYPE, handler);
+	}
+
+	@Override
+	public void layout() {
+	}
+
+	@Override
+	public void disable() {
+		dateinput.setEnabled(false);
+	}
 
 	@Override
 	public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, SoftwareVersion version) {
 		// TODO Auto-generated method stub
-		
+
 	}
+
 	@Override
 	public void createWidget(Entity entity, MetadataProperty prop, Vocabulary vocabulary, ModelVersion version) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

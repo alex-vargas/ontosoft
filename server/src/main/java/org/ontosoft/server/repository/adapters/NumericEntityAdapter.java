@@ -6,8 +6,8 @@ import edu.isi.wings.ontapi.KBAPI;
 
 public class NumericEntityAdapter extends EntityAdapter {
 
-  public NumericEntityAdapter(KBAPI kb, KBAPI ontkb, String clsid) {
-    super(kb, ontkb, null, clsid, ontns+"hasNumericValue", NumericEntity.class);
-  }
+	public NumericEntityAdapter(KBAPI kb, KBAPI ontkb, String clsid) {
+		super(kb, ontkb, null, clsid, ontns + "hasNumericValue", NumericEntity.class);
+	}
 
 }

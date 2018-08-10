@@ -7,17 +7,16 @@ import org.ontosoft.shared.plugins.PluginResponse;
 
 public class CodeAnalysisPlugin extends Plugin {
 
-  public CodeAnalysisPlugin() {
-    super("CodeAnalysis", "Analyze code", 
-        KBConstants.ONTNS()+"hasCodeLocation");
-    this.setValueMatchRegex(".*\\.m$");
-  }
+	public CodeAnalysisPlugin() {
+		super("CodeAnalysis", "Analyze code", KBConstants.ONTNS() + "hasCodeLocation");
+		this.setValueMatchRegex(".*\\.m$");
+	}
 
-  @Override
-  public PluginResponse run(Software software) {
-    PluginResponse response = new PluginResponse(this);
-    response.setMessage("Code checked and found to be full of awesome :)");
-    return response;
-  }
+	@Override
+	public PluginResponse run(Software software) {
+		PluginResponse response = new PluginResponse(this);
+		response.setMessage("Code checked and found to be full of awesome :)");
+		return response;
+	}
 
 }

@@ -10,6 +10,7 @@ import org.ontosoft.client.application.list.SoftwareListView;
 import org.ontosoft.client.application.model.browse.ModelBrowseView;
 import org.ontosoft.client.application.model.list.ModelListView;
 import org.ontosoft.client.application.model.publish.PublishModelView;
+import org.ontosoft.client.application.model.version.list.ModelVersionListView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishView;
 import org.ontosoft.client.application.users.UserView;
@@ -31,95 +32,86 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.shared.proxy.PlaceRequest;
 
-public class ApplicationPresenter extends
-    Presenter<ApplicationPresenter.MyView, ApplicationPresenter.MyProxy> {
+public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView, ApplicationPresenter.MyProxy> {
 
-  @ProxyCodeSplit
-  public interface MyProxy extends Proxy<ApplicationPresenter> {
-  }
+	@ProxyCodeSplit
+	public interface MyProxy extends Proxy<ApplicationPresenter> {
+	}
 
-  public interface MyView extends ParameterizedView {
-  }
+	public interface MyView extends ParameterizedView {
+	}
 
-  public static final NestedSlot CONTENT_SLOT = new NestedSlot();
+	public static final NestedSlot CONTENT_SLOT = new NestedSlot();
 
-  @Inject
-  public ApplicationPresenter(EventBus eventBus, final MyView view, 
-	  MyProxy proxy, final PlaceManager placemanager, 
-	  final PublishView publishview, 
-	  final PublishVersionView publishversionview,
-	  final BrowseView browseview, 
-	  final VersionBrowseView versionbrowseview, 
-	  final SoftwareListView listview, 
-	  final SoftwareVersionListView versionlistview, 
-	  final FunctionListView functionlistview,
-      final CompareView compareview, 
-      final CompareFunctionView comparefunctionview, 
-      final CompareVersionView compareversionview, 
-      final UserView userview,
-      final ModelListView modellistview,
-      final ModelConfigurationListView modelConfigurationListView,
-      final ModelBrowseView modelbrowse,
-      final PublishModelView publishmodel) {
-    super(eventBus, view, proxy, RevealType.Root);
-    
-    final PlaceRequest.Builder builder = new PlaceRequest.Builder();
-    
-    // Add history change handler
-    History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(final ValueChangeEvent<String> event) {
-        String token = event.getValue();
-        String[] tokens = token.split("/");
-        String nametoken = tokens[0];
-        ParameterizedView sectionview = null;
-        if(nametoken.equals(NameTokens.publish))
-          sectionview = publishview;
-        else if(nametoken.equals(NameTokens.publishversion))
-            sectionview = publishversionview;
-        else if(nametoken.equals(NameTokens.browse))
-          sectionview = browseview;
-        else if(nametoken.equals(NameTokens.version))
-    	  sectionview = versionbrowseview;
-        else if(nametoken.equals(NameTokens.versions))
-          sectionview = versionlistview;
-        else if(nametoken.equals(NameTokens.functions))
-            sectionview = functionlistview;
-        else if(nametoken.equals(NameTokens.list))
-          sectionview = listview;        
-        else if(nametoken.equals(NameTokens.compare))
-          sectionview = compareview;
-        else if(nametoken.equals(NameTokens.comparefunction))
-            sectionview = comparefunctionview;
-        else if(nametoken.equals(NameTokens.compareversion))
-            sectionview = compareversionview;
-        else if(nametoken.equals(NameTokens.users))
-            sectionview = userview;
-        else if(nametoken.equals(NameTokens.models))
-            sectionview = modellistview;
-        else if(nametoken.equals(NameTokens.modelbrowse))
-        	sectionview = modelbrowse;
-        else if(nametoken.equals(NameTokens.publishModel))
-        	sectionview = publishmodel;
-        else if(nametoken.equals(NameTokens.modelversion))
-        	sectionview = publishmodel;
-        else if(nametoken.equals(NameTokens.modelconfigurations))
-            sectionview = modelConfigurationListView;
+	@Inject
+	public ApplicationPresenter(EventBus eventBus, final MyView view, MyProxy proxy, final PlaceManager placemanager,
+			final PublishView publishview, final PublishVersionView publishversionview, final BrowseView browseview,
+			final VersionBrowseView versionbrowseview, final SoftwareListView listview,
+			final SoftwareVersionListView versionlistview, final FunctionListView functionlistview,
+			final CompareView compareview, final CompareFunctionView comparefunctionview,
+			final CompareVersionView compareversionview, final UserView userview, final ModelListView modellistview,
+			final ModelConfigurationListView modelConfigurationListView, final ModelBrowseView modelbrowse,
+			final PublishModelView publishmodel, final ModelVersionListView modelVersionListView) {
+		super(eventBus, view, proxy, RevealType.Root);
 
-        // Reveal called view with parameters
-        if(sectionview != null) {
-          placemanager.revealPlace(builder.nameToken(nametoken).build(), false);
-          String[] params = new String[] {};
-          if (tokens.length > 1)
-            params = Arrays.copyOfRange(tokens, 1, tokens.length);
-          sectionview.initializeParameters(params);
-        }
-        
-        // Tell application view about the parameters in case it wants to change something
-        view.initializeParameters(tokens);
-      }
-    });
-    if(History.getToken() !=  null)
-      History.fireCurrentHistoryState();
-  }
+		final PlaceRequest.Builder builder = new PlaceRequest.Builder();
+
+		// Add history change handler
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(final ValueChangeEvent<String> event) {
+				String token = event.getValue();
+				String[] tokens = token.split("/");
+				String nametoken = tokens[0];
+				ParameterizedView sectionview = null;
+				if (nametoken.equals(NameTokens.publish))
+					sectionview = publishview;
+				else if (nametoken.equals(NameTokens.publishversion))
+					sectionview = publishversionview;
+				else if (nametoken.equals(NameTokens.browse))
+					sectionview = browseview;
+				else if (nametoken.equals(NameTokens.version))
+					sectionview = versionbrowseview;
+				else if (nametoken.equals(NameTokens.versions))
+					sectionview = versionlistview;
+				else if (nametoken.equals(NameTokens.functions))
+					sectionview = functionlistview;
+				else if (nametoken.equals(NameTokens.list))
+					sectionview = listview;
+				else if (nametoken.equals(NameTokens.compare))
+					sectionview = compareview;
+				else if (nametoken.equals(NameTokens.comparefunction))
+					sectionview = comparefunctionview;
+				else if (nametoken.equals(NameTokens.compareversion))
+					sectionview = compareversionview;
+				else if (nametoken.equals(NameTokens.users))
+					sectionview = userview;
+				else if (nametoken.equals(NameTokens.models))
+					sectionview = modellistview;
+				else if (nametoken.equals(NameTokens.modelBrowse))
+					sectionview = modelbrowse;
+				else if (nametoken.equals(NameTokens.publishModel))
+					sectionview = publishmodel;
+				else if (nametoken.equals(NameTokens.modelVersion))
+					sectionview = modelVersionListView;
+				else if (nametoken.equals(NameTokens.modelConfigurations))
+					sectionview = modelConfigurationListView;
+
+				// Reveal called view with parameters
+				if (sectionview != null) {
+					placemanager.revealPlace(builder.nameToken(nametoken).build(), false);
+					String[] params = new String[] {};
+					if (tokens.length > 1)
+						params = Arrays.copyOfRange(tokens, 1, tokens.length);
+					sectionview.initializeParameters(params);
+				}
+
+				// Tell application view about the parameters in case it wants to change
+				// something
+				view.initializeParameters(tokens);
+			}
+		});
+		if (History.getToken() != null)
+			History.fireCurrentHistoryState();
+	}
 }

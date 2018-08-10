@@ -11,20 +11,19 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyStandard;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-public class LoaderPresenter extends
-    Presenter<LoaderPresenter.MyView, LoaderPresenter.MyProxy> {
+public class LoaderPresenter extends Presenter<LoaderPresenter.MyView, LoaderPresenter.MyProxy> {
 
-  @ProxyStandard
-  @NameToken(NameTokens.router)
-  public interface MyProxy extends ProxyPlace<LoaderPresenter> {
-  }
+	@ProxyStandard
+	@NameToken(NameTokens.router)
+	public interface MyProxy extends ProxyPlace<LoaderPresenter> {
+	}
 
-  public interface MyView extends ParameterizedView {
-  }
+	public interface MyView extends ParameterizedView {
+	}
 
-  @Inject
-  public LoaderPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
-    super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
-  }
-  
+	@Inject
+	public LoaderPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
+		super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
+	}
+
 }

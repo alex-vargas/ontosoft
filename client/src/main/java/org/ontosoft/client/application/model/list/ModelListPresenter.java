@@ -11,20 +11,18 @@ import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-public class ModelListPresenter extends
-    Presenter<ModelListPresenter.MyView, 
-    	ModelListPresenter.MyProxy> {
+public class ModelListPresenter extends Presenter<ModelListPresenter.MyView, ModelListPresenter.MyProxy> {
 
-  @ProxyCodeSplit
-  @NameToken(NameTokens.models)
-  public interface MyProxy extends ProxyPlace<ModelListPresenter> {
-  }
+	@ProxyCodeSplit
+	@NameToken(NameTokens.models)
+	public interface MyProxy extends ProxyPlace<ModelListPresenter> {
+	}
 
-  public interface MyView extends ParameterizedView {
-  }
+	public interface MyView extends ParameterizedView {
+	}
 
-  @Inject
-  public ModelListPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
-    super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
-  }
+	@Inject
+	public ModelListPresenter(EventBus eventBus, MyView view, MyProxy proxy) {
+		super(eventBus, view, proxy, ApplicationPresenter.CONTENT_SLOT);
+	}
 }

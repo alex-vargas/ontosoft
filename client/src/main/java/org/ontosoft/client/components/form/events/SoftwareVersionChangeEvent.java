@@ -6,25 +6,25 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class SoftwareVersionChangeEvent extends GwtEvent<SoftwareVersionChangeHandler> {
 
-  public static Type<SoftwareVersionChangeHandler> TYPE = new Type<SoftwareVersionChangeHandler>();
-  
-  private SoftwareVersion version;
-  
-  public SoftwareVersionChangeEvent(SoftwareVersion version) {
-    this.version = version;
-  }
-  
-  @Override
-  public Type<SoftwareVersionChangeHandler> getAssociatedType() {
-    return TYPE;
-  }
+	public static Type<SoftwareVersionChangeHandler> TYPE = new Type<SoftwareVersionChangeHandler>();
 
-  @Override
-  protected void dispatch(SoftwareVersionChangeHandler handler) {
-    handler.onSoftwareVersionChange(this);
-  }
+	private SoftwareVersion version;
 
-  public SoftwareVersion getSoftwareVersion() {
-    return version;
-  }
+	public SoftwareVersionChangeEvent(SoftwareVersion version) {
+		this.version = version;
+	}
+
+	@Override
+	public Type<SoftwareVersionChangeHandler> getAssociatedType() {
+		return TYPE;
+	}
+
+	@Override
+	protected void dispatch(SoftwareVersionChangeHandler handler) {
+		handler.onSoftwareVersionChange(this);
+	}
+
+	public SoftwareVersion getSoftwareVersion() {
+		return version;
+	}
 }

@@ -5,38 +5,38 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.ontosoft.shared.classes.users.UserSession;
 
-public class UserAuthenticator implements SecurityContext {  
-  UserSession session;
-  User user;
-  
-  public UserAuthenticator(UserSession session) {
-    this.session = session;
-    this.user = UserDatabase.get().getUser(session);
-  }
+public class UserAuthenticator implements SecurityContext {
+	UserSession session;
+	User user;
 
-  @Override
-  public String getAuthenticationScheme() {
-    return BASIC_AUTH;
-  }
+	public UserAuthenticator(UserSession session) {
+		this.session = session;
+		this.user = UserDatabase.get().getUser(session);
+	}
 
-  @Override
-  public Principal getUserPrincipal() {
-    return this.user;
-  }
+	@Override
+	public String getAuthenticationScheme() {
+		return BASIC_AUTH;
+	}
 
-  @Override
-  public boolean isSecure() {
-    return true;
-  }
+	@Override
+	public Principal getUserPrincipal() {
+		return this.user;
+	}
 
-  @Override
-  public boolean isUserInRole(String role) {
-    if(this.user != null && this.user.getRoles() != null) {
-      for(String urole : this.user.getRoles()) {
-        if(urole.equals(role))
-          return true;
-      }
-    }
-    return false;
-  }
+	@Override
+	public boolean isSecure() {
+		return true;
+	}
+
+	@Override
+	public boolean isUserInRole(String role) {
+		if (this.user != null && this.user.getRoles() != null) {
+			for (String urole : this.user.getRoles()) {
+				if (urole.equals(role))
+					return true;
+			}
+		}
+		return false;
+	}
 }

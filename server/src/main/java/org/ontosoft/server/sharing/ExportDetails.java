@@ -3,26 +3,26 @@ package org.ontosoft.server.sharing;
 import java.util.ArrayList;
 
 public class ExportDetails {
-  public ArrayList<String> allowedIPs;
-  public String featureQuery;
+	public ArrayList<String> allowedIPs;
+	public String featureQuery;
 
-  public ExportDetails() {
-    allowedIPs = new ArrayList<String>();
-  }
+	public ExportDetails() {
+		allowedIPs = new ArrayList<String>();
+	}
 
-  public ArrayList<String> getAllowedIPs() {
-    return allowedIPs;
-  }
+	public ArrayList<String> getAllowedIPs() {
+		return allowedIPs;
+	}
 
-  public void setAllowedIPs(ArrayList<String> allowedIPs) {
-    this.allowedIPs = allowedIPs;
-  }
+	public void setAllowedIPs(ArrayList<String> allowedIPs) {
+		this.allowedIPs = allowedIPs;
+	}
 
-  public String getFeatureQuery() {
-    return featureQuery;
-  }
+	public String getFeatureQuery() {
+		return featureQuery;
+	}
 
-  public void setFeatureQuery(String featureQuery) {
-    this.featureQuery = featureQuery;
-  }
+	public void setFeatureQuery(String featureQuery) {
+		this.featureQuery = featureQuery;
+	}
 }

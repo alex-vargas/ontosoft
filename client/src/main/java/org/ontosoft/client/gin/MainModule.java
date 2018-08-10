@@ -10,15 +10,15 @@ import com.gwtplatform.mvp.client.gin.AbstractPresenterModule;
 import com.gwtplatform.mvp.client.gin.DefaultModule;
 
 public class MainModule extends AbstractPresenterModule {
-  @Override
-  protected void configure() {
-    // Singletons
-    install(new DefaultModule());
-    install(new ApplicationModule());
+	@Override
+	protected void configure() {
+		// Singletons
+		install(new DefaultModule());
+		install(new ApplicationModule());
 
-    // Constants
-    bindConstant().annotatedWith(DefaultPlace.class).to(NameTokens.home);
-    bindConstant().annotatedWith(ErrorPlace.class).to(NameTokens.router);
-    bindConstant().annotatedWith(UnauthorizedPlace.class).to(NameTokens.router);
-  }
+		// Constants
+		bindConstant().annotatedWith(DefaultPlace.class).to(NameTokens.home);
+		bindConstant().annotatedWith(ErrorPlace.class).to(NameTokens.router);
+		bindConstant().annotatedWith(UnauthorizedPlace.class).to(NameTokens.router);
+	}
 }

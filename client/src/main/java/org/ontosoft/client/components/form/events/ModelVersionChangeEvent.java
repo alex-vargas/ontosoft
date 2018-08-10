@@ -6,25 +6,25 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class ModelVersionChangeEvent extends GwtEvent<ModelVersionChangeHandler> {
 
-  public static Type<ModelVersionChangeHandler> TYPE = new Type<ModelVersionChangeHandler>();
-  
-  private ModelVersion version;
-  
-  public ModelVersionChangeEvent(ModelVersion version) {
-    this.version = version;
-  }
-  
-  @Override
-  public Type<ModelVersionChangeHandler> getAssociatedType() {
-    return TYPE;
-  }
+	public static Type<ModelVersionChangeHandler> TYPE = new Type<ModelVersionChangeHandler>();
 
-  @Override
-  protected void dispatch(ModelVersionChangeHandler handler) {
-    handler.onModelVersionChange(this);
-  }
+	private ModelVersion version;
 
-  public ModelVersion getModelVersion() {
-    return version;
-  }
+	public ModelVersionChangeEvent(ModelVersion version) {
+		this.version = version;
+	}
+
+	@Override
+	public Type<ModelVersionChangeHandler> getAssociatedType() {
+		return TYPE;
+	}
+
+	@Override
+	protected void dispatch(ModelVersionChangeHandler handler) {
+		handler.onModelVersionChange(this);
+	}
+
+	public ModelVersion getModelVersion() {
+		return version;
+	}
 }

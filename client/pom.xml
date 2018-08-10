@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
@@ -10,22 +10,22 @@
 	<name>Ontosoft client</name>
 	<description>Ontosoft portal web application</description>
 	<packaging>war</packaging>
-    <parent>
-        <groupId>org.ontosoft</groupId>
-        <artifactId>ontosoft</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.ontosoft</groupId>
+		<artifactId>ontosoft</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<properties>
 		<gwt.version>2.7.0</gwt.version>
 		<gwtp.version>1.5</gwtp.version>
 		<gin.version>2.1.2</gin.version>
 		<gwt.d3.version>1.1.1</gwt.d3.version>
-		<restygwt.version>2.0.3</restygwt.version>		
+		<restygwt.version>2.0.3</restygwt.version>
 		<validation.version>1.0.0.GA</validation.version>
 		<gwtbootstrap3.version>1.0-SNAPSHOT</gwtbootstrap3.version>
-		
+
 		<java.version>1.7</java.version>
 		<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,7 +45,7 @@
 			<version>${project.version}</version>
 			<classifier>sources</classifier>
 		</dependency>
-		
+
 		<!-- GWT -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
@@ -62,12 +62,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.gwtbootstrap3</groupId>
-		    <artifactId>gwtbootstrap3-extras</artifactId>
-		    <version>${gwtbootstrap3.version}</version>
-		    <scope>provided</scope>
-		</dependency>		
-		
+			<groupId>org.gwtbootstrap3</groupId>
+			<artifactId>gwtbootstrap3-extras</artifactId>
+			<version>${gwtbootstrap3.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- GWT D3 -->
 		<dependency>
 			<groupId>com.github.gwtd3</groupId>
@@ -75,7 +75,7 @@
 			<version>${gwt.d3.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- GWT Gin -->
 		<dependency>
 			<groupId>com.google.gwt.inject</groupId>
@@ -83,7 +83,7 @@
 			<version>${gin.version}</version>
 			<scope>provided</scope>
 		</dependency>
-	
+
 		<!-- GWT MVP -->
 		<dependency>
 			<groupId>com.gwtplatform</groupId>
@@ -91,7 +91,7 @@
 			<version>${gwtp.version}</version>
 			<scope>provided</scope>
 		</dependency>
-	        
+
 		<!-- RESTY GWT -->
 		<dependency>
 			<groupId>org.fusesource.restygwt</groupId>
@@ -120,27 +120,24 @@
 				<inherited>true</inherited>
 				<configuration>
 					<runTarget>index.html</runTarget>
-                    <hostedWebapp>${webappDirectory}</hostedWebapp>
+					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<methodNameDisplayMode>NONE</methodNameDisplayMode>
 					<namespace>NONE</namespace>
 					<style>OBFUSCATED</style>
 					<sourceLevel>auto</sourceLevel>
-					<!--compileReport>true</compileReport>
-					<nocompilerMetrics>true</nocompilerMetrics-->
+					<!--compileReport>true</compileReport> <nocompilerMetrics>true</nocompilerMetrics -->
 					<nocheckCasts>true</nocheckCasts>
 					<noclassMetadata>true</noclassMetadata>
 					<clusterFunction>true</clusterFunction>
 					<inlineLiteralParameters>true</inlineLiteralParameters>
 					<optimizeDataflow>true</optimizeDataflow>
-					<!--noincrementalCompileWarnings>true</noincrementalCompileWarnings>
-					<enableJsonSoyc>true</enableJsonSoyc-->
+					<!--noincrementalCompileWarnings>true</noincrementalCompileWarnings> 
+						<enableJsonSoyc>true</enableJsonSoyc -->
 					<nooverlappingSourceWarnings>true</nooverlappingSourceWarnings>
-					<!--saveSource>true</saveSource>
-					<soycReport>true</soycReport>
-					<nodetailedSoyc>true</nodetailedSoyc-->
+					<!--saveSource>true</saveSource> <soycReport>true</soycReport> <nodetailedSoyc>true</nodetailedSoyc -->
 					<optimize>9</optimize>
-					<!--logLevel>DEBUG</logLevel-->
-					<!--enableClosureCompiler>true</enableClosureCompiler-->
+					<!--logLevel>DEBUG</logLevel -->
+					<!--enableClosureCompiler>true</enableClosureCompiler -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -152,15 +149,13 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-			<!--plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.1.16.v20140903</version>
-			</plugin-->
+			<!--plugin> <groupId>org.mortbay.jetty</groupId> <artifactId>jetty-maven-plugin</artifactId> 
+				<version>8.1.16.v20140903</version> </plugin -->
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -208,5 +203,5 @@
 			</releases>
 		</repository>
 	</repositories>
-    
+
 </project>

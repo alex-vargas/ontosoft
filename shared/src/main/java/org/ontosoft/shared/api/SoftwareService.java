@@ -16,22 +16,19 @@ import org.fusesource.restygwt.client.DirectRestService;
 import org.ontosoft.shared.classes.FunctionSummary;
 import org.ontosoft.shared.classes.ModelConfigurationSummary;
 import org.ontosoft.shared.classes.ModelSummary;
-import org.ontosoft.shared.classes.ModelVersionSummary;
 import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
-import org.ontosoft.shared.classes.entities.Model;
-import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
-import org.ontosoft.shared.classes.provenance.Provenance;
 import org.ontosoft.shared.classes.permission.AccessMode;
 import org.ontosoft.shared.classes.permission.Authorization;
+import org.ontosoft.shared.classes.permission.Permission;
+import org.ontosoft.shared.classes.provenance.Provenance;
 import org.ontosoft.shared.classes.vocabulary.MetadataEnumeration;
 import org.ontosoft.shared.classes.vocabulary.Vocabulary;
 import org.ontosoft.shared.plugins.PluginResponse;
 import org.ontosoft.shared.search.EnumerationFacet;
-import org.ontosoft.shared.classes.permission.Permission;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -146,7 +143,15 @@ public interface SoftwareService extends DirectRestService {
   @Path("software/{name}/version")
   @Produces("application/json")
   @Consumes("application/json")
-  public SoftwareVersion publishVersion(@PathParam("name") String name, @JsonProperty("version") SoftwareVersion version);
+  public SoftwareVersion publishVersion(@PathParam("name") String name,
+		  @JsonProperty("version") SoftwareVersion version);
+  
+  /* model versions */
+  @POST
+  @Path("model/{name}/version")
+  @Produces("application/json")
+  @Consumes("application/json")
+  public SoftwareVersion publishModelVersion(@PathParam("name") String name, @JsonProperty("version") SoftwareVersion version);
   
   @GET
   @Path("vocabulary")
@@ -194,7 +199,8 @@ public interface SoftwareService extends DirectRestService {
   @Path("software/{swname}/version/{vname}")
   @Produces("application/json")
   @Consumes("application/json")
-  public Software updateVersion(@PathParam("swname") String swname, @PathParam("vname") String vname,
+  public Software updateVersion(@PathParam("isModel") boolean isModel,
+		  @PathParam("swname") String swname, @PathParam("vname") String vname,
       @JsonProperty("version") SoftwareVersion version);
 
 
@@ -304,5 +310,6 @@ public interface SoftwareService extends DirectRestService {
   @Produces("application/json")  
   @Consumes("application/json")
   public Boolean getPermissionFeatureEnabled();
+
 
 }

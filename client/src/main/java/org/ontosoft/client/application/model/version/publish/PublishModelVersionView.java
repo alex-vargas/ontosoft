@@ -611,7 +611,7 @@ public class PublishModelVersionView extends ParameterizedViewImpl implements Pu
 		anchor.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(NameTokens.modelVersion + "/" + softwarename + ":" + versionname);
+				History.newItem(NameTokens.modelVersions + "/" + softwarename + ":" + versionname);
 			}
 		});
 		// anchor.setStyleName("first-crumb");

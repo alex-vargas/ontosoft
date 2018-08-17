@@ -15,7 +15,7 @@ public class ModelVersionListPresenter
 		extends Presenter<ModelVersionListPresenter.MyView, ModelVersionListPresenter.MyProxy> {
 
 	@ProxyCodeSplit
-	@NameToken(NameTokens.modelVersion)
+	@NameToken(NameTokens.modelVersions)
 	public interface MyProxy extends ProxyPlace<ModelVersionListPresenter> {
 	}
 

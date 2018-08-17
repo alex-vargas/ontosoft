@@ -319,7 +319,7 @@ public class SoftwareREST {
 			}
 		};
 		REST.withCallback(methodCallback).call(this.service)
-			.listSoftwareVersionWithFacets(facets, software, isModel);
+		.listSoftwareVersionWithFacets(facets, software, isModel);
 	}
 
 	public void getModelConfigurationListFaceted(List<EnumerationFacet> facets, String model,
@@ -560,9 +560,9 @@ public class SoftwareREST {
 			REST.withCallback(methodCallback).call(this.service).publish(software);
 	}
 
-	public void publishSoftwareVersion(final String software, final SoftwareVersion version,
+	public void publishSoftwareVersion(boolean isModel, final String software, final SoftwareVersion version,
 			final Callback<SoftwareVersion, Throwable> callback) {
-		REST.withCallback(new MethodCallback<SoftwareVersion>() {
+		MethodCallback<SoftwareVersion> methodCallback = new MethodCallback<SoftwareVersion>() {
 			@Override
 			public void onSuccess(Method method, SoftwareVersion sw) {
 				if (sw != null) {
@@ -581,7 +581,11 @@ public class SoftwareREST {
 				AppNotification.notifyFailure("Could not publish");
 				callback.onFailure(exception);
 			}
-		}).call(this.service).publishVersion(software, version);
+		};
+		if(isModel)
+			REST.withCallback(methodCallback).call(this.service).publishModelVersion(software, version);
+		else
+			REST.withCallback(methodCallback).call(this.service).publishVersion(software, version);
 	}
 
 	public void updateSoftware(final Software software, final Callback<Software, Throwable> callback) {
@@ -601,7 +605,7 @@ public class SoftwareREST {
 		}).call(this.service).update(software.getName(), software);
 	}
 
-	public void updateSoftwareVersion(final String software, final SoftwareVersion version,
+	public void updateSoftwareVersion(boolean isModel, final String software, final SoftwareVersion version,
 			final Callback<SoftwareVersion, Throwable> callback) {
 		REST.withCallback(new MethodCallback<SoftwareVersion>() {
 			@Override
@@ -616,7 +620,7 @@ public class SoftwareREST {
 				AppNotification.notifyFailure("Could not save " + version.getLabel());
 				callback.onFailure(exception);
 			}
-		}).call(this.service).updateVersion(software, version.getName(), version);
+		}).call(this.service).updateVersion(isModel, software, version.getName(), version);
 	}
 
 	public void deleteSoftware(final String swname, final Callback<Void, Throwable> callback) {

@@ -89,7 +89,6 @@ public class SoftwareVersionListView extends ParameterizedViewImpl implements So
 	TextBox softwarelabel, searchbox;
 
 	@UiField
-	private
 	FacetedSearchPanel facets;
 
 	@UiField(provided = true)
@@ -516,10 +515,7 @@ public class SoftwareVersionListView extends ParameterizedViewImpl implements So
 				}
 			};
 			// TODO: provide Software name, instead of an empty string
-			if (isModel)
-				this.api.publishSoftware(tmpsw, callback, true);
-			else
-				this.api.publishSoftware(tmpsw, callback, false);
+			this.api.publishSoftware(tmpsw, callback, isModel);
 		}
 	}
 

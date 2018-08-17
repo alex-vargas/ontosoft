@@ -24,7 +24,7 @@ public class ModelVersionListView extends SoftwareVersionListView implements Mod
 		setCompareVersionPlace(NameTokens.compareModelVersion);
 		setPublishPlace(NameTokens.publishModel);
 		setPublishVersionPlace(NameTokens.publishModelVersion);
-		setVersionPlace(NameTokens.modelVersion);
+		setVersionPlace(NameTokens.modelVersionBrowse);
 	}
 
 	@Override

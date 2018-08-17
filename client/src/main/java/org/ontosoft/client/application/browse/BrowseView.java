@@ -451,7 +451,7 @@ public class BrowseView extends ParameterizedViewImpl implements BrowsePresenter
 		if (softwarelabel.validate(true)) {
 			SoftwareVersion tmpsw = new SoftwareVersion();
 			tmpsw.setLabel(label);
-			this.api.publishSoftwareVersion(softwarename, tmpsw, new Callback<SoftwareVersion, Throwable>() {
+			this.api.publishSoftwareVersion(isModel, softwarename, tmpsw, new Callback<SoftwareVersion, Throwable>() {
 				public void onSuccess(SoftwareVersion sw) {
 					// Add item to list
 					SoftwareSummary newsw = new SoftwareSummary(sw);
@@ -496,6 +496,9 @@ public class BrowseView extends ParameterizedViewImpl implements BrowsePresenter
 
 	public void setPublishVersionsPlace(String publishVersionsPlace) {
 		this.publishVersionsPlace = publishVersionsPlace;
+	}
+	public void setIsModel(boolean value) {
+		isModel = value;
 	}
 
 }

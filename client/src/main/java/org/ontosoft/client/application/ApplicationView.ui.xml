@@ -46,7 +46,7 @@
 										text="Models" targetHistoryToken="{nameTokens.getModelsList}" />
 									<b:AnchorListItem icon="COPY"
 										text="Model Versions"
-										targetHistoryToken="{nameTokens.getModelVersion}" />
+										targetHistoryToken="{nameTokens.getModelVersions}" />
 									<b:AnchorListItem icon="GEARS"
 										text="Model Configurations"
 										targetHistoryToken="{nameTokens.getModelConfigurations}" />

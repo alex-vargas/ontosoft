@@ -25,7 +25,6 @@ import org.ontosoft.shared.classes.SoftwareSummary;
 import org.ontosoft.shared.classes.SoftwareVersionSummary;
 import org.ontosoft.shared.classes.entities.Entity;
 import org.ontosoft.shared.classes.entities.EnumerationEntity;
-import org.ontosoft.shared.classes.entities.Model;
 import org.ontosoft.shared.classes.entities.ModelVersion;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareFunction;
@@ -130,7 +129,7 @@ public class SoftwareRepository {
 		this.server = props.getString("server");
 		onturi = KBConstants.ONTURI();
 		// onturi = "https://w3id.org/ontosoft-vff/ontology";
-		onturi = "http://localhost/mint/alex_lucas_ontology7.owl";
+		onturi = "http://localhost/mint/alex_lucas_ontology8.owl";
 		// onturi = "http://localhost/lucas_ontology32.owl";
 		caturi = KBConstants.CATURI();
 		liburi = this.LIBURI();
@@ -150,7 +149,7 @@ public class SoftwareRepository {
 		topclass = ontns + "Software";
 		topclassversion = ontns + "SoftwareVersion";
 		topClassModel = KBConstants.MODELCATALOGURINS() + "Model";
-		topClassModelVersion = ontns + "SoftwareVersion";
+		topClassModelVersion = KBConstants.MODELCATALOGURINS() + "ModelVersion";
 		topClassModelConfiguration = KBConstants.MODELCATALOGURINS() + "ModelConfiguration";
 
 		uniongraph = "urn:x-arq:UnionGraph";
@@ -471,59 +470,38 @@ public class SoftwareRepository {
 
 	/**
 	 * Adding new software
+	 * @param isModel Indicates if software is of type model
 	 * 
 	 * @param version
 	 *            Software
 	 * @return
 	 * @throws Exception
 	 */
-	public String addSoftwareVersion(String swid, SoftwareVersion version, User user) throws Exception {
-		if (version.getId() == null)
-			version.setId(this.LIBNS() + swid + "/version/" + "SoftwareVersion-" + GUID.get());
+	public String addSoftwareVersion(boolean isModel, String swid, SoftwareVersion version, User user) throws Exception {
+		String topClassVersionString = "";
+		if (version.getId() == null) {
+			if(isModel)
+				version.setId(this.LIBNS() + swid + "/version/" + "ModelVersion-" + GUID.get());
+			else
+				version.setId(this.LIBNS() + swid + "/version/" + "SoftwareVersion-" + GUID.get());
+		}
 
-		if (version.getType() == null)
-			version.setType(topclassversion);
+		if (version.getType() == null){
+			if(isModel)
+				topClassVersionString = topClassModelVersion;
+			else
+				topClassVersionString = topclassversion;
+		}
+		version.setType(topClassVersionString);
 
 		// First Look for existing software with same label
-		for (MetadataEnumeration menum : enumerations.get(topclassversion)) {
+		for (MetadataEnumeration menum : enumerations.get(topClassVersionString)) {
 			if (menum.getLabel().equalsIgnoreCase(version.getLabel())) {
 				version.setId(menum.getId());
 				return version.getId();
 			}
 		}
-		String vid = updateOrAddSoftwareVersion(swid, version, user, false);
-		if (version != null) {
-			Provenance prov = this.prov.getAddProvenance(version, user);
-			this.prov.addProvenance(prov);
-			Permission perm = this.perm_repo.createSoftwarePermisson(version.getId(), user);
-			this.perm_repo.commitPermission(perm, version.getId());
-		}
-		return vid;
-	}
-
-	/**
-	 * Adding new model version
-	 * 
-	 * @param version
-	 *            Model
-	 * @return
-	 * @throws Exception
-	 */
-	public String addModelVersion(String swid, ModelVersion version, User user) throws Exception {
-		if (version.getId() == null)
-			version.setId(this.LIBNS() + swid + "/version/" + "ModelVersion-" + GUID.get());
-
-		if (version.getType() == null)
-			version.setType(topclassversion);
-
-		// First Look for existing software with same label
-		for (MetadataEnumeration menum : enumerations.get(topclassversion)) {
-			if (menum.getLabel().equalsIgnoreCase(version.getLabel())) {
-				version.setId(menum.getId());
-				return version.getId();
-			}
-		}
-		String vid = updateOrAddModelVersion(swid, version, user, false);
+		String vid = updateOrAddSoftwareVersion(isModel, swid, version, user, false);
 		if (version != null) {
 			Provenance prov = this.prov.getAddProvenance(version, user);
 			this.prov.addProvenance(prov);
@@ -557,7 +535,7 @@ public class SoftwareRepository {
 				return sw.getId();
 			}
 		}
-		String swid = isModel ? updateOrAddModel(sw, user, false) : updateOrAddSoftware(sw, user, false);
+		String swid = updateOrAddSoftware(isModel, sw, user, false);
 		if (swid != null) {
 			Provenance prov = this.prov.getAddProvenance(sw, user);
 			this.prov.addProvenance(prov);
@@ -589,7 +567,7 @@ public class SoftwareRepository {
 		return GUID.randomEntityId(swid, entity.getType());
 	}
 
-	private String updateOrAddSoftware(Software sw, User user, boolean update) throws Exception {
+	private String updateOrAddSoftware(boolean isModel, Software sw, User user, boolean update) throws Exception {
 		boolean isModerator = false;
 		Boolean permFetureEnabled = getPermissionFeatureEnabled();
 
@@ -653,7 +631,8 @@ public class SoftwareRepository {
 							continue;
 						}
 
-						if (vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+						if (vocabulary.isA(type, vocabulary.getType(topclassversion))
+								|| vocabulary.isA(type, vocabulary.getType(topClassModelVersion))) {
 							String[] parts = entity.getId().split("#");
 							if (parts.length > 1) {
 								String vid = this.LIBNS() + sw.getName() + "/version/" + parts[1];
@@ -664,7 +643,7 @@ public class SoftwareRepository {
 								subsw.setId(entity.getId());
 								subsw.setLabel(entity.getValue().toString());
 								subsw.setType(entity.getType());
-								String swid = this.addSoftwareVersion(sw.getName(), subsw, user);
+								String swid = this.addSoftwareVersion(isModel, sw.getName(), subsw, user);
 								entity.setId(swid);
 							}
 
@@ -711,126 +690,10 @@ public class SoftwareRepository {
 		return null;
 	}
 
-	private String updateOrAddModel(Software model, User user, boolean update) throws Exception {
-		boolean isModerator = false;
-		Boolean permFetureEnabled = getPermissionFeatureEnabled();
-
-		if (update) {
-			String accesslevel = PermUtils.getAccessLevelForUser(model, user.getName(), model.getId());
-			if (user.getRoles().contains("admin") || PermUtils.hasOwnerAccess(model.getPermission(), user.getName())
-					|| accesslevel.equals("Write")) {
-				isModerator = true;
-			}
-		}
-
-		KBAPI modelKB = fac.getKB(model.getId(), OntSpec.PLAIN, true);
-		String modelType = model.getType();
-		if (modelType == null)
-			modelType = topClassModel;
-		KBObject modelCls = this.ontkb.getConcept(modelType);
-
-		KBObject modelObj = update ? modelKB.getIndividual(model.getId())
-				: modelKB.createObjectOfClass(model.getId(), modelCls);
-
-		if (modelObj == null)
-			return null;
-
-		if (model.getLabel() != null)
-			modelKB.setLabel(modelObj, model.getLabel());
-
-		for (String propid : model.getValue().keySet()) {
-			if (!permFetureEnabled || !update || isModerator
-					|| PermUtils.getAccessLevelForUser(model, user.getName(), propid).equals("Write")) {
-				KBObject modelProp = this.ontkb.getProperty(propid);
-				if (modelProp != null) {
-					List<Entity> entities = model.getValue().get(propid);
-					MetadataProperty prop = vocabulary.getProperty(modelProp.getID());
-
-					// Remove existing property values if any
-					if (update) {
-						for (KBTriple t : modelKB.genericTripleQuery(modelObj, modelProp, null))
-							modelKB.removeTriple(t);
-					}
-
-					for (Entity entity : entities) {
-						MetadataType type = vocabulary.getType(entity.getType());
-
-						// Treat model entities specially
-						if (vocabulary.isA(type, vocabulary.getType(topclass))) {
-							if (!this.hasModel(entity.getId())) {
-								Model subModel = new Model();
-								subModel.setId(entity.getId());
-								subModel.setLabel((String) entity.getValue());
-								subModel.setType(entity.getType());
-								String modelID = this.addModel(subModel, user);
-								entity.setId(modelID);
-							}
-
-							KBObject modelVal = modelKB.getResource(entity.getId());
-							modelKB.addPropertyValue(modelObj, modelProp, modelVal);
-							continue;
-						}
-
-						if (vocabulary.isA(type, vocabulary.getType(topClassModelVersion))) {
-							String[] parts = entity.getId().split("#");
-							if (parts.length > 1) {
-								String vid = this.LIBNS() + model.getName() + "/version/" + parts[1];
-								entity.setId(vid);
-							}
-							if (!this.hasModel(entity.getId())) {
-								ModelVersion subsw = new ModelVersion();
-								subsw.setId(entity.getId());
-								subsw.setLabel(entity.getValue().toString());
-								subsw.setType(entity.getType());
-								String swid = this.addModelVersion(model.getName(), subsw, user);
-								entity.setId(swid);
-							}
-
-							KBObject swval = modelKB.getResource(entity.getId());
-							modelKB.addPropertyValue(modelObj, modelProp, swval);
-							continue;
-						}
-
-						// Get entity adapter for class
-						IEntityAdapter adapter = EntityRegistrar.getAdapter(modelKB, ontkb, enumkb, prop.getRange());
-						if (adapter != null) {
-							if (entity.getId() == null) {
-								entity.setId(GUID.randomEntityId(model.getId(), entity.getType()));
-							}
-							if (adapter.saveEntity(entity)) {
-								KBObject entityobj = modelKB.getIndividual(entity.getId());
-								if (entityobj == null)
-									entityobj = ontkb.getIndividual(entity.getId());
-								if (entityobj == null)
-									entityobj = enumkb.getIndividual(entity.getId());
-								if (entityobj != null)
-									modelKB.addPropertyValue(modelObj, modelProp, entityobj);
-							}
-						} else {
-							System.out.println("No adapter registered for type: " + entity.getType());
-						}
-					}
-				}
-			}
-		}
-
-		if (modelKB.save() && enumkb.save()) {
-			if (!update) {
-				MetadataEnumeration menum = new MetadataEnumeration();
-				menum.setId(model.getId());
-				menum.setLabel(model.getLabel());
-				menum.setType(model.getType());
-				menum.setName(model.getName());
-				addEnumerationToVocabulary(menum);
-				// vocabulary.setNeedsReload(true);
-			}
-			return model.getId();
-		}
-		return null;
-	}
-
-	private String updateOrAddSoftwareVersion(String swid, SoftwareVersion version, User user, boolean update)
+	private String updateOrAddSoftwareVersion(boolean isModel, String swid,
+			SoftwareVersion version, User user, boolean update)
 			throws Exception {
+		String topClassVersionString = isModel ? topClassModelVersion : topclassversion;
 		boolean isModerator = false;
 		Boolean permFetureEnabled = getPermissionFeatureEnabled();
 		KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
@@ -846,7 +709,7 @@ public class SoftwareRepository {
 		KBAPI vkb = fac.getKB(version.getId(), OntSpec.PLAIN, true);
 		String swtype = version.getType();
 		if (swtype == null)
-			swtype = topclassversion;
+			swtype = topClassVersionString;
 		KBObject swcls = this.ontkb.getConcept(swtype);
 
 		KBObject vobj = update ? vkb.getIndividual(version.getId()) : vkb.createObjectOfClass(version.getId(), swcls);
@@ -875,14 +738,14 @@ public class SoftwareRepository {
 						MetadataType type = vocabulary.getType(entity.getType());
 
 						// Treat software entities specially
-						if (vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+						if (vocabulary.isA(type, vocabulary.getType(topClassVersionString))) {
 							if (!this.hasSoftware(entity.getId())) {
 								SoftwareVersion subsw = new SoftwareVersion();
 								subsw.setId(entity.getId());
 								subsw.setLabel((String) entity.getValue());
 								subsw.setType(entity.getType());
 								subsw.setSoftware(swid);
-								String vid = this.addSoftwareVersion(swid, subsw, user);
+								String vid = this.addSoftwareVersion(isModel, swid, subsw, user);
 								entity.setId(vid);
 							}
 
@@ -920,134 +783,10 @@ public class SoftwareRepository {
 		if (!update) {
 			KBAPI swkb = fac.getKB(this.LIBNS() + swid, OntSpec.PLAIN);
 			KBObject swobj = swkb.getIndividual(this.LIBNS() + swid);
-			KBObject swprop = this.ontkb.getProperty(KBConstants.ONTNS() + "hasSoftwareVersion");
-			KBObject swprop2 = this.ontkb.getProperty(KBConstants.ONTNS() + "hasLatestSoftwareVersion");
-
-			KBObject latestVersion = swkb.getPropertyValue(swobj, swprop2);
-			if (latestVersion != null) {
-				KBAPI lvkb = fac.getKB(latestVersion.getID(), OntSpec.PLAIN, true);
-				KBObject latestVersionIndidual = lvkb.getIndividual(latestVersion.getID());
-				if (latestVersionIndidual != null) {
-					copyVersionPropertiesToNewLatestSoftwareVersion(swobj, latestVersion, vobj, vkb, allkb);
-				}
-
-				for (KBTriple t : swkb.genericTripleQuery(swobj, swprop2, null))
-					swkb.removeTriple(t);
-			}
-
-			swkb.addPropertyValue(swobj, swprop, vobj);
-			swkb.addPropertyValue(swobj, swprop2, vobj);
-			swkb.save();
-		}
-
-		if (vkb.save() && enumkb.save()) {
-			if (!update) {
-				MetadataEnumeration menum = new MetadataEnumeration();
-				menum.setId(version.getId());
-				menum.setLabel(version.getLabel());
-				menum.setType(version.getType());
-				menum.setName(version.getName());
-				addEnumerationToVocabulary(menum);
-				// vocabulary.setNeedsReload(true);
-			}
-			return version.getId();
-		}
-		return null;
-	}
-
-	private String updateOrAddModelVersion(String swid, ModelVersion version, User user, boolean update)
-			throws Exception {
-		boolean isModerator = false;
-		Boolean permFetureEnabled = getPermissionFeatureEnabled();
-		KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
-
-		if (update) {
-			String accesslevel = PermUtils.getAccessLevelForUser(version, user.getName(), version.getId());
-			if (user.getRoles().contains("admin") || PermUtils.hasOwnerAccess(version.getPermission(), user.getName())
-					|| accesslevel.equals("Write")) {
-				isModerator = true;
-			}
-		}
-
-		KBAPI vkb = fac.getKB(version.getId(), OntSpec.PLAIN, true);
-		String swtype = version.getType();
-		if (swtype == null)
-			swtype = topclassversion;
-		KBObject swcls = this.ontkb.getConcept(swtype);
-
-		KBObject vobj = update ? vkb.getIndividual(version.getId()) : vkb.createObjectOfClass(version.getId(), swcls);
-
-		if (vobj == null)
-			return null;
-
-		if (version.getLabel() != null)
-			vkb.setLabel(vobj, version.getLabel());
-
-		for (String propid : version.getValue().keySet()) {
-			if (!permFetureEnabled || !update || isModerator
-					|| PermUtils.getAccessLevelForUser(version, user.getName(), propid).equals("Write")) {
-				KBObject vprop = this.ontkb.getProperty(propid);
-				if (vprop != null) {
-					List<Entity> entities = version.getValue().get(propid);
-					MetadataProperty prop = vocabulary.getProperty(vprop.getID());
-
-					// Remove existing property values if any
-					if (update) {
-						for (KBTriple t : vkb.genericTripleQuery(vobj, vprop, null))
-							vkb.removeTriple(t);
-					}
-
-					for (Entity entity : entities) {
-						MetadataType type = vocabulary.getType(entity.getType());
-
-						// Treat software entities specially
-						if (vocabulary.isA(type, vocabulary.getType(topclassversion))) {
-							if (!this.hasSoftware(entity.getId())) {
-								SoftwareVersion subsw = new SoftwareVersion();
-								subsw.setId(entity.getId());
-								subsw.setLabel((String) entity.getValue());
-								subsw.setType(entity.getType());
-								subsw.setSoftware(swid);
-								String vid = this.addSoftwareVersion(swid, subsw, user);
-								entity.setId(vid);
-							}
-
-							KBObject swval = vkb.getResource(entity.getId());
-							vkb.addPropertyValue(vobj, vprop, swval);
-
-							continue;
-						}
-
-						// Get entity adapter for class
-						IEntityAdapter adapter = EntityRegistrar.getAdapter(vkb, ontkb, enumkb, prop.getRange());
-						if (adapter != null) {
-							if (entity.getId() == null) {
-								entity.setId(GUID.randomEntityId(version.getId(), entity.getType()));
-							}
-							if (adapter.saveEntity(entity)) {
-								KBObject entityobj = vkb.getIndividual(entity.getId());
-								if (entityobj == null)
-									entityobj = ontkb.getIndividual(entity.getId());
-								if (entityobj == null)
-									entityobj = enumkb.getIndividual(entity.getId());
-								if (entityobj == null)
-									entityobj = allkb.getIndividual(entity.getId());
-								if (entityobj != null)
-									vkb.addPropertyValue(vobj, vprop, entityobj);
-							}
-						} else {
-							System.out.println("No adapter registered for type: " + entity.getType());
-						}
-					}
-				}
-			}
-		}
-
-		if (!update) {
-			KBAPI swkb = fac.getKB(this.LIBNS() + swid, OntSpec.PLAIN);
-			KBObject swobj = swkb.getIndividual(this.LIBNS() + swid);
-			KBObject swprop = this.ontkb.getProperty(KBConstants.ONTNS() + "hasSoftwareVersion");
-			KBObject swprop2 = this.ontkb.getProperty(KBConstants.ONTNS() + "hasLatestSoftwareVersion");
+			String softwareVersionURI = isModel ? KBConstants.ONTNS() + "hasModelVersion": KBConstants.ONTNS() + "hasSoftwareVersion";
+			String latestSoftwareVersionURI = isModel ? KBConstants.ONTNS() + "hasLatestModelVersion": KBConstants.ONTNS() + "hasLatestSoftwareVersion";
+			KBObject swprop = this.ontkb.getProperty(softwareVersionURI);
+			KBObject swprop2 = this.ontkb.getProperty(latestSoftwareVersionURI);
 
 			KBObject latestVersion = swkb.getPropertyValue(swobj, swprop2);
 			if (latestVersion != null) {
@@ -1136,7 +875,7 @@ public class SoftwareRepository {
 		Software cursw = this.getSoftware(swid);
 
 		Provenance prov = this.prov.getUpdateProvenance(cursw, newsw, user);
-		String nswid = this.updateOrAddSoftware(newsw, user, true);
+		String nswid = this.updateOrAddSoftware(false, newsw, user, true);
 		if (nswid != null) {
 			this.prov.addProvenance(prov);
 			return true;
@@ -1146,38 +885,19 @@ public class SoftwareRepository {
 
 	/**
 	 * Updating software version (for now just deleting old and adding new)
+	 * @param isModel Indicates if software is of type Model
 	 * 
 	 * @param sw
 	 * @param swid
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean updateSoftwareVersion(SoftwareVersion newversion, String swid, String vid, User user)
+	public boolean updateSoftwareVersion(boolean isModel, SoftwareVersion newversion, String swid, String vid, User user)
 			throws Exception {
 		SoftwareVersion curv = this.getSoftwareVersion(swid, vid);
 
 		Provenance prov = this.prov.getUpdateProvenance(curv, newversion, user);
-		String nswid = this.updateOrAddSoftwareVersion(swid, newversion, user, true);
-		if (nswid != null) {
-			this.prov.addProvenance(prov);
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Updating model version (for now just deleting old and adding new)
-	 * 
-	 * @param sw
-	 * @param swid
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean updateModelVersion(ModelVersion newversion, String swid, String vid, User user) throws Exception {
-		ModelVersion curv = this.getModelVersion(swid, vid);
-
-		Provenance prov = this.prov.getUpdateProvenance(curv, newversion, user);
-		String nswid = this.updateOrAddModelVersion(swid, newversion, user, true);
+		String nswid = this.updateOrAddSoftwareVersion(isModel, swid, newversion, user, true);
 		if (nswid != null) {
 			this.prov.addProvenance(prov);
 			return true;

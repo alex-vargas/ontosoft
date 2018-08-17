@@ -434,8 +434,12 @@ public class SoftwareResource implements SoftwareService {
 	@Override
 	public SoftwareVersion publishVersion(@PathParam("name") String name,
 			@JsonProperty("version") SoftwareVersion version) {
+		return publishSoftwareVersion(false, name, version);
+	}
+
+	private SoftwareVersion publishSoftwareVersion(boolean isModel, String name, SoftwareVersion version) {
 		try {
-			String vid = this.repo.addSoftwareVersion(name, version, (User) securityContext.getUserPrincipal());
+			String vid = this.repo.addSoftwareVersion(isModel, name, version, (User) securityContext.getUserPrincipal());
 			if (vid != null) {
 				version.setId(vid);
 				return this.repo.getSoftwareVersion(name, vid);
@@ -447,6 +451,17 @@ public class SoftwareResource implements SoftwareService {
 			e.printStackTrace();
 			throw new RuntimeException("Exception in add: " + e.getMessage());
 		}
+	}
+	
+	@POST
+	@Path("model/{name}/version")
+	@Produces("application/json")
+	@Consumes("application/json")
+	@RolesAllowed("user")
+	@Override
+	public SoftwareVersion publishModelVersion(@PathParam("name") String name,
+			@JsonProperty("version") SoftwareVersion version) {
+		return publishSoftwareVersion(true, name, version);
 	}
 
 	@PUT
@@ -475,7 +490,8 @@ public class SoftwareResource implements SoftwareService {
 	@Produces("application/json")
 	@RolesAllowed("user")
 	@Override
-	public Software updateVersion(@PathParam("swname") String swname, @PathParam("vname") String vname,
+	public Software updateVersion(@PathParam("isModel") boolean isModel,
+			@PathParam("swname") String swname, @PathParam("vname") String vname,
 			@JsonProperty("version") SoftwareVersion version) {
 		try {
 			String swid = swname;
@@ -484,7 +500,7 @@ public class SoftwareResource implements SoftwareService {
 				swid = repo.LIBNS() + swname;
 			if (!vname.startsWith("http:"))
 				vid = swid + "/version/" + vname;
-			if (!this.repo.updateSoftwareVersion(version, swid, vid, (User) securityContext.getUserPrincipal()))
+			if (!this.repo.updateSoftwareVersion(isModel, version, swid, vid, (User) securityContext.getUserPrincipal()))
 				throw new RuntimeException("Could not update " + vname);
 			return version;
 		} catch (Exception e) {

@@ -72,6 +72,7 @@ import com.google.inject.Inject;
 
 public class PublishVersionView extends ParameterizedViewImpl implements PublishVersionPresenter.MyView {
 
+	private boolean isModel = false;
 	@UiField
 	CategoryPieChart piechart;
 
@@ -496,7 +497,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		tmpsw.setName(versionname);
 		// savebutton.state().loading();
 
-		this.api.updateSoftwareVersion(softwarename, tmpsw, new Callback<SoftwareVersion, Throwable>() {
+		this.api.updateSoftwareVersion(isModel, softwarename, tmpsw, new Callback<SoftwareVersion, Throwable>() {
 			@Override
 			public void onSuccess(SoftwareVersion sw) {
 				version = sw;

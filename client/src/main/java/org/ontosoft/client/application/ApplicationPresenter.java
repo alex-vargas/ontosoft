@@ -10,6 +10,7 @@ import org.ontosoft.client.application.list.SoftwareListView;
 import org.ontosoft.client.application.model.browse.ModelBrowseView;
 import org.ontosoft.client.application.model.list.ModelListView;
 import org.ontosoft.client.application.model.publish.PublishModelView;
+import org.ontosoft.client.application.model.version.browse.ModelVersionBrowseView;
 import org.ontosoft.client.application.model.version.list.ModelVersionListView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishView;
@@ -44,14 +45,26 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
 	public static final NestedSlot CONTENT_SLOT = new NestedSlot();
 
 	@Inject
-	public ApplicationPresenter(EventBus eventBus, final MyView view, MyProxy proxy, final PlaceManager placemanager,
-			final PublishView publishview, final PublishVersionView publishversionview, final BrowseView browseview,
-			final VersionBrowseView versionbrowseview, final SoftwareListView listview,
-			final SoftwareVersionListView versionlistview, final FunctionListView functionlistview,
-			final CompareView compareview, final CompareFunctionView comparefunctionview,
-			final CompareVersionView compareversionview, final UserView userview, final ModelListView modellistview,
-			final ModelConfigurationListView modelConfigurationListView, final ModelBrowseView modelbrowse,
-			final PublishModelView publishmodel, final ModelVersionListView modelVersionListView) {
+	public ApplicationPresenter(EventBus eventBus,
+			final MyView view, MyProxy proxy,
+			final PlaceManager placemanager,
+			final PublishView publishview,
+			final PublishVersionView publishversionview,
+			final BrowseView browseview,
+			final VersionBrowseView versionbrowseview,
+			final SoftwareListView listview,
+			final SoftwareVersionListView versionlistview,
+			final FunctionListView functionlistview,
+			final CompareView compareview,
+			final CompareFunctionView comparefunctionview,
+			final CompareVersionView compareversionview,
+			final UserView userview,
+			final ModelListView modellistview,
+			final ModelConfigurationListView modelConfigurationListView,
+			final ModelBrowseView modelbrowse,
+			final PublishModelView publishmodel,
+			final ModelVersionListView modelVersionListView,
+			final ModelVersionBrowseView modelVersionBrowseView) {
 		super(eventBus, view, proxy, RevealType.Root);
 
 		final PlaceRequest.Builder builder = new PlaceRequest.Builder();
@@ -92,8 +105,10 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
 					sectionview = modelbrowse;
 				else if (nametoken.equals(NameTokens.publishModel))
 					sectionview = publishmodel;
-				else if (nametoken.equals(NameTokens.modelVersion))
+				else if (nametoken.equals(NameTokens.modelVersions))
 					sectionview = modelVersionListView;
+				else if (nametoken.equals(NameTokens.modelVersionBrowse))
+					sectionview = modelVersionBrowseView;
 				else if (nametoken.equals(NameTokens.modelConfigurations))
 					sectionview = modelConfigurationListView;
 

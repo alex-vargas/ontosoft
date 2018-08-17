@@ -25,10 +25,11 @@ public class NameTokens {
 	public static final String models = "models";
 	public static final String modelConfigurations = "modelconfigurations";
 	public static final String modelBrowse = "modelbrowse";
-	public static final String modelVersion = "modelversion";
+	public static final String modelVersions = "modelversions";
+	public static final String modelVersionBrowse = "browsemodelversion";
 
-	public static String getModelVersion() {
-		return modelVersion;
+	public static String getModelVersions() {
+		return modelVersions;
 	}
 
 	public static String getModelBrowse() {

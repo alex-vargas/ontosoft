@@ -11,13 +11,13 @@ public class ModelBrowseView extends BrowseView implements ModelBrowsePresenter.
 	@Inject
 	public ModelBrowseView(Binder binder) {
 		super(binder);
-
+		setIsModel(true);
 	}
 
 	@Override
 	public void initPlaces() {
 		setPublishPlace(NameTokens.publishModel);
-		setVersionsPlace(NameTokens.modelVersion);
+		setVersionsPlace(NameTokens.modelVersions);
 		setPublishVersionsPlace(NameTokens.publishModelVersion);
 	}
 

@@ -57,8 +57,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 public class VersionBrowseView extends ParameterizedViewImpl implements VersionBrowsePresenter.MyView {
+	
+	private boolean isModel = false;
+	private String browsePlace = "";
+	private String publishVersionPlace = "";
 
-	interface Binder extends UiBinder<Widget, VersionBrowseView> {
+	public interface Binder extends UiBinder<Widget, VersionBrowseView> {
 	}
 
 	@UiField
@@ -107,8 +111,14 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 	public VersionBrowseView(Binder binder) {
 		initWidget(binder.createAndBindUi(this));
 		initVocabulary();
-
+		initPlaces();
+		
 		this.codec = GWT.create(SoftwareCodec.class);
+	}
+	
+	public void initPlaces() {
+		setBrowsePlace(NameTokens.browse);
+		setPublishVersionPlace(NameTokens.publishversion);
 	}
 
 	public static void setBrowserWindowTitle(String newTitle) {
@@ -171,7 +181,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 			public void onSuccess(Software sw) {
 				software = sw;
 				softwareName.clear();
-				String softwareLink = "#" + NameTokens.browse + "/" + software.getName();
+				String softwareLink = "#" + getBrowsePlace() + "/" + software.getName();
 
 				if (software.getSoftwareName() != null)
 					softwareLink = "<a href='" + softwareLink + "'>" + software.getSoftwareName() + "</a>";
@@ -232,7 +242,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 
 		initializePieChart();
 
-		Entity swName = sw.getPropertyValue(KBConstants.ONTNS() + "hasName");
+		Entity swName = sw.getPropertyValue(getHasNameNameSpace());
 		if (swName != null)
 			softwareTitle.setText(swName.getValue().toString());
 		else
@@ -355,6 +365,15 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 		bigpublishbutton.getParent().setVisible(true);
 	}
 
+	/**
+	 * Returns the namespace for "hasName" using OntoSoft Ontology NameSpace
+	 * 
+	 * @return
+	 */
+	public String getHasNameNameSpace() {
+		return KBConstants.ONTNS() + "hasName";
+	}
+
 	private boolean hasSomePropertyValues(List<MetadataProperty> props, Software sw) {
 		for (MetadataProperty prop : props) {
 			if (sw.getPropertyValues(prop.getId()).size() > 0) {
@@ -367,7 +386,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 	@UiHandler("editbutton")
 	void onEditButtonClick(ClickEvent event) {
 		String[] swnames = softwarename.split("\\s*:\\s*");
-		History.newItem(NameTokens.publishversion + "/" + swnames[0] + ":" + version.getName());
+		History.newItem(getPublishVersionPlace() + "/" + swnames[0] + ":" + version.getName());
 	}
 
 	@UiHandler("rdfbutton")
@@ -451,7 +470,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 		if (softwarelabel.validate(true)) {
 			SoftwareVersion tmpsw = new SoftwareVersion();
 			tmpsw.setLabel(label);
-			this.api.publishSoftwareVersion(swnames[0], tmpsw, new Callback<SoftwareVersion, Throwable>() {
+			this.api.publishSoftwareVersion(isModel, swnames[0], tmpsw, new Callback<SoftwareVersion, Throwable>() {
 				public void onSuccess(SoftwareVersion sw) {
 					// Add item to list
 					SoftwareVersionSummary newsw = new SoftwareVersionSummary(sw);
@@ -461,7 +480,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 					// updateList();
 
 					// Go to the new item
-					History.newItem(NameTokens.publishversion + "/" + swnames[0] + ":" + sw.getName());
+					History.newItem(getPublishVersionPlace() + "/" + swnames[0] + ":" + sw.getName());
 
 					publishdialog.hide();
 					softwarelabel.setValue(null);
@@ -473,5 +492,25 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 			});
 		}
 	}
+	public void setIsModel(boolean value) {
+		isModel = value;
+	}
 
+	public String getBrowsePlace() {
+		return browsePlace;
+	}
+
+	public void setBrowsePlace(String browsePlace) {
+		this.browsePlace = browsePlace;
+	}
+
+	public String getPublishVersionPlace() {
+		return publishVersionPlace;
+	}
+
+	public void setPublishVersionPlace(String publishVersionPlace) {
+		this.publishVersionPlace = publishVersionPlace;
+	}
+
+	
 }

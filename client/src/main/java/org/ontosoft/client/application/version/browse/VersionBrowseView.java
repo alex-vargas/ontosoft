@@ -160,7 +160,8 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 
 		String[] swnames = softwarename.split("\\s*:\\s*");
 
-		this.api.getSoftwareVersion(swnames[0], swnames[1], new Callback<SoftwareVersion, Throwable>() {
+		this.api.getSoftwareVersion(isModel, swnames[0], swnames[1], 
+				new Callback<SoftwareVersion, Throwable>() {
 			@Override
 			public void onSuccess(SoftwareVersion v) {
 				version = v;
@@ -331,9 +332,7 @@ public class VersionBrowseView extends ParameterizedViewImpl implements VersionB
 				props.retainAll(vocabulary.getPropertiesInCategory(lvl2cat));
 				props = vocabulary.orderProperties(props);
 
-				String html = swtype.getName() + browser.getEntitiesHTML(sw, props, false);
-				for (MetadataProperty prop : props)
-					html += prop.getName() + " - " + prop.getLabel() + " - " + prop.getCategory();
+				String html = browser.getEntitiesHTML(sw, props, false);
 				HTML lvl2html = new HTML(html);
 				if (hasSomePropertyValues(props, sw)) {
 					hasSomeValues = true;

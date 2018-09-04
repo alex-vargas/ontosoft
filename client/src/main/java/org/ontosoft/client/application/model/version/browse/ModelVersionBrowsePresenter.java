@@ -12,10 +12,11 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 public class ModelVersionBrowsePresenter
-		extends Presenter<ModelVersionBrowsePresenter.MyView, ModelVersionBrowsePresenter.MyProxy> {
+		extends Presenter<ModelVersionBrowsePresenter.MyView, 
+		ModelVersionBrowsePresenter.MyProxy> {
 
 	@ProxyCodeSplit
-	@NameToken(NameTokens.version)
+	@NameToken(NameTokens.modelVersionBrowse)
 	public interface MyProxy extends ProxyPlace<ModelVersionBrowsePresenter> {
 	}
 

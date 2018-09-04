@@ -34,6 +34,8 @@ import com.google.inject.Inject;
 
 public class CompareVersionView extends ParameterizedViewImpl implements CompareVersionPresenter.MyView {
 
+	boolean isModel;
+	
 	@UiField
 	FlexTable table;
 
@@ -122,7 +124,7 @@ public class CompareVersionView extends ParameterizedViewImpl implements Compare
 			// api = this.apis.get(nsname[0]);
 			// swname = nsname[1];
 			// }
-			api.getSoftwareVersion(urlname[0], urlname[1], new Callback<SoftwareVersion, Throwable>() {
+			api.getSoftwareVersion(isModel, urlname[0], urlname[1], new Callback<SoftwareVersion, Throwable>() {
 				@Override
 				public void onSuccess(SoftwareVersion f) {
 					softwares.add(f);
@@ -237,6 +239,10 @@ public class CompareVersionView extends ParameterizedViewImpl implements Compare
 			table.setHTML(numRows + 1, i++, html);
 		}
 		cellFormatter.addStyleName(numRows + 1, i - 1, "no-border-cell");
+	}
+	
+	public void setIsModel(boolean value) {
+		isModel = value;
 	}
 
 }

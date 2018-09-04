@@ -5,7 +5,8 @@ import org.ontosoft.client.place.NameTokens;
 
 import com.google.inject.Inject;
 
-public class PublishModelView extends PublishView implements PublishModelPresenter.MyView {
+public class PublishModelView extends PublishView 
+	implements PublishModelPresenter.MyView {
 
 	@Inject
 	public PublishModelView(Binder binder) {

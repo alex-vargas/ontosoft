@@ -308,8 +308,13 @@ public class ProvenanceRepository {
 			Map<Entity, Entity> modified = new HashMap<Entity, Entity>();
 			List<Entity> added = new ArrayList<Entity>();
 			List<Entity> deleted = new ArrayList<Entity>();
-
+			System.out.println(newEntities.size());
+			System.out.println(propid);
 			for (Entity newEntity : newEntities) {
+				System.out.println(newEntity == null);
+				System.out.println(newEntity.getLabel());
+				System.out.println(newEntity.getName());
+				System.out.println(newEntity.getId());
 				// If this entity id is not found in current entities
 				boolean found = false;
 				for (Entity curEntity : curEntities) {

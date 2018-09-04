@@ -382,13 +382,15 @@ public class SoftwareREST {
 		}
 	}
 
-	public void getSoftwareVersion(final String swname, final String vname,
+	public void getSoftwareVersion(boolean isModel, final String swname, 
+			final String vname,
 			final Callback<SoftwareVersion, Throwable> callback, final boolean reload) {
 		// GWT.log(softwareCache.keySet().toString() + ": "+reload);
 		if (softwareVersionCache.containsKey(vname) && !reload) {
 			callback.onSuccess(softwareVersionCache.get(vname));
 		} else {
-			REST.withCallback(new MethodCallback<SoftwareVersion>() {
+			MethodCallback<SoftwareVersion> methodCallback = 
+					new MethodCallback<SoftwareVersion>() {
 				@Override
 				public void onSuccess(Method method, SoftwareVersion sw) {
 					// GWT.log("caching "+sw.getName());
@@ -409,7 +411,15 @@ public class SoftwareREST {
 					AppNotification.notifyFailure("Could not fetch software: " + vname);
 					callback.onFailure(exception);
 				}
-			}).call(this.service).getVersion(URL.encodeQueryString(swname), URL.encodeQueryString(vname));
+			};
+			if(isModel)
+				REST.withCallback(methodCallback).call(this.service)
+				.getModelVersion(URL.encodeQueryString(swname), 
+						URL.encodeQueryString(vname));
+			else
+				REST.withCallback(methodCallback).call(this.service)
+					.getVersion(URL.encodeQueryString(swname), 
+							URL.encodeQueryString(vname));
 		}
 	}
 

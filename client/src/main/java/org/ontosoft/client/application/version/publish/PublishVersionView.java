@@ -72,6 +72,8 @@ import com.google.inject.Inject;
 
 public class PublishVersionView extends ParameterizedViewImpl implements PublishVersionPresenter.MyView {
 
+	String publishVersionPlace, publishPlace, versionPlace;
+	
 	private boolean isModel = false;
 	@UiField
 	CategoryPieChart piechart;
@@ -139,7 +141,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 
 	private Comparator<Authorization> metacompare;
 
-	interface Binder extends UiBinder<Widget, PublishVersionView> {
+	public interface Binder extends UiBinder<Widget, PublishVersionView> {
 	}
 
 	@Inject
@@ -147,6 +149,13 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		initWidget(binder.createAndBindUi(this));
 		initVocabulary();
 		initTable();
+		initPlaces();
+	}
+	
+	public void initPlaces() {
+		setPublishVersionPlace(NameTokens.publishversion);
+		setPublishPlace(NameTokens.publish);
+		setVersionsPlace(NameTokens.version);
 	}
 
 	public static void setBrowserWindowTitle(String newTitle) {
@@ -368,7 +377,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 			public void onSuccess(Software sw) {
 				software = sw;
 
-				api.getSoftwareVersion(softwarename, versionname1, new Callback<SoftwareVersion, Throwable>() {
+				api.getSoftwareVersion(isModel, softwarename, versionname1, new Callback<SoftwareVersion, Throwable>() {
 					@Override
 					public void onSuccess(SoftwareVersion sw) {
 						reloadbutton.setIconSpin(false);
@@ -472,7 +481,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
 		if (pcat != null) {
 			History.replaceItem(
-					NameTokens.publishversion + "/" + softwarename + ":" + versionname + "/" + pcat.getName(), false);
+					getPublishVersionPlace() + "/" + softwarename + ":" + versionname + "/" + pcat.getName(), false);
 			barchart.setActiveCategoryId(null, false);
 			pieCategorySelected(pcat.getId());
 			setBreadCrumbs();
@@ -484,7 +493,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		MetadataCategory pcat = vocabulary.getCategory(piechart.getActiveCategoryId());
 		MetadataCategory bcat = vocabulary.getCategory(barchart.getActiveCategoryId());
 		if (bcat != null && pcat != null) {
-			History.replaceItem(NameTokens.publishversion + "/" + softwarename + ":" + versionname + "/"
+			History.replaceItem(getPublishVersionPlace() + "/" + softwarename + ":" + versionname + "/"
 					+ pcat.getName() + "/" + bcat.getName(), false);
 			barCategorySelected(bcat.getId());
 		}
@@ -601,7 +610,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		anchor1.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(NameTokens.publish + "/" + softwarename);
+				History.newItem(getPublishPlace() + "/" + softwarename);
 			}
 		});
 		anchor1.setStyleName("first-crumb");
@@ -611,7 +620,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		anchor.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(NameTokens.version + "/" + softwarename + ":" + versionname);
+				History.newItem(getVersionPlace() + "/" + softwarename + ":" + versionname);
 			}
 		});
 		// anchor.setStyleName("first-crumb");
@@ -622,7 +631,7 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 			anchor.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
-					History.replaceItem(NameTokens.publishversion + "/" + softwarename + ":" + versionname, false);
+					History.replaceItem(getPublishVersionPlace() + "/" + softwarename + ":" + versionname, false);
 					clear();
 					initialDraw();
 					// initSoftware(softwarename);
@@ -896,4 +905,30 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 		permissiondialog.hide();
 		event.stopPropagation();
 	}
+
+	public String getPublishVersionPlace() {
+		return publishVersionPlace;
+	}
+
+	public void setPublishVersionPlace(String publishVersionPlace) {
+		this.publishVersionPlace = publishVersionPlace;
+	}
+
+	public String getPublishPlace() {
+		return publishPlace;
+	}
+
+	public void setPublishPlace(String publishPlace) {
+		this.publishPlace = publishPlace;
+	}
+
+	public String getVersionPlace() {
+		return versionPlace;
+	}
+
+	public void setVersionsPlace(String versionPlace) {
+		this.versionPlace = versionPlace;
+	}
+	
+	
 }

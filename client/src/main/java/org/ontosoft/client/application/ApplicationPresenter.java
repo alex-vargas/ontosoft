@@ -12,6 +12,7 @@ import org.ontosoft.client.application.model.list.ModelListView;
 import org.ontosoft.client.application.model.publish.PublishModelView;
 import org.ontosoft.client.application.model.version.browse.ModelVersionBrowseView;
 import org.ontosoft.client.application.model.version.list.ModelVersionListView;
+import org.ontosoft.client.application.model.version.publish.PublishModelVersionView;
 import org.ontosoft.client.application.modelconfiguration.list.ModelConfigurationListView;
 import org.ontosoft.client.application.publish.PublishView;
 import org.ontosoft.client.application.users.UserView;
@@ -64,7 +65,8 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
 			final ModelBrowseView modelbrowse,
 			final PublishModelView publishmodel,
 			final ModelVersionListView modelVersionListView,
-			final ModelVersionBrowseView modelVersionBrowseView) {
+			final ModelVersionBrowseView modelVersionBrowseView,
+			final PublishModelVersionView publishModelVersionView) {
 		super(eventBus, view, proxy, RevealType.Root);
 
 		final PlaceRequest.Builder builder = new PlaceRequest.Builder();
@@ -109,6 +111,8 @@ public class ApplicationPresenter extends Presenter<ApplicationPresenter.MyView,
 					sectionview = modelVersionListView;
 				else if (nametoken.equals(NameTokens.modelVersionBrowse))
 					sectionview = modelVersionBrowseView;
+				else if (nametoken.equals(NameTokens.publishModelVersion))
+					sectionview = publishModelVersionView;
 				else if (nametoken.equals(NameTokens.modelConfigurations))
 					sectionview = modelConfigurationListView;
 

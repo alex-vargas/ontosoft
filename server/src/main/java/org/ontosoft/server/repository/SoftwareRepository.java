@@ -129,7 +129,7 @@ public class SoftwareRepository {
 		this.server = props.getString("server");
 		onturi = KBConstants.ONTURI();
 		// onturi = "https://w3id.org/ontosoft-vff/ontology";
-		onturi = "http://localhost/mint/alex_lucas_ontology8.owl";
+		onturi = "http://localhost/mint/alex_lucas_ontology11.owl";
 		// onturi = "http://localhost/lucas_ontology32.owl";
 		caturi = KBConstants.CATURI();
 		liburi = this.LIBURI();
@@ -793,7 +793,7 @@ public class SoftwareRepository {
 				KBAPI lvkb = fac.getKB(latestVersion.getID(), OntSpec.PLAIN, true);
 				KBObject latestVersionIndidual = lvkb.getIndividual(latestVersion.getID());
 				if (latestVersionIndidual != null) {
-					copyVersionPropertiesToNewLatestSoftwareVersion(swobj, latestVersion, vobj, vkb, allkb);
+					copyVersionPropertiesToNewLatestSoftwareVersion(isModel, swobj, latestVersion, vobj, vkb, allkb);
 				}
 
 				for (KBTriple t : swkb.genericTripleQuery(swobj, swprop2, null))
@@ -820,10 +820,11 @@ public class SoftwareRepository {
 		return null;
 	}
 
-	private void copyVersionPropertiesToNewLatestSoftwareVersion(KBObject swobj, KBObject latestVersion, KBObject vobj,
+	private void copyVersionPropertiesToNewLatestSoftwareVersion(boolean isModel, KBObject swobj,
+			KBObject latestVersion, KBObject vobj,
 			KBAPI vkb, KBAPI allkb) throws Exception {
 		KBAPI lvkb = fac.getKB(latestVersion.getID(), OntSpec.PLAIN, true);
-		SoftwareVersion version = getSoftwareVersion(swobj.getID(), latestVersion.getID());
+		SoftwareVersion version = getSoftwareVersion(isModel, swobj.getID(), latestVersion.getID());
 
 		for (String propid : version.getValue().keySet()) {
 			KBObject vprop = this.ontkb.getProperty(propid);
@@ -894,7 +895,7 @@ public class SoftwareRepository {
 	 */
 	public boolean updateSoftwareVersion(boolean isModel, SoftwareVersion newversion, String swid, String vid, User user)
 			throws Exception {
-		SoftwareVersion curv = this.getSoftwareVersion(swid, vid);
+		SoftwareVersion curv = this.getSoftwareVersion(isModel, swid, vid);
 
 		Provenance prov = this.prov.getUpdateProvenance(curv, newversion, user);
 		String nswid = this.updateOrAddSoftwareVersion(isModel, swid, newversion, user, true);
@@ -1619,7 +1620,8 @@ public class SoftwareRepository {
 		return null;
 	}
 
-	public SoftwareVersion getSoftwareVersion(String swid, String vid) throws Exception {
+	public SoftwareVersion getSoftwareVersion(boolean isModel, String swid, 
+			String vid) throws Exception {
 		KBAPI allkb = fac.getKB(uniongraph, OntSpec.PLAIN);
 		KBAPI vkb = fac.getKB(vid, OntSpec.PLAIN);
 		KBObject vobj = vkb.getIndividual(vid);
@@ -1643,7 +1645,10 @@ public class SoftwareRepository {
 
 					MetadataType type = vocabulary.getType(prop.getRange());
 					// Treat software entities specially
-					if (vocabulary.isA(type, vocabulary.getType(topclassversion))) {
+					if ((!isModel && 
+					vocabulary.isA(type, vocabulary.getType(topclassversion))) ||
+						(isModel && 
+					vocabulary.isA(type, vocabulary.getType(topClassModelVersion))) ) {
 						KBAPI tmpkb = fac.getKB(valobj.getID(), OntSpec.PLAIN);
 						KBObject valswobj = tmpkb.getIndividual(valobj.getID());
 						if (valswobj != null) {

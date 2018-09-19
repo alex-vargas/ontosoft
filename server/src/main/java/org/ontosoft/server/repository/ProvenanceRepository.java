@@ -283,7 +283,8 @@ public class ProvenanceRepository {
 		return this.USERNS() + user.getName().replaceAll("[^a-zA-Z0-9_]", "_");
 	}
 
-	public Provenance getUpdateProvenance(Software cursw, Software newsw, User user) throws Exception {
+	public Provenance getUpdateProvenance(Software cursw, Software newsw,
+			User user) throws Exception {
 		// Compare softwares
 		Provenance prov = new Provenance();
 		prov.setId(PROVURI(cursw.getId()));

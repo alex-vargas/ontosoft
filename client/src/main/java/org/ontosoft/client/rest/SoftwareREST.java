@@ -615,8 +615,9 @@ public class SoftwareREST {
 		}).call(this.service).update(software.getName(), software);
 	}
 
-	public void updateSoftwareVersion(boolean isModel, final String software, final SoftwareVersion version,
-			final Callback<SoftwareVersion, Throwable> callback) {
+	public void updateSoftwareVersion(boolean isModel, final String software,
+			final SoftwareVersion version,
+			final Callback<SoftwareVersion,Throwable> callback) {
 		REST.withCallback(new MethodCallback<SoftwareVersion>() {
 			@Override
 			public void onSuccess(Method method, SoftwareVersion sw) {
@@ -630,7 +631,8 @@ public class SoftwareREST {
 				AppNotification.notifyFailure("Could not save " + version.getLabel());
 				callback.onFailure(exception);
 			}
-		}).call(this.service).updateVersion(isModel, software, version.getName(), version);
+		}).call(this.service).updateVersion(isModel, software,
+				version.getName(), version);
 	}
 
 	public void deleteSoftware(final String swname, final Callback<Void, Throwable> callback) {

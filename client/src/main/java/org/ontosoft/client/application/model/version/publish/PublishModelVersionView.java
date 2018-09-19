@@ -18,7 +18,7 @@ public class PublishModelVersionView extends
 	public void initPlaces() {
 		setPublishVersionPlace(NameTokens.publishModelVersion);
 		setPublishPlace(NameTokens.publishModel);
-		setVersionsPlace(NameTokens.modelVersions);
+		setVersionsPlace(NameTokens.modelVersionBrowse);
 	}
 	
 }

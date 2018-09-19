@@ -3,9 +3,11 @@ package org.ontosoft.client.application.version.publish;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Breadcrumbs;
@@ -33,6 +35,7 @@ import org.ontosoft.client.place.NameTokens;
 import org.ontosoft.client.rest.AppNotification;
 import org.ontosoft.client.rest.SoftwareREST;
 import org.ontosoft.client.rest.UserREST;
+import org.ontosoft.shared.classes.entities.Entity;
 import org.ontosoft.shared.classes.entities.Software;
 import org.ontosoft.shared.classes.entities.SoftwareVersion;
 import org.ontosoft.shared.classes.permission.AccessMode;
@@ -504,30 +507,36 @@ public class PublishVersionView extends ParameterizedViewImpl implements Publish
 	public void onSave(ClickEvent event) {
 		final SoftwareVersion tmpsw = softwareform.getSoftwareVersion();
 		tmpsw.setName(versionname);
+				
+		String a = "v";
+		if(!a.equals("v"))
+			a = "c";
 		// savebutton.state().loading();
-
-		this.api.updateSoftwareVersion(isModel, softwarename, tmpsw, new Callback<SoftwareVersion, Throwable>() {
-			@Override
-			public void onSuccess(SoftwareVersion sw) {
-				version = sw;
-				// softwarename = tmpsw.getName();
-				piechart.setSoftware(version);
-				barchart.setSoftware(version);
-				softwareform.setSoftwareVersion(version);
-
-				// savebutton.state().reset();
-				savebutton.setEnabled(false);
-
-				// TODO: Save should reset invalid entries ?
-				// piechart.fillCategories(true);
-				// piechart.setActiveCategoryId(piechart.getActiveCategoryId(), false);
-			}
-
-			@Override
-			public void onFailure(Throwable exception) {
-				savebutton.state().reset();
-			}
-		});
+		Callback<SoftwareVersion, Throwable> callback = 
+			new Callback<SoftwareVersion, Throwable>() {
+				@Override
+				public void onSuccess(SoftwareVersion sw) {
+					version = sw;
+					// softwarename = tmpsw.getName();
+					piechart.setSoftware(version);
+					barchart.setSoftware(version);
+					softwareform.setSoftwareVersion(version);
+	
+					// savebutton.state().reset();
+					savebutton.setEnabled(false);
+	
+					// TODO: Save should reset invalid entries ?
+					// piechart.fillCategories(true);
+					// piechart.setActiveCategoryId(piechart.getActiveCategoryId(), false);
+				}
+	
+				@Override
+				public void onFailure(Throwable exception) {
+					savebutton.state().reset();
+				}
+			};
+		this.api.updateSoftwareVersion(isModel, softwarename, tmpsw, callback);
+				
 	}
 
 	@UiHandler("reloadbutton")

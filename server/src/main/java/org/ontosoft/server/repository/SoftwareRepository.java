@@ -893,7 +893,8 @@ public class SoftwareRepository {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean updateSoftwareVersion(boolean isModel, SoftwareVersion newversion, String swid, String vid, User user)
+	public boolean updateSoftwareVersion(boolean isModel,
+			SoftwareVersion newversion, String swid, String vid, User user)
 			throws Exception {
 		SoftwareVersion curv = this.getSoftwareVersion(isModel, swid, vid);
 
